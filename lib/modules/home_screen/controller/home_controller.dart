@@ -1,13 +1,6 @@
-// ============================================================
-// FILE: homescreen/controller/home_controller.dart
-// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
-// ============================================================
-//
-// Dependency: get: ^4.6.6  (pubspec.yaml)
-// ============================================================
-
 import 'package:get/get.dart';
 import '../model/home_model.dart';
+import '../../lapor_fasilitas/view/lapor_fasilitas_view.dart';
 
 class HomeController extends GetxController {
   // --------------------------------------------------------
@@ -161,8 +154,7 @@ class HomeController extends GetxController {
     switch (route) {
       case AksesCepatRoute.laporFasilitas:
         // TODO: Get.toNamed(Routes.laporFasilitas)
-        Get.snackbar('Akses Cepat', 'Menuju Lapor Fasilitas...',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.to(() => const LaporFasilitasView());
         break;
       case AksesCepatRoute.lostFound:
         Get.snackbar('Akses Cepat', 'Menuju Lost & Found...',

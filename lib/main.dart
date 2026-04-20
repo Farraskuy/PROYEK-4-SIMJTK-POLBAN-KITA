@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-// import 'package:proyek_4_poki_polban_kita/modules/detail_laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
-// import 'package:proyek_4_poki_polban_kita/modules/detail_laporan_fasilitas/model/laporan_fasilitas_model.dart';
-import 'package:proyek_4_poki_polban_kita/modules/selesaikan_tugas/view/selesaikan_tugas_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/detail_laporan_fasilitas/model/laporan_fasilitas_model.dart';
-=======
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -12,7 +6,6 @@ import 'package:provider/provider.dart';
 import 'modules/home_screen/view/home_view.dart';
 import 'modules/Admin/controller/fasilitas_controller.dart';
 import 'modules/Admin/view/laporan_fasilitas_screen.dart';
->>>>>>> 48cb882b01ffb443d95f8c4a2a0bc1b955a043ba
 
 void main() {
   runApp(const MyApp());
@@ -23,41 +16,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
-    // Dummy laporan untuk test
-    final dummyLaporan = LaporanFasilitasModel(
-      id: 'test-001',
-      judul: 'Test Laporan Fasilitas',
-      deskripsi: 'Ini adalah laporan test untuk fitur selesaikan tugas.',
-      lokasiLabKelas: 'Lab Komputer 1',
-      fotoUrls: [],
-      status: StatusLaporan.assigned,
-      prioritas: 'Tinggi',
-      pelaporNama: 'Mahasiswa Test',
-      pelaporId: 'mhs-001',
-      handlerNama: 'Staff Test',
-      handlerId: 'staff-001',
-      estimasiSelesai: DateTime.now().add(const Duration(days: 2)),
-      createdAt: DateTime.now(),
-      riwayat: [],
-    );
-
-    return MaterialApp(home: SelesaikanTugasView(laporan: dummyLaporan));
-  }
-}
-
-// Kode lama dikomentari:
-/*
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: DetailLaporanFasilitasView(
-        laporanId: 'test-001',
-        role: RoleUser.staff, // ganti-ganti di sini untuk test tiap role
-=======
     return GetMaterialApp(
       title: 'SIMJTK - Integrated Portal',
       debugShowCheckedModeBanner: false,
@@ -146,7 +104,6 @@ class RolePickerScreen extends StatelessWidget {
             ],
           ),
         ),
->>>>>>> 48cb882b01ffb443d95f8c4a2a0bc1b955a043ba
       ),
     );
   }
@@ -164,9 +121,6 @@ class RolePickerScreen extends StatelessWidget {
     );
   }
 }
-<<<<<<< HEAD
-*/
-=======
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COMPONENT: RoleTile
@@ -234,4 +188,3 @@ class _RoleTile extends StatelessWidget {
     );
   }
 }
->>>>>>> 48cb882b01ffb443d95f8c4a2a0bc1b955a043ba
