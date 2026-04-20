@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../Admin/fasilitas_controller.dart';
+import '../controller/fasilitas_controller.dart';
 
 class AdminDelegasiScreen extends StatefulWidget {
   final LaporanFasilitas laporan;

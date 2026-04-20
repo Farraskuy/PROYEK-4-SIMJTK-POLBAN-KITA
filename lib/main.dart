@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-// Pastikan path ini sesuai dengan struktur folder project kamu
-import 'modules/Admin/fasilitas_controller.dart';
-import 'modules/Admin/laporan_fasilitas_screen.dart';
+// Import sesuai struktur folder baru
+import 'modules/home_screen/view/home_view.dart';
+import 'modules/Admin/controller/fasilitas_controller.dart';
+import 'modules/Admin/view/laporan_fasilitas_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -14,8 +16,8 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SIMJTK - Admin Portal',
+    return GetMaterialApp(
+      title: 'SIMJTK - Integrated Portal',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -31,7 +33,7 @@ class MainApp extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ROLE PICKER — Fokus pada Akses Admin
+// ROLE PICKER — Gerbang Utama Aplikasi
 // ─────────────────────────────────────────────────────────────────────────────
 
 class RolePickerScreen extends StatelessWidget {
@@ -48,22 +50,10 @@ class RolePickerScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-
-              // Brand Icon
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(Icons.dashboard_customize_rounded,
-                    color: Colors.white, size: 28),
-              ),
+              _buildLogo(),
               const SizedBox(height: 28),
-
               const Text(
-                'Admin\nManagement',
+                'SIMJTK\nManagement',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 32,
@@ -73,35 +63,40 @@ class RolePickerScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                'Kelola pelaporan fasilitas dan delegasi tugas teknisi.',
+                'Pilih akses layanan mahasiswa atau manajemen jurusan.',
                 style: TextStyle(
                     color: Colors.white.withOpacity(0.6), fontSize: 14),
               ),
-
               const Spacer(),
 
-              // Admin Entry Tile
+              // ROLE 1: MAHASISWA (GetX)
+              _RoleTile(
+                icon: Icons.school_outlined,
+                role: 'Akses Mahasiswa',
+                subtitle: 'Laporan fasilitas & informasi JTK',
+                onTap: () => Get.to(() => const HomeView()),
+              ),
+
+              const SizedBox(height: 16),
+
+              // ROLE 2: ADMIN (Provider + Refactored View)
               _RoleTile(
                 icon: Icons.admin_panel_settings_outlined,
                 role: 'Masuk sebagai Admin',
-                subtitle: 'Akses penuh kelola fasilitas & aspirasi',
+                subtitle: 'Kelola & delegasi laporan teknisi',
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChangeNotifierProvider(
+                  // Injeksi controller saat navigasi ke view yang didefinisikan di subfolder view/
+                  Get.to(() => ChangeNotifierProvider(
                         create: (_) => AdminFasilitasController(),
                         child: const AdminLaporanFasilitasScreen(),
-                      ),
-                    ),
-                  );
+                      ));
                 },
               ),
 
               const SizedBox(height: 32),
               Center(
                 child: Text(
-                  'v1.0.0 · SIMJTK Admin Module',
+                  'v1.0.0 · Politeknik Negeri Bandung',
                   style: TextStyle(
                       color: Colors.white.withOpacity(0.3), fontSize: 12),
                 ),
@@ -112,7 +107,24 @@ class RolePickerScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildLogo() {
+    return Container(
+      width: 52,
+      height: 52,
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: const Icon(Icons.dashboard_customize_rounded,
+          color: Colors.white, size: 28),
+    );
+  }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENT: RoleTile
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _RoleTile extends StatelessWidget {
   final IconData icon;
@@ -167,8 +179,8 @@ class _RoleTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right_rounded,
-                  color: Colors.white.withOpacity(0.5), size: 24),
+              const Icon(Icons.chevron_right_rounded,
+                  color: Colors.white, size: 24),
             ],
           ),
         ),
