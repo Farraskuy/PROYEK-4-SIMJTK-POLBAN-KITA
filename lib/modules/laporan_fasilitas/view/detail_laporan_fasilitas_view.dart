@@ -230,7 +230,7 @@ class _InfoUtamaCard extends StatelessWidget {
           _InfoRow(
             icon: Icons.person_outline_rounded,
             label: 'Pelapor',
-            value: laporan.pelaporNama,
+            value: laporan.pelaporDisplayName,
           ),
           const SizedBox(height: 12),
           _InfoRow(
@@ -436,6 +436,8 @@ class _TimelineCard extends StatelessWidget {
             _TimelineStep(
               tindakan: TindakanFasilitas(
                 id: 'end',
+                laporanId: laporan.id,
+                aktorId: '',
                 aktivitas: 'Selesai',
                 catatanPengerjaan:
                     'Perbaikan selesai dan fasilitas dapat digunakan kembali.',

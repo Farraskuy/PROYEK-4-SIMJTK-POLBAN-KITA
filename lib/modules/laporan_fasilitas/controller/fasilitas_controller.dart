@@ -1,64 +1,6 @@
 import 'package:flutter/material.dart';
-
-// ── Mock Models (temporary, replace with real models later) ──────────────────
-
-class LaporanFasilitas {
-  final String id;
-  final String judul;
-  final String deskripsi;
-  final String kategoriId;
-  final String? namaKategori;
-  final String lokasiLabKelas;
-  final List<String> fotoUrls;
-  String status;
-  String prioritas;
-  final String pelaporId;
-  final String pelaporName;
-  String? handlerId;
-  String? handlerName;
-  DateTime? estimasiSelesai;
-  final DateTime createdAt;
-  DateTime updatedAt;
-
-  LaporanFasilitas({
-    required this.id,
-    required this.judul,
-    required this.deskripsi,
-    required this.kategoriId,
-    this.namaKategori,
-    required this.lokasiLabKelas,
-    required this.fotoUrls,
-    required this.status,
-    required this.prioritas,
-    required this.pelaporId,
-    required this.pelaporName,
-    this.handlerId,
-    this.handlerName,
-    this.estimasiSelesai,
-    required this.createdAt,
-    required this.updatedAt,
-  });
-}
-
-class UserModel {
-  final String id;
-  final String name;
-  final String nimNip;
-  final String email;
-  final String role;
-  final bool isActive;
-
-  const UserModel({
-    required this.id,
-    required this.name,
-    required this.nimNip,
-    required this.email,
-    required this.role,
-    this.isActive = true,
-  });
-}
-
-// ── Controller ───────────────────────────────────────────────────────────────
+import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
+import '../model/laporan_fasilitas_model.dart';
 
 class AdminFasilitasController extends ChangeNotifier {
   List<LaporanFasilitas> _allLaporan = [];
@@ -75,24 +17,30 @@ class AdminFasilitasController extends ChangeNotifier {
   List<LaporanFasilitas> get filteredLaporan {
     if (_filterStatus == 'semua') return _allLaporan;
     if (_filterStatus == 'baru') {
-      return _allLaporan.where((l) => l.status == 'pending').toList();
+      return _allLaporan
+          .where((l) => l.status == StatusLaporan.pending)
+          .toList();
     }
     if (_filterStatus == 'ditugaskan') {
       return _allLaporan
-          .where((l) => l.status == 'assigned' || l.status == 'in_progress')
+          .where(
+            (l) =>
+                l.status == StatusLaporan.assigned ||
+                l.status == StatusLaporan.inProgress,
+          )
           .toList();
     }
-    return _allLaporan.where((l) => l.status == _filterStatus).toList();
+    return _allLaporan.where((l) => l.status.value == _filterStatus).toList();
   }
 
   int get totalLaporan => _allLaporan.length;
   int get totalTeknisiAktif => _allTeknisi.where((t) => t.isActive).length;
   int get laporanPending =>
-      _allLaporan.where((l) => l.status == 'pending').length;
+      _allLaporan.where((l) => l.status == StatusLaporan.pending).length;
   int get laporanInProgress =>
-      _allLaporan.where((l) => l.status == 'in_progress').length;
+      _allLaporan.where((l) => l.status == StatusLaporan.inProgress).length;
   int get laporanResolved =>
-      _allLaporan.where((l) => l.status == 'resolved').length;
+      _allLaporan.where((l) => l.status == StatusLaporan.resolved).length;
 
   Future<void> loadData() async {
     _setLoading(true);
@@ -121,8 +69,8 @@ class AdminFasilitasController extends ChangeNotifier {
 
       _allLaporan[idx].handlerId = teknisiId;
       _allLaporan[idx].handlerName = teknisiName;
-      _allLaporan[idx].prioritas = prioritas;
-      _allLaporan[idx].status = 'assigned';
+      _allLaporan[idx].prioritas = PrioritasLaporan.fromValue(prioritas);
+      _allLaporan[idx].status = StatusLaporan.assigned;
       _allLaporan[idx].estimasiSelesai = deadline;
       _allLaporan[idx].updatedAt = DateTime.now();
 
@@ -147,7 +95,7 @@ class AdminFasilitasController extends ChangeNotifier {
       final idx = _allLaporan.indexWhere((l) => l.id == laporanId);
       if (idx == -1) return false;
 
-      _allLaporan[idx].status = 'rejected';
+      _allLaporan[idx].status = StatusLaporan.rejected;
       _allLaporan[idx].updatedAt = DateTime.now();
 
       notifyListeners();
@@ -175,24 +123,27 @@ class AdminFasilitasController extends ChangeNotifier {
     _allTeknisi = const [
       UserModel(
         id: 'user-t1',
+        username: 'T-045',
         name: 'Budi Santoso',
-        nimNip: 'T-045',
         email: 'budi@polban.ac.id',
         role: 'staff',
+        isActive: true,
       ),
       UserModel(
         id: 'user-t2',
+        username: 'T-067',
         name: 'Dedi Hermawan',
-        nimNip: 'T-067',
         email: 'dedi@polban.ac.id',
         role: 'staff',
+        isActive: true,
       ),
       UserModel(
         id: 'user-t3',
+        username: 'T-089',
         name: 'Siti Rahayu',
-        nimNip: 'T-089',
         email: 'siti@polban.ac.id',
         role: 'staff',
+        isActive: true,
       ),
     ];
 

@@ -11,6 +11,7 @@ class DetailLaporanFasilitasService {
       judul: 'AC Central Mati Total & Meneteskan Air',
       deskripsi:
           'AC tiba-tiba mati saat sedang digunakan rapat. Ada rembesan air cukup deras dari celah ventilasi. Harap segera ditangani karena ruangan akan digunakan kembali siang ini.',
+      kategoriId: 'kat-003',
       lokasiLabKelas: 'Ruang Rapat Eksekutif, Lt. 3 Gedung A',
       fotoUrls: [],
       status: StatusLaporan.inProgress,
@@ -21,9 +22,12 @@ class DetailLaporanFasilitasService {
       handlerId: 'teknisi-001',
       estimasiSelesai: DateTime.now().add(const Duration(hours: 2)),
       createdAt: DateTime.now().subtract(const Duration(hours: 1)),
+      updatedAt: DateTime.now().subtract(const Duration(minutes: 20)),
       riwayat: [
         TindakanFasilitas(
           id: 'tindakan-001',
+          laporanId: id,
+          aktorId: 'system',
           aktivitas: 'Laporan Dibuat',
           catatanPengerjaan: 'Laporan berhasil diterima oleh sistem.',
           timestamp: DateTime.now().subtract(const Duration(hours: 1)),
@@ -31,6 +35,8 @@ class DetailLaporanFasilitasService {
         ),
         TindakanFasilitas(
           id: 'tindakan-002',
+          laporanId: id,
+          aktorId: 'admin-001',
           aktivitas: 'Ditugaskan ke Teknisi',
           catatanPengerjaan:
               'Teknisi Ahmad Sapri ditugaskan untuk menangani laporan ini.',
@@ -39,6 +45,8 @@ class DetailLaporanFasilitasService {
         ),
         TindakanFasilitas(
           id: 'tindakan-003',
+          laporanId: id,
+          aktorId: 'teknisi-001',
           aktivitas: 'Sedang Diperbaiki',
           catatanPengerjaan:
               'Teknisi sedang melakukan pengecekan dan penggantian komponen di lokasi.',

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/lapor_fasilitas_controller.dart';
-import '../model/lapor_fasilitas_model.dart';
+import '../model/laporan_fasilitas_model.dart';
 
 // ============================================================
 // DESIGN TOKENS

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controller/fasilitas_controller.dart';
+import '../model/laporan_fasilitas_model.dart';
 import 'delegasi_screen.dart';
 
 class AdminLaporanFasilitasScreen extends StatefulWidget {
@@ -214,7 +215,8 @@ class _AdminLaporanFasilitasScreenState
                             final laporan = displayed[i];
                             return _LaporanCard(
                               laporan: laporan,
-                              onDelegasi: laporan.status == 'pending'
+                              onDelegasi:
+                                  laporan.status == StatusLaporan.pending
                                   ? () => _openDelegasi(laporan)
                                   : null,
                               onDetail: () => _openDetail(laporan),
@@ -313,7 +315,7 @@ class _LaporanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPriorHigh = laporan.prioritas == 'high';
+    final isPriorHigh = laporan.prioritas == PrioritasLaporan.high;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -341,7 +343,7 @@ class _LaporanCard extends StatelessWidget {
               children: [
                 _KategoriBadge(
                   label: laporan.namaKategori ?? laporan.kategoriId,
-                  status: laporan.status,
+                  status: laporan.status.value,
                 ),
                 const Spacer(),
                 if (isPriorHigh)

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import '../model/home_model.dart';
 import '../../laporan_fasilitas/view/lapor_fasilitas_view.dart';
 
@@ -8,7 +9,14 @@ class HomeController extends GetxController {
   // --------------------------------------------------------
 
   /// Data user yang sedang login
-  final Rx<UserModel> currentUser = UserModel.dummy().obs;
+  final Rx<UserModel> currentUser = const UserModel(
+    id: 'usr-001',
+    username: '241511006',
+    email: 'budi@student.polban.ac.id',
+    name: 'Budi',
+    role: 'mahasiswa',
+    isActive: true,
+  ).obs;
 
   /// List agenda kalender yang ditampilkan di carousel
   final RxList<KalenderAkademikModel> kalenderList =

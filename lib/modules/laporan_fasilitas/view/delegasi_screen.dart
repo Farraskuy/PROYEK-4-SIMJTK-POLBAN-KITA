@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controller/fasilitas_controller.dart';
+import '../model/laporan_fasilitas_model.dart';
 
 class AdminDelegasiScreen extends StatefulWidget {
   final LaporanFasilitas laporan;
@@ -22,7 +23,7 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
   void initState() {
     super.initState();
     // Pre-fill priority from laporan
-    _selectedPrioritas = widget.laporan.prioritas;
+    _selectedPrioritas = widget.laporan.prioritas.value;
   }
 
   @override
@@ -151,7 +152,7 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
                                         ),
                                       ),
                                       Text(
-                                        'ID: ${t.nimNip}',
+                                        'ID: ${t.username}',
                                         style: const TextStyle(
                                           color: Colors.grey,
                                           fontSize: 11,
@@ -308,7 +309,7 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
 
   Widget _buildLaporanInfoCard() {
     final l = widget.laporan;
-    final isPrioritasHigh = l.prioritas == 'high';
+    final isPrioritasHigh = l.prioritas == PrioritasLaporan.high;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -375,7 +376,7 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
                   ),
                 )
               else
-                _PrioritasPill(prioritas: l.prioritas),
+                _PrioritasPill(prioritas: l.prioritas.value),
             ],
           ),
           const SizedBox(height: 10),

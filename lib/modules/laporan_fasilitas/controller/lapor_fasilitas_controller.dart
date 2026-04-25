@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../model/lapor_fasilitas_model.dart';
+import '../model/laporan_fasilitas_model.dart';
 
 class LaporFasilitasController extends GetxController {
   // --------------------------------------------------------

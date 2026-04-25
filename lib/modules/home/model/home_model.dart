@@ -1,33 +1,3 @@
-// --------------- USER MODEL ---------------
-class UserModel {
-  final String id;
-  final String name;
-  final String nimNip;
-  final String email;
-  final String role; // mahasiswa | staff | admin
-  final String? avatarUrl;
-
-  const UserModel({
-    required this.id,
-    required this.name,
-    required this.nimNip,
-    required this.email,
-    required this.role,
-    this.avatarUrl,
-  });
-
-  /// Dummy data untuk keperluan prototype / low-fidelity
-  factory UserModel.dummy() => const UserModel(
-        id: 'usr-001',
-        name: 'Budi',
-        nimNip: '241511006',
-        email: 'budi@student.polban.ac.id',
-        role: 'mahasiswa',
-        avatarUrl: null,
-      );
-}
-
-// --------------- KALENDER AKADEMIK MODEL ---------------
 enum KategoriAgenda { akademik, himpunan, umum, libur }
 enum TipeKartuKalender { ujian, tugas, event }
 
