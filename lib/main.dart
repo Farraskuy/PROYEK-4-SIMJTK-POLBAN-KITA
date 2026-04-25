@@ -8,7 +8,7 @@ import 'modules/login/view/login_view.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: '.env');
+  await dotenv.load(fileName: '.env.example');
 
   await MonggoDBServices().connectToDatabase();
 
