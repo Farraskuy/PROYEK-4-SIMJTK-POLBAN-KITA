@@ -9,11 +9,13 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class AuthService {
   static const String _usersCollection = 'users';
-  static const String _academicLoginUrl = 'https://akademik.polban.ac.id/laman/login';
+  static const String _academicLoginUrl =
+      'https://akademik.polban.ac.id/laman/login';
   static const String _academicSuccessUrl = 'https://akademik.polban.ac.id/Mhs';
   static const String _usernameSelector = '.form-control[name="username"]';
   static const String _passwordSelector = '.form-control[name="password"]';
-  static const String _loginButtonSelector = '.btn.btn-primary.btn-block.btn-flat[name="submit"]';
+  static const String _loginButtonSelector =
+      '.btn.btn-primary.btn-block.btn-flat[name="submit"]';
 
   static final AuthService _instance = AuthService._internal();
 
@@ -29,6 +31,40 @@ class AuthService {
   UserModel? _currentUser;
 
   UserModel? get currentUser => _currentUser;
+
+  Future<UserModel?> loadSavedSession() async {
+    if (_currentUser != null) {
+      return _currentUser;
+    }
+
+    final storedUser = await _storage.read(key: _userKey);
+    if (storedUser == null || storedUser.isEmpty) {
+      return null;
+    }
+
+    try {
+      final decoded = json.decode(storedUser);
+      if (decoded is Map<String, dynamic>) {
+        _currentUser = UserModel.fromJson(decoded);
+        return _currentUser;
+      }
+
+      if (decoded is Map) {
+        _currentUser = UserModel.fromJson(
+          decoded.map((key, value) => MapEntry(key.toString(), value)),
+        );
+        return _currentUser;
+      }
+    } catch (e) {
+      await LogService.writeLog(
+        "AUTH: Gagal memuat sesi user - $e",
+        source: "auth_service.dart",
+        level: 1,
+      );
+    }
+
+    return null;
+  }
 
   /// Login menggunakan API (mengakses database Mongo)
   Future<bool> login(String username, String password) async {
@@ -362,7 +398,7 @@ class AuthService {
   Future<Map<String, dynamic>> _extractAcademicProfile(
     WebViewController controller,
   ) async {
-    final result = await controller.runJavaScriptReturningResult('''
+    final result = await controller.runJavaScriptReturningResult(r'''
       (function() {
         const userHeader = document.querySelector('li.user-header');
         if (!userHeader) {
@@ -425,8 +461,9 @@ class AuthService {
     required Map<String, dynamic> profile,
   }) async {
     final nimFromWebsite = (profile['nim'] ?? '').toString().trim();
-    final usernameToStore =
-        nimFromWebsite.isNotEmpty ? nimFromWebsite : fallbackUsername;
+    final usernameToStore = nimFromWebsite.isNotEmpty
+        ? nimFromWebsite
+        : fallbackUsername;
 
     final now = DateTime.now().toIso8601String();
     final passwordHash = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
