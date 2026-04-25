@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 
-// Import sesuai struktur folder modules
-import 'modules/home/view/home_view.dart';
-import 'modules/admin/controller/fasilitas_controller.dart';
-import 'modules/admin/view/laporan_fasilitas_screen.dart';
+import 'modules/login/view/login_view.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: '.env');
+
+  await MonggoDBServices().connectToDatabase();
+
   runApp(const MyApp());
 }
 
@@ -27,182 +31,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Roboto',
       ),
-      home: const RolePickerScreen(),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ROLE PICKER — Gerbang Utama Aplikasi
-// ─────────────────────────────────────────────────────────────────────────────
-
-class RolePickerScreen extends StatelessWidget {
-  const RolePickerScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF1E3A5F),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20),
-              _buildLogo(),
-              const SizedBox(height: 28),
-              const Text(
-                'SIMJTK\nManagement',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  height: 1.2,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Pilih akses layanan mahasiswa atau manajemen jurusan.',
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.6),
-                  fontSize: 14,
-                ),
-              ),
-              const Spacer(),
-
-              // ROLE 1: MAHASISWA (GetX)
-              _RoleTile(
-                icon: Icons.school_outlined,
-                role: 'Akses Mahasiswa',
-                subtitle: 'Laporan fasilitas & informasi JTK',
-                onTap: () => Get.to(() => const HomeView()),
-              ),
-
-              const SizedBox(height: 16),
-
-              // ROLE 2: ADMIN (Provider + Refactored View)
-              _RoleTile(
-                icon: Icons.admin_panel_settings_outlined,
-                role: 'Masuk sebagai Admin',
-                subtitle: 'Kelola & delegasi laporan teknisi',
-                onTap: () {
-                  // Injeksi controller saat navigasi ke view yang didefinisikan di subfolder view/
-                  Get.to(
-                    () => ChangeNotifierProvider(
-                      create: (_) => AdminFasilitasController(),
-                      child: const AdminLaporanFasilitasScreen(),
-                    ),
-                  );
-                },
-              ),
-
-              const SizedBox(height: 32),
-              Center(
-                child: Text(
-                  'v1.0.0 · Politeknik Negeri Bandung',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.3),
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLogo() {
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: const Icon(
-        Icons.dashboard_customize_rounded,
-        color: Colors.white,
-        size: 28,
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// COMPONENT: RoleTile
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _RoleTile extends StatelessWidget {
-  final IconData icon;
-  final String role;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _RoleTile({
-    required this.icon,
-    required this.role,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withOpacity(0.1),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        splashColor: Colors.white.withOpacity(0.1),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: Colors.white, size: 26),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      role,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.65),
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: Colors.white,
-                size: 24,
-              ),
-            ],
-          ),
-        ),
-      ),
+      home: const LoginView(),
     );
   }
 }

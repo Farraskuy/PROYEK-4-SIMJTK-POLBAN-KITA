@@ -7,6 +7,7 @@ class UserModel {
   final String programStudy;
   final String photoUrl;
   final String source;
+  final bool isActive;
 
   const UserModel({
     required this.id,
@@ -14,6 +15,7 @@ class UserModel {
     required this.email,
     required this.name,
     required this.role,
+    required this.isActive,
     this.programStudy = '',
     this.photoUrl = '',
     this.source = '',
@@ -26,6 +28,7 @@ class UserModel {
       email: (json['email'] ?? '').toString(),
       name: (json['name'] ?? '').toString(),
       role: (json['role'] ?? '').toString(),
+      isActive: (json['isActive'] ?? false) as bool,
       programStudy: (json['programStudy'] ?? '').toString(),
       photoUrl: (json['photoUrl'] ?? '').toString(),
       source: (json['source'] ?? '').toString(),
@@ -39,6 +42,7 @@ class UserModel {
       'email': email,
       'name': name,
       'role': role,
+      'isActive': isActive,
       'programStudy': programStudy,
       'photoUrl': photoUrl,
       'source': source,
