@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/view/home_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/view/home_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/fasilitas_controller.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/laporan_fasilitas_screen.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';

@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import '../model/home_model.dart';
-import '../../../lapor_fasilitas/view/lapor_fasilitas_view.dart';
+import '../../../laporan_fasilitas/view/lapor_fasilitas_view.dart';
 import '../../../aspirasi/view/aspirasi_view.dart';
 
 class HomeController extends GetxController {
@@ -86,8 +86,11 @@ class HomeController extends GetxController {
         break;
       case 1:
         // Layanan
-        Get.snackbar('Layanan', 'Menuju Layanan...',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Layanan',
+          'Menuju Layanan...',
+          snackPosition: SnackPosition.BOTTOM,
+        );
         break;
       case 2:
         // Aspirasi
@@ -95,8 +98,11 @@ class HomeController extends GetxController {
         break;
       case 3:
         // Profil
-        Get.snackbar('Profil', 'Menuju Profil...',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Profil',
+          'Menuju Profil...',
+          snackPosition: SnackPosition.BOTTOM,
+        );
         break;
     }
   }

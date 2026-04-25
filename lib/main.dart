@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 
 import 'modules/login/view/login_view.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await dotenv.load(fileName: '.env');
+
+  await MonggoDBServices().connectToDatabase();
+
   runApp(const MyApp());
 }
 

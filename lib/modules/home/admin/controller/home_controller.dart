@@ -10,8 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import '../model/home_model.dart';
-import '../../../Admin/controller/fasilitas_controller.dart';
-import '../../../Admin/view/laporan_fasilitas_screen.dart';
+import '../../../laporan_fasilitas/controller/fasilitas_controller.dart';
+import '../../../laporan_fasilitas/view/laporan_fasilitas_screen.dart';
 
 class AdminDashboardController extends GetxController {
   // --------------------------------------------------------
