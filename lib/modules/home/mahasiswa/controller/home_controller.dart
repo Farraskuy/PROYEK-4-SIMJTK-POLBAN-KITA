@@ -1,7 +1,8 @@
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import '../model/home_model.dart';
-import '../../laporan_fasilitas/view/lapor_fasilitas_view.dart';
+import '../../../lapor_fasilitas/view/lapor_fasilitas_view.dart';
+import '../../../aspirasi/view/aspirasi_view.dart';
 
 class HomeController extends GetxController {
   // --------------------------------------------------------
@@ -79,8 +80,25 @@ class HomeController extends GetxController {
   /// Dipanggil saat user memilih item bottom nav
   void onNavItemTapped(int index) {
     selectedNavIndex.value = index;
-    // TODO: navigasi ke halaman yang sesuai
-    // Contoh: Get.toNamed(Routes.layanan) saat index == 1
+    switch (index) {
+      case 0:
+        // Home - stay on home
+        break;
+      case 1:
+        // Layanan
+        Get.snackbar('Layanan', 'Menuju Layanan...',
+            snackPosition: SnackPosition.BOTTOM);
+        break;
+      case 2:
+        // Aspirasi
+        Get.to(() => const AspirasiView());
+        break;
+      case 3:
+        // Profil
+        Get.snackbar('Profil', 'Menuju Profil...',
+            snackPosition: SnackPosition.BOTTOM);
+        break;
+    }
   }
 
   /// Dipanggil saat kartu kalender di-swipe
@@ -154,7 +172,7 @@ class HomeController extends GetxController {
 
   /// Dipanggil saat "Lihat Semua" aspirasi ditekan
   void onLihatSemuaAspirasi() {
-    // TODO: Get.toNamed(Routes.aspirasi)
+    Get.to(() => const AspirasiView());
   }
 
   /// Dipanggil saat salah satu menu akses cepat ditekan
