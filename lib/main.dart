@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 
 // Import sesuai struktur folder modules
-import 'modules/home/view/home_view.dart';
-import 'modules/admin/controller/fasilitas_controller.dart';
-import 'modules/admin/view/laporan_fasilitas_screen.dart';
+import 'modules/home/mahasiswa/view/home_view.dart' as mahasiswa;
+import 'modules/home/admin/view/home_view.dart' as admin;
+import 'modules/home/admin/controller/home_controller.dart';
 
 void main() {
   runApp(const MyApp());
@@ -76,25 +75,17 @@ class RolePickerScreen extends StatelessWidget {
                 icon: Icons.school_outlined,
                 role: 'Akses Mahasiswa',
                 subtitle: 'Laporan fasilitas & informasi JTK',
-                onTap: () => Get.to(() => const HomeView()),
+                onTap: () => Get.to(() => const mahasiswa.HomeView()),
               ),
 
               const SizedBox(height: 16),
 
-              // ROLE 2: ADMIN (Provider + Refactored View)
+              // ROLE 2: ADMIN (GetX)
               _RoleTile(
                 icon: Icons.admin_panel_settings_outlined,
                 role: 'Masuk sebagai Admin',
                 subtitle: 'Kelola & delegasi laporan teknisi',
-                onTap: () {
-                  // Injeksi controller saat navigasi ke view yang didefinisikan di subfolder view/
-                  Get.to(
-                    () => ChangeNotifierProvider(
-                      create: (_) => AdminFasilitasController(),
-                      child: const AdminLaporanFasilitasScreen(),
-                    ),
-                  );
-                },
+                onTap: () => Get.to(() => const admin.AdminDashboardView()),
               ),
 
               const SizedBox(height: 32),

@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import '../model/home_model.dart';
-import '../../lapor_fasilitas/view/lapor_fasilitas_view.dart';
-import '../../aspirasi/view/aspirasi_view.dart';
+import '../../../lapor_fasilitas/view/lapor_fasilitas_view.dart';
+import '../../../aspirasi/view/aspirasi_view.dart';
 
 class HomeController extends GetxController {
   // --------------------------------------------------------
