@@ -25,6 +25,8 @@ dependencies:
   uuid: ^4.5.3
   camera: ^0.11.0+2
   permission_handler: ^11.3.1
+  bcrypt: ^1.2.0
+  webview_flutter: ^4.10.0
   
 dev_dependencies:
   flutter_test:
@@ -33,3 +35,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - .env
