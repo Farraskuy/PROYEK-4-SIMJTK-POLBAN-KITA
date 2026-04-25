@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-// Import sesuai struktur folder baru
-import 'modules/home_screen/view/home_view.dart';
-import 'modules/Admin/controller/fasilitas_controller.dart';
-import 'modules/Admin/view/laporan_fasilitas_screen.dart';
+// Import sesuai struktur folder modules
+import 'modules/home/view/home_view.dart';
+import 'modules/admin/controller/fasilitas_controller.dart';
+import 'modules/admin/view/laporan_fasilitas_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -65,7 +65,9 @@ class RolePickerScreen extends StatelessWidget {
               Text(
                 'Pilih akses layanan mahasiswa atau manajemen jurusan.',
                 style: TextStyle(
-                    color: Colors.white.withOpacity(0.6), fontSize: 14),
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 14,
+                ),
               ),
               const Spacer(),
 
@@ -86,10 +88,12 @@ class RolePickerScreen extends StatelessWidget {
                 subtitle: 'Kelola & delegasi laporan teknisi',
                 onTap: () {
                   // Injeksi controller saat navigasi ke view yang didefinisikan di subfolder view/
-                  Get.to(() => ChangeNotifierProvider(
-                        create: (_) => AdminFasilitasController(),
-                        child: const AdminLaporanFasilitasScreen(),
-                      ));
+                  Get.to(
+                    () => ChangeNotifierProvider(
+                      create: (_) => AdminFasilitasController(),
+                      child: const AdminLaporanFasilitasScreen(),
+                    ),
+                  );
                 },
               ),
 
@@ -98,7 +102,9 @@ class RolePickerScreen extends StatelessWidget {
                 child: Text(
                   'v1.0.0 · Politeknik Negeri Bandung',
                   style: TextStyle(
-                      color: Colors.white.withOpacity(0.3), fontSize: 12),
+                    color: Colors.white.withOpacity(0.3),
+                    fontSize: 12,
+                  ),
                 ),
               ),
             ],
@@ -116,8 +122,11 @@ class RolePickerScreen extends StatelessWidget {
         color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(14),
       ),
-      child: const Icon(Icons.dashboard_customize_rounded,
-          color: Colors.white, size: 28),
+      child: const Icon(
+        Icons.dashboard_customize_rounded,
+        color: Colors.white,
+        size: 28,
+      ),
     );
   }
 }
@@ -166,21 +175,30 @@ class _RoleTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(role,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16)),
+                    Text(
+                      role,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(subtitle,
-                        style: TextStyle(
-                            color: Colors.white.withOpacity(0.65),
-                            fontSize: 13)),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.65),
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded,
-                  color: Colors.white, size: 24),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
             ],
           ),
         ),
