@@ -1,6 +1,5 @@
-// Re-export model laporan yang dibutuhkan dari feature detail_laporan_fasilitas
-export '../../detail_laporan_fasilitas/model/laporan_fasilitas_model.dart'
-    show LaporanFasilitasModel, StatusLaporan;
+// Re-export model laporan yang dibutuhkan oleh fitur selesaikan tugas.
+export 'laporan_fasilitas_model.dart' show LaporanFasilitasModel, StatusLaporan;
 
 class SelesaikanTugasModel {
   final String laporanId;

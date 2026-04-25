@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import '../model/home_model.dart';
-import '../../lapor_fasilitas/view/lapor_fasilitas_view.dart';
+import '../../laporan_fasilitas/view/lapor_fasilitas_view.dart';
 
 class HomeController extends GetxController {
   // --------------------------------------------------------
@@ -157,32 +157,53 @@ class HomeController extends GetxController {
         Get.to(() => const LaporFasilitasView());
         break;
       case AksesCepatRoute.lostFound:
-        Get.snackbar('Akses Cepat', 'Menuju Lost & Found...',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Akses Cepat',
+          'Menuju Lost & Found...',
+          snackPosition: SnackPosition.BOTTOM,
+        );
         break;
       case AksesCepatRoute.beasiswa:
-        Get.snackbar('Akses Cepat', 'Menuju Beasiswa...',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Akses Cepat',
+          'Menuju Beasiswa...',
+          snackPosition: SnackPosition.BOTTOM,
+        );
         break;
       case AksesCepatRoute.suratKeterangan:
-        Get.snackbar('Akses Cepat', 'Menuju Surat Keterangan...',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Akses Cepat',
+          'Menuju Surat Keterangan...',
+          snackPosition: SnackPosition.BOTTOM,
+        );
         break;
       case AksesCepatRoute.izinLab:
-        Get.snackbar('Akses Cepat', 'Menuju Izin Lab...',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Akses Cepat',
+          'Menuju Izin Lab...',
+          snackPosition: SnackPosition.BOTTOM,
+        );
         break;
       case AksesCepatRoute.peminjamanRuang:
-        Get.snackbar('Akses Cepat', 'Menuju Peminjaman Ruang...',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Akses Cepat',
+          'Menuju Peminjaman Ruang...',
+          snackPosition: SnackPosition.BOTTOM,
+        );
         break;
       case AksesCepatRoute.jadwalKuliah:
-        Get.snackbar('Akses Cepat', 'Menuju Jadwal Kuliah...',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Akses Cepat',
+          'Menuju Jadwal Kuliah...',
+          snackPosition: SnackPosition.BOTTOM,
+        );
         break;
       case AksesCepatRoute.infoUkt:
-        Get.snackbar('Akses Cepat', 'Menuju Info UKT...',
-            snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Akses Cepat',
+          'Menuju Info UKT...',
+          snackPosition: SnackPosition.BOTTOM,
+        );
         break;
     }
   }

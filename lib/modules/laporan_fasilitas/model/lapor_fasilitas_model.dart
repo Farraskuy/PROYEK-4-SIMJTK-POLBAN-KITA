@@ -40,49 +40,49 @@ class KategoriFasilitasModel {
 
   /// Dummy data kategori berdasarkan dokumen pengajuan topik
   static List<KategoriFasilitasModel> dummyList() => const [
-        KategoriFasilitasModel(
-          id: 'kat-001',
-          namaKategori: 'Jaringan Internet',
-          deskripsi: 'Masalah koneksi WiFi atau LAN di area JTK',
-          iconName: 'wifi',
-        ),
-        KategoriFasilitasModel(
-          id: 'kat-002',
-          namaKategori: 'Perangkat PC',
-          deskripsi: 'Kerusakan komputer, monitor, keyboard, atau mouse',
-          iconName: 'computer',
-        ),
-        KategoriFasilitasModel(
-          id: 'kat-003',
-          namaKategori: 'AC / Pendingin',
-          deskripsi: 'AC mati atau tidak berfungsi dengan baik',
-          iconName: 'ac_unit',
-        ),
-        KategoriFasilitasModel(
-          id: 'kat-004',
-          namaKategori: 'Kebersihan',
-          deskripsi: 'Masalah kebersihan di lab atau ruang kelas',
-          iconName: 'cleaning_services',
-        ),
-        KategoriFasilitasModel(
-          id: 'kat-005',
-          namaKategori: 'Furnitur',
-          deskripsi: 'Kursi, meja, atau lemari rusak',
-          iconName: 'chair',
-        ),
-        KategoriFasilitasModel(
-          id: 'kat-006',
-          namaKategori: 'Listrik & Proyektor',
-          deskripsi: 'Masalah listrik, lampu padam, atau proyektor rusak',
-          iconName: 'electrical_services',
-        ),
-        KategoriFasilitasModel(
-          id: 'kat-007',
-          namaKategori: 'Lainnya',
-          deskripsi: 'Kerusakan fasilitas lain yang tidak tercantum di atas',
-          iconName: 'build',
-        ),
-      ];
+    KategoriFasilitasModel(
+      id: 'kat-001',
+      namaKategori: 'Jaringan Internet',
+      deskripsi: 'Masalah koneksi WiFi atau LAN di area JTK',
+      iconName: 'wifi',
+    ),
+    KategoriFasilitasModel(
+      id: 'kat-002',
+      namaKategori: 'Perangkat PC',
+      deskripsi: 'Kerusakan komputer, monitor, keyboard, atau mouse',
+      iconName: 'computer',
+    ),
+    KategoriFasilitasModel(
+      id: 'kat-003',
+      namaKategori: 'AC / Pendingin',
+      deskripsi: 'AC mati atau tidak berfungsi dengan baik',
+      iconName: 'ac_unit',
+    ),
+    KategoriFasilitasModel(
+      id: 'kat-004',
+      namaKategori: 'Kebersihan',
+      deskripsi: 'Masalah kebersihan di lab atau ruang kelas',
+      iconName: 'cleaning_services',
+    ),
+    KategoriFasilitasModel(
+      id: 'kat-005',
+      namaKategori: 'Furnitur',
+      deskripsi: 'Kursi, meja, atau lemari rusak',
+      iconName: 'chair',
+    ),
+    KategoriFasilitasModel(
+      id: 'kat-006',
+      namaKategori: 'Listrik & Proyektor',
+      deskripsi: 'Masalah listrik, lampu padam, atau proyektor rusak',
+      iconName: 'electrical_services',
+    ),
+    KategoriFasilitasModel(
+      id: 'kat-007',
+      namaKategori: 'Lainnya',
+      deskripsi: 'Kerusakan fasilitas lain yang tidak tercantum di atas',
+      iconName: 'build',
+    ),
+  ];
 }
 
 // --------------- LAPORAN FASILITAS MODEL ---------------

@@ -45,12 +45,14 @@ class _AdminLaporanFasilitasScreenState
     return Consumer<AdminFasilitasController>(
       builder: (context, ctrl, _) {
         final displayed = ctrl.filteredLaporan
-            .where((l) =>
-                _searchQuery.isEmpty ||
-                l.judul.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                l.lokasiLabKelas
-                    .toLowerCase()
-                    .contains(_searchQuery.toLowerCase()))
+            .where(
+              (l) =>
+                  _searchQuery.isEmpty ||
+                  l.judul.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                  l.lokasiLabKelas.toLowerCase().contains(
+                    _searchQuery.toLowerCase(),
+                  ),
+            )
             .toList();
 
         return Scaffold(
@@ -64,8 +66,7 @@ class _AdminLaporanFasilitasScreenState
                 const CircleAvatar(
                   radius: 16,
                   backgroundColor: Color(0xFF1E3A5F),
-                  child:
-                      Icon(Icons.person, color: Colors.white, size: 18),
+                  child: Icon(Icons.person, color: Colors.white, size: 18),
                 ),
                 const SizedBox(width: 10),
                 const Column(
@@ -74,9 +75,10 @@ class _AdminLaporanFasilitasScreenState
                     Text(
                       'Institution Admin',
                       style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700),
+                        color: Colors.black,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     Text(
                       'Kelola Laporan Fasilitas',
@@ -90,8 +92,10 @@ class _AdminLaporanFasilitasScreenState
               Stack(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.notifications_outlined,
-                        color: Colors.black),
+                    icon: const Icon(
+                      Icons.notifications_outlined,
+                      color: Colors.black,
+                    ),
                     onPressed: () {},
                   ),
                   Positioned(
@@ -119,9 +123,13 @@ class _AdminLaporanFasilitasScreenState
                 indicatorColor: const Color(0xFF1E3A5F),
                 indicatorWeight: 3,
                 labelStyle: const TextStyle(
-                    fontWeight: FontWeight.w700, fontSize: 13),
-                unselectedLabelStyle:
-                    const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                ),
                 tabs: _tabs.map((t) => Tab(text: t['label'])).toList(),
               ),
             ),
@@ -130,25 +138,32 @@ class _AdminLaporanFasilitasScreenState
             children: [
               // Search bar
               Padding(
-                padding:
-                    const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: TextField(
                   controller: _searchController,
                   onChanged: (v) => setState(() => _searchQuery = v),
                   decoration: InputDecoration(
                     hintText: 'Cari laporan...',
-                    hintStyle:
-                        const TextStyle(color: Colors.grey, fontSize: 13),
-                    prefixIcon:
-                        const Icon(Icons.search, color: Colors.grey, size: 20),
+                    hintStyle: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 13,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? GestureDetector(
                             onTap: () {
                               _searchController.clear();
                               setState(() => _searchQuery = '');
                             },
-                            child: const Icon(Icons.close,
-                                color: Colors.grey, size: 18),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.grey,
+                              size: 18,
+                            ),
                           )
                         : null,
                     filled: true,
@@ -171,7 +186,9 @@ class _AdminLaporanFasilitasScreenState
                       Text(
                         '${displayed.length} laporan ditemukan',
                         style: const TextStyle(
-                            color: Colors.grey, fontSize: 12),
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),
@@ -182,27 +199,29 @@ class _AdminLaporanFasilitasScreenState
                 child: ctrl.isLoading
                     ? const Center(
                         child: CircularProgressIndicator(
-                            color: Color(0xFF1E3A5F)))
+                          color: Color(0xFF1E3A5F),
+                        ),
+                      )
                     : displayed.isEmpty
-                        ? _buildEmpty()
-                        : RefreshIndicator(
-                            color: const Color(0xFF1E3A5F),
-                            onRefresh: () => ctrl.loadData(),
-                            child: ListView.builder(
-                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                              itemCount: displayed.length,
-                              itemBuilder: (context, i) {
-                                final laporan = displayed[i];
-                                return _LaporanCard(
-                                  laporan: laporan,
-                                  onDelegasi: laporan.status == 'pending'
-                                      ? () => _openDelegasi(laporan)
-                                      : null,
-                                  onDetail: () => _openDetail(laporan),
-                                );
-                              },
-                            ),
-                          ),
+                    ? _buildEmpty()
+                    : RefreshIndicator(
+                        color: const Color(0xFF1E3A5F),
+                        onRefresh: () => ctrl.loadData(),
+                        child: ListView.builder(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                          itemCount: displayed.length,
+                          itemBuilder: (context, i) {
+                            final laporan = displayed[i];
+                            return _LaporanCard(
+                              laporan: laporan,
+                              onDelegasi: laporan.status == 'pending'
+                                  ? () => _openDelegasi(laporan)
+                                  : null,
+                              onDetail: () => _openDetail(laporan),
+                            );
+                          },
+                        ),
+                      ),
               ),
             ],
           ),
@@ -241,9 +260,9 @@ class _AdminLaporanFasilitasScreenState
   }
 
   void _openDetail(LaporanFasilitas laporan) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Detail: ${laporan.judul}')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Detail: ${laporan.judul}')));
   }
 
   Widget _buildBottomNav() {
@@ -252,17 +271,27 @@ class _AdminLaporanFasilitasScreenState
       selectedItemColor: const Color(0xFF1E3A5F),
       unselectedItemColor: Colors.grey,
       type: BottomNavigationBarType.fixed,
-      selectedLabelStyle:
-          const TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
+      selectedLabelStyle: const TextStyle(
+        fontWeight: FontWeight.w600,
+        fontSize: 11,
+      ),
       items: const [
         BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard_outlined), label: 'Dashboard'),
+          icon: Icon(Icons.dashboard_outlined),
+          label: 'Dashboard',
+        ),
         BottomNavigationBarItem(
-            icon: Icon(Icons.build_outlined), label: 'Facilities'),
+          icon: Icon(Icons.build_outlined),
+          label: 'Facilities',
+        ),
         BottomNavigationBarItem(
-            icon: Icon(Icons.lightbulb_outline), label: 'Aspirations'),
+          icon: Icon(Icons.lightbulb_outline),
+          label: 'Aspirations',
+        ),
         BottomNavigationBarItem(
-            icon: Icon(Icons.people_outline), label: 'Users'),
+          icon: Icon(Icons.people_outline),
+          label: 'Users',
+        ),
       ],
       onTap: (i) {},
     );
@@ -319,21 +348,25 @@ class _LaporanCard extends StatelessWidget {
                   Container(
                     margin: const EdgeInsets.only(right: 8),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Text('Urgent',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      'Urgent',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 Text(
                   _timeAgo(laporan.createdAt),
-                  style:
-                      const TextStyle(color: Colors.grey, fontSize: 11),
+                  style: const TextStyle(color: Colors.grey, fontSize: 11),
                 ),
               ],
             ),
@@ -343,23 +376,26 @@ class _LaporanCard extends StatelessWidget {
             Text(
               laporan.judul,
               style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: Color(0xFF1E3A5F)),
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+                color: Color(0xFF1E3A5F),
+              ),
             ),
             const SizedBox(height: 5),
 
             // Lokasi
             Row(
               children: [
-                const Icon(Icons.location_on_outlined,
-                    size: 13, color: Colors.grey),
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 13,
+                  color: Colors.grey,
+                ),
                 const SizedBox(width: 3),
                 Expanded(
                   child: Text(
                     laporan.lokasiLabKelas,
-                    style:
-                        const TextStyle(color: Colors.grey, fontSize: 12),
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -371,13 +407,18 @@ class _LaporanCard extends StatelessWidget {
               const SizedBox(height: 6),
               Row(
                 children: [
-                  const Icon(Icons.engineering_outlined,
-                      size: 13, color: Colors.blueGrey),
+                  const Icon(
+                    Icons.engineering_outlined,
+                    size: 13,
+                    color: Colors.blueGrey,
+                  ),
                   const SizedBox(width: 3),
                   Text(
                     'Ditugaskan ke: ${laporan.handlerName}',
                     style: const TextStyle(
-                        color: Colors.blueGrey, fontSize: 12),
+                      color: Colors.blueGrey,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
@@ -395,20 +436,23 @@ class _LaporanCard extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1E3A5F),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     elevation: 0,
                   ),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Delegasikan',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13)),
+                      Text(
+                        'Delegasikan',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
                       SizedBox(width: 4),
-                      Icon(Icons.arrow_forward,
-                          size: 15, color: Colors.white),
+                      Icon(Icons.arrow_forward, size: 15, color: Colors.white),
                     ],
                   ),
                 ),
@@ -421,15 +465,21 @@ class _LaporanCard extends StatelessWidget {
                   onPressed: onDetail,
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(
-                        color: Color(0xFF1E3A5F), width: 1.5),
+                      color: Color(0xFF1E3A5F),
+                      width: 1.5,
+                    ),
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  child: const Text('Lihat Detail',
-                      style: TextStyle(
-                          color: Color(0xFF1E3A5F),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13)),
+                  child: const Text(
+                    'Lihat Detail',
+                    style: TextStyle(
+                      color: Color(0xFF1E3A5F),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
               ),
           ],
@@ -454,12 +504,18 @@ class _KategoriBadge extends StatelessWidget {
 
   Color _color() {
     switch (status) {
-      case 'pending': return Colors.orange;
-      case 'assigned': return Colors.blue;
-      case 'in_progress': return Colors.purple;
-      case 'resolved': return Colors.green;
-      case 'rejected': return Colors.red;
-      default: return Colors.grey;
+      case 'pending':
+        return Colors.orange;
+      case 'assigned':
+        return Colors.blue;
+      case 'in_progress':
+        return Colors.purple;
+      case 'resolved':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -474,8 +530,7 @@ class _KategoriBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-            color: c, fontSize: 11, fontWeight: FontWeight.w700),
+        style: TextStyle(color: c, fontSize: 11, fontWeight: FontWeight.w700),
       ),
     );
   }

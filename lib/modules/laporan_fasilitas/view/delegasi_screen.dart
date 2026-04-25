@@ -48,9 +48,10 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
         title: const Text(
           'Delegasi Tugas',
           style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 16),
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
         centerTitle: false,
       ),
@@ -94,10 +95,11 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
                       const Text(
                         'FORM PENUGASAN',
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                            color: Color(0xFF1E3A5F),
-                            letterSpacing: 1),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: Color(0xFF1E3A5F),
+                          letterSpacing: 1,
+                        ),
                       ),
                     ],
                   ),
@@ -115,43 +117,53 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
                     isExpanded: true,
                     decoration: _inputDecoration(),
                     items: teknisiList
-                        .map((t) => DropdownMenuItem(
-                              value: t.id,
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 15,
-                                    backgroundColor: const Color(0xFF1E3A5F)
-                                        .withOpacity(0.12),
-                                    child: Text(
-                                      t.name[0],
-                                      style: const TextStyle(
-                                          color: Color(0xFF1E3A5F),
+                        .map(
+                          (t) => DropdownMenuItem(
+                            value: t.id,
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 15,
+                                  backgroundColor: const Color(
+                                    0xFF1E3A5F,
+                                  ).withOpacity(0.12),
+                                  child: Text(
+                                    t.name[0],
+                                    style: const TextStyle(
+                                      color: Color(0xFF1E3A5F),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        t.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w600,
                                           fontSize: 13,
-                                          fontWeight: FontWeight.bold),
-                                    ),
+                                        ),
+                                      ),
+                                      Text(
+                                        'ID: ${t.nimNip}',
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(t.name,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 13)),
-                                        Text('ID: ${t.nimNip}',
-                                            style: const TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 11)),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ))
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
                         .toList(),
                     onChanged: (val) =>
                         setState(() => _selectedTeknisiId = val),
@@ -161,9 +173,7 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
                   // ── Prioritas ─────────────────────────────
                   _fieldLabel('Prioritas'),
                   const SizedBox(height: 8),
-                  Row(
-                    children: _prioritasOptions(),
-                  ),
+                  Row(children: _prioritasOptions()),
                   const SizedBox(height: 18),
 
                   // ── Deadline ──────────────────────────────
@@ -173,38 +183,45 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
                     onTap: _pickDeadline,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 13),
+                        horizontal: 14,
+                        vertical: 13,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.grey[50],
                         borderRadius: BorderRadius.circular(10),
-                        border:
-                            Border.all(color: Colors.grey[300]!, width: 1),
+                        border: Border.all(color: Colors.grey[300]!, width: 1),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.calendar_today_outlined,
-                              size: 16,
-                              color: _selectedDeadline != null
-                                  ? const Color(0xFF1E3A5F)
-                                  : Colors.grey),
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 16,
+                            color: _selectedDeadline != null
+                                ? const Color(0xFF1E3A5F)
+                                : Colors.grey,
+                          ),
                           const SizedBox(width: 10),
                           Text(
                             _selectedDeadline != null
                                 ? '${_selectedDeadline!.day}/${_selectedDeadline!.month}/${_selectedDeadline!.year}'
                                 : 'mm/dd/yyyy',
                             style: TextStyle(
-                                color: _selectedDeadline != null
-                                    ? Colors.black87
-                                    : Colors.grey,
-                                fontSize: 14),
+                              color: _selectedDeadline != null
+                                  ? Colors.black87
+                                  : Colors.grey,
+                              fontSize: 14,
+                            ),
                           ),
                           const Spacer(),
                           if (_selectedDeadline != null)
                             GestureDetector(
                               onTap: () =>
                                   setState(() => _selectedDeadline = null),
-                              child: const Icon(Icons.close,
-                                  size: 16, color: Colors.grey),
+                              child: const Icon(
+                                Icons.close,
+                                size: 16,
+                                color: Colors.grey,
+                              ),
                             ),
                         ],
                       ),
@@ -220,10 +237,11 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
                     maxLines: 3,
                     style: const TextStyle(fontSize: 13),
                     decoration: _inputDecoration().copyWith(
-                      hintText:
-                          'Tambahkan instruksi khusus untuk teknisi...',
+                      hintText: 'Tambahkan instruksi khusus untuk teknisi...',
                       hintStyle: const TextStyle(
-                          fontSize: 13, color: Colors.grey),
+                        fontSize: 13,
+                        color: Colors.grey,
+                      ),
                       contentPadding: const EdgeInsets.all(14),
                     ),
                   ),
@@ -240,11 +258,13 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
                 onPressed: _isSubmitting ? null : _submitDelegasi,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1E3A5F),
-                  disabledBackgroundColor:
-                      const Color(0xFF1E3A5F).withOpacity(0.6),
+                  disabledBackgroundColor: const Color(
+                    0xFF1E3A5F,
+                  ).withOpacity(0.6),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 0,
                 ),
                 child: _isSubmitting
@@ -252,20 +272,26 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
                         height: 22,
                         width: 22,
                         child: CircularProgressIndicator(
-                            color: Colors.white, strokeWidth: 2.5),
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                        ),
                       )
                     : const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.assignment_turned_in_outlined,
-                              color: Colors.white, size: 18),
+                          Icon(
+                            Icons.assignment_turned_in_outlined,
+                            color: Colors.white,
+                            size: 18,
+                          ),
                           SizedBox(width: 8),
                           Text(
                             'Tugaskan Teknisi',
                             style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15),
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
                           ),
                         ],
                       ),
@@ -311,16 +337,19 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
               const Text(
                 'LAPORAN MASUK',
                 style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.8),
+                  fontSize: 11,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.8,
+                ),
               ),
               const Spacer(),
               if (isPrioritasHigh)
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.red,
                     borderRadius: BorderRadius.circular(6),
@@ -328,14 +357,20 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.warning_amber_rounded,
-                          color: Colors.white, size: 12),
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.white,
+                        size: 12,
+                      ),
                       SizedBox(width: 3),
-                      Text('Urgent',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold)),
+                      Text(
+                        'Urgent',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
                 )
@@ -347,14 +382,19 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
           Text(
             l.judul,
             style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 17,
-                color: Color(0xFF1E3A5F)),
+              fontWeight: FontWeight.bold,
+              fontSize: 17,
+              color: Color(0xFF1E3A5F),
+            ),
           ),
           const SizedBox(height: 6),
           Text(
             l.deskripsi,
-            style: const TextStyle(color: Colors.grey, fontSize: 13, height: 1.4),
+            style: const TextStyle(
+              color: Colors.grey,
+              fontSize: 13,
+              height: 1.4,
+            ),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -363,23 +403,27 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.access_time_outlined,
-                  size: 13, color: Colors.grey),
+              const Icon(
+                Icons.access_time_outlined,
+                size: 13,
+                color: Colors.grey,
+              ),
               const SizedBox(width: 5),
               Text(
                 _formatTime(l.createdAt),
-                style:
-                    const TextStyle(color: Colors.grey, fontSize: 12),
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
               const SizedBox(width: 16),
-              const Icon(Icons.location_on_outlined,
-                  size: 13, color: Colors.grey),
+              const Icon(
+                Icons.location_on_outlined,
+                size: 13,
+                color: Colors.grey,
+              ),
               const SizedBox(width: 5),
               Expanded(
                 child: Text(
                   l.lokasiLabKelas,
-                  style:
-                      const TextStyle(color: Colors.grey, fontSize: 12),
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -404,8 +448,8 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
       final color = p['key'] == 'low'
           ? Colors.green
           : p['key'] == 'medium'
-              ? Colors.orange
-              : Colors.red;
+          ? Colors.orange
+          : Colors.red;
 
       return Expanded(
         child: GestureDetector(
@@ -425,9 +469,10 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
               child: Text(
                 p['label']!,
                 style: TextStyle(
-                    color: isSelected ? color : Colors.grey[500],
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13),
+                  color: isSelected ? color : Colors.grey[500],
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
               ),
             ),
           ),
@@ -440,9 +485,10 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
     return Text(
       label,
       style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 13,
-          color: Colors.black87),
+        fontWeight: FontWeight.w600,
+        fontSize: 13,
+        color: Colors.black87,
+      ),
     );
   }
 
@@ -460,11 +506,9 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide:
-            const BorderSide(color: Color(0xFF1E3A5F), width: 1.5),
+        borderSide: const BorderSide(color: Color(0xFF1E3A5F), width: 1.5),
       ),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
     );
   }
 
@@ -486,9 +530,7 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
       lastDate: DateTime.now().add(const Duration(days: 90)),
       builder: (context, child) => Theme(
         data: Theme.of(context).copyWith(
-          colorScheme: const ColorScheme.light(
-            primary: Color(0xFF1E3A5F),
-          ),
+          colorScheme: const ColorScheme.light(primary: Color(0xFF1E3A5F)),
         ),
         child: child!,
       ),
@@ -510,17 +552,16 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
     setState(() => _isSubmitting = true);
 
     final ctrl = context.read<AdminFasilitasController>();
-    final teknisi =
-        ctrl.allTeknisi.firstWhere((t) => t.id == _selectedTeknisiId);
+    final teknisi = ctrl.allTeknisi.firstWhere(
+      (t) => t.id == _selectedTeknisiId,
+    );
 
     final success = await ctrl.delegasikanLaporan(
       laporanId: widget.laporan.id,
       teknisiId: _selectedTeknisiId!,
       prioritas: _selectedPrioritas,
       deadline: _selectedDeadline,
-      catatan: _catatanController.text.isEmpty
-          ? null
-          : _catatanController.text,
+      catatan: _catatanController.text.isEmpty ? null : _catatanController.text,
       adminId: 'admin-default',
       adminName: 'Admin',
       teknisiName: teknisi.name,
@@ -538,10 +579,7 @@ class _AdminDelegasiScreenState extends State<AdminDelegasiScreen> {
       Navigator.pop(context);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(ctrl.errorMessage),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(ctrl.errorMessage), backgroundColor: Colors.red),
       );
     }
   }
@@ -581,9 +619,10 @@ class _PrioritasPill extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-            color: color,
-            fontSize: 11,
-            fontWeight: FontWeight.bold),
+          color: color,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

@@ -36,8 +36,9 @@ class LaporFasilitasController extends GetxController {
   final RxBool isEditMode = false.obs;
 
   /// Laporan yang sedang di-edit (null jika mode tambah)
-  final Rx<LaporanFasilitasModel?> existingLaporan =
-      Rx<LaporanFasilitasModel?>(null);
+  final Rx<LaporanFasilitasModel?> existingLaporan = Rx<LaporanFasilitasModel?>(
+    null,
+  );
 
   /// Pesan error per field
   final RxString errorKategori = ''.obs;
@@ -105,7 +106,9 @@ class LaporFasilitasController extends GetxController {
     selectedFotoPaths.assignAll(laporan.fotoUrls);
 
     // Set kategori yang sudah dipilih
-    final kat = kategoriList.firstWhereOrNull((k) => k.id == laporan.kategoriId);
+    final kat = kategoriList.firstWhereOrNull(
+      (k) => k.id == laporan.kategoriId,
+    );
     if (kat != null) selectedKategori.value = kat;
   }
 
@@ -260,13 +263,15 @@ class LaporFasilitasController extends GetxController {
     return true; // Asumsikan online untuk prototype
   }
 
-  void _onSubmitSuccess(LaporanFasilitasModel laporan,
-      {required bool isOffline}) {
+  void _onSubmitSuccess(
+    LaporanFasilitasModel laporan, {
+    required bool isOffline,
+  }) {
     final message = isOffline
         ? 'Laporan disimpan secara offline. Akan dikirim otomatis saat ada koneksi.'
         : isEditMode.value
-            ? 'Laporan berhasil diperbarui!'
-            : 'Laporan berhasil dikirim! Kami akan segera menindaklanjuti.';
+        ? 'Laporan berhasil diperbarui!'
+        : 'Laporan berhasil dikirim! Kami akan segera menindaklanjuti.';
 
     Get.back(result: laporan); // Kirim data balik ke halaman sebelumnya
 
@@ -274,10 +279,10 @@ class LaporFasilitasController extends GetxController {
       isOffline ? 'Tersimpan Offline' : 'Berhasil!',
       message,
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor:
-          isOffline ? Colors.orange.shade100 : Colors.green.shade100,
-      colorText:
-          isOffline ? Colors.orange.shade900 : Colors.green.shade900,
+      backgroundColor: isOffline
+          ? Colors.orange.shade100
+          : Colors.green.shade100,
+      colorText: isOffline ? Colors.orange.shade900 : Colors.green.shade900,
       duration: const Duration(seconds: 4),
       margin: const EdgeInsets.all(16),
     );
@@ -301,7 +306,8 @@ class LaporFasilitasController extends GetxController {
         AlertDialog(
           title: const Text('Batalkan Laporan?'),
           content: const Text(
-              'Data yang sudah Anda isi akan hilang. Yakin ingin kembali?'),
+            'Data yang sudah Anda isi akan hilang. Yakin ingin kembali?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Get.back(), // Tutup dialog
@@ -350,6 +356,7 @@ class LaporFasilitasController extends GetxController {
       isEditMode.value ? 'Perbarui Laporan' : 'Kirim Laporan';
 
   /// Judul halaman berdasarkan mode
-  String get pageTitle =>
-      isEditMode.value ? 'Edit Laporan Fasilitas' : 'Tambah/Edit Laporan\nFasilitas';
+  String get pageTitle => isEditMode.value
+      ? 'Edit Laporan Fasilitas'
+      : 'Tambah/Edit Laporan\nFasilitas';
 }

@@ -87,9 +87,12 @@ class AdminFasilitasController extends ChangeNotifier {
 
   int get totalLaporan => _allLaporan.length;
   int get totalTeknisiAktif => _allTeknisi.where((t) => t.isActive).length;
-  int get laporanPending => _allLaporan.where((l) => l.status == 'pending').length;
-  int get laporanInProgress => _allLaporan.where((l) => l.status == 'in_progress').length;
-  int get laporanResolved => _allLaporan.where((l) => l.status == 'resolved').length;
+  int get laporanPending =>
+      _allLaporan.where((l) => l.status == 'pending').length;
+  int get laporanInProgress =>
+      _allLaporan.where((l) => l.status == 'in_progress').length;
+  int get laporanResolved =>
+      _allLaporan.where((l) => l.status == 'resolved').length;
 
   Future<void> loadData() async {
     _setLoading(true);
@@ -109,7 +112,9 @@ class AdminFasilitasController extends ChangeNotifier {
     required String teknisiName,
   }) async {
     try {
-      await Future.delayed(const Duration(milliseconds: 800)); // simulate network
+      await Future.delayed(
+        const Duration(milliseconds: 800),
+      ); // simulate network
 
       final idx = _allLaporan.indexWhere((l) => l.id == laporanId);
       if (idx == -1) return false;

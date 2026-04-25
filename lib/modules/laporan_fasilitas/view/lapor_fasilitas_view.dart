@@ -91,8 +91,11 @@ class LaporFasilitasView extends StatelessWidget {
       backgroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_rounded,
-            color: _AppColors.textPrimary, size: 22),
+        icon: const Icon(
+          Icons.arrow_back_rounded,
+          color: _AppColors.textPrimary,
+          size: 22,
+        ),
         onPressed: controller.onBatalKembali,
       ),
       title: const Text(
@@ -105,8 +108,11 @@ class LaporFasilitasView extends StatelessWidget {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_outlined,
-              color: _AppColors.textPrimary, size: 24),
+          icon: const Icon(
+            Icons.notifications_outlined,
+            color: _AppColors.textPrimary,
+            size: 24,
+          ),
           onPressed: () {},
         ),
         Padding(
@@ -128,15 +134,17 @@ class LaporFasilitasView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Obx(() => Text(
-              controller.pageTitle,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: _AppColors.textPrimary,
-                height: 1.25,
-              ),
-            )),
+        Obx(
+          () => Text(
+            controller.pageTitle,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: _AppColors.textPrimary,
+              height: 1.25,
+            ),
+          ),
+        ),
         const SizedBox(height: 8),
         const Text(
           'Silakan lengkapi formulir di bawah ini untuk melaporkan masalah atau kerusakan pada fasilitas kampus.',
@@ -154,118 +162,130 @@ class LaporFasilitasView extends StatelessWidget {
   // KATEGORI DROPDOWN
   // ============================================================
   Widget _buildKategoriDropdown(LaporFasilitasController controller) {
-    return Obx(() => _FormFieldWrapper(
-          label: 'Kategori Laporan',
-          isRequired: true,
-          errorText: controller.errorKategori.value,
-          child: Container(
-            decoration: BoxDecoration(
-              color: _AppColors.cardBg,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: controller.errorKategori.value.isNotEmpty
-                    ? _AppColors.inputError
-                    : _AppColors.inputBorder,
-                width: 1.2,
-              ),
+    return Obx(
+      () => _FormFieldWrapper(
+        label: 'Kategori Laporan',
+        isRequired: true,
+        errorText: controller.errorKategori.value,
+        child: Container(
+          decoration: BoxDecoration(
+            color: _AppColors.cardBg,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: controller.errorKategori.value.isNotEmpty
+                  ? _AppColors.inputError
+                  : _AppColors.inputBorder,
+              width: 1.2,
             ),
-            child: controller.isLoadingKategori.value
-                ? const Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: _AppColors.primary),
+          ),
+          child: controller.isLoadingKategori.value
+              ? const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: _AppColors.primary,
                         ),
-                        SizedBox(width: 12),
-                        Text('Memuat kategori...',
-                            style: TextStyle(
-                                color: _AppColors.textLight, fontSize: 14)),
-                      ],
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        'Memuat kategori...',
+                        style: TextStyle(
+                          color: _AppColors.textLight,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : DropdownButtonHideUnderline(
+                  child: DropdownButton<KategoriFasilitasModel>(
+                    value: controller.selectedKategori.value,
+                    isExpanded: true,
+                    hint: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 14),
+                      child: Text(
+                        'Pilih Kategori...',
+                        style: TextStyle(
+                          color: _AppColors.textLight,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
-                  )
-                : DropdownButtonHideUnderline(
-                    child: DropdownButton<KategoriFasilitasModel>(
-                      value: controller.selectedKategori.value,
-                      isExpanded: true,
-                      hint: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 14),
-                        child: Text(
-                          'Pilih Kategori...',
-                          style: TextStyle(
-                            color: _AppColors.textLight,
-                            fontSize: 14,
-                          ),
-                        ),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    borderRadius: BorderRadius.circular(10),
+                    icon: const Padding(
+                      padding: EdgeInsets.only(right: 12),
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: _AppColors.textSecondary,
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      borderRadius: BorderRadius.circular(10),
-                      icon: const Padding(
-                        padding: EdgeInsets.only(right: 12),
-                        child: Icon(Icons.keyboard_arrow_down_rounded,
-                            color: _AppColors.textSecondary),
-                      ),
-                      items: controller.kategoriList.map((kat) {
-                        return DropdownMenuItem<KategoriFasilitasModel>(
-                          value: kat,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 14),
-                            child: Text(
-                              kat.namaKategori,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: _AppColors.textPrimary,
-                              ),
+                    ),
+                    items: controller.kategoriList.map((kat) {
+                      return DropdownMenuItem<KategoriFasilitasModel>(
+                        value: kat,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          child: Text(
+                            kat.namaKategori,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: _AppColors.textPrimary,
                             ),
                           ),
-                        );
-                      }).toList(),
-                      onChanged: controller.onKategoriSelected,
-                    ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: controller.onKategoriSelected,
                   ),
-          ),
-        ));
+                ),
+        ),
+      ),
+    );
   }
 
   // ============================================================
   // LOKASI FIELD
   // ============================================================
   Widget _buildLokasiField(LaporFasilitasController controller) {
-    return Obx(() => _FormFieldWrapper(
-          label: 'Lokasi / Ruangan',
-          isRequired: true,
-          errorText: controller.errorLokasi.value,
-          child: _StyledTextField(
-            controller: controller.lokasiController,
-            hintText: 'Contoh: Lab Komputer 2, Gedung A',
-            hasError: controller.errorLokasi.value.isNotEmpty,
-            textInputAction: TextInputAction.next,
-          ),
-        ));
+    return Obx(
+      () => _FormFieldWrapper(
+        label: 'Lokasi / Ruangan',
+        isRequired: true,
+        errorText: controller.errorLokasi.value,
+        child: _StyledTextField(
+          controller: controller.lokasiController,
+          hintText: 'Contoh: Lab Komputer 2, Gedung A',
+          hasError: controller.errorLokasi.value.isNotEmpty,
+          textInputAction: TextInputAction.next,
+        ),
+      ),
+    );
   }
 
   // ============================================================
   // DESKRIPSI FIELD
   // ============================================================
   Widget _buildDeskripsiField(LaporFasilitasController controller) {
-    return Obx(() => _FormFieldWrapper(
-          label: 'Deskripsi Masalah',
-          isRequired: true,
-          errorText: controller.errorDeskripsi.value,
-          child: _StyledTextField(
-            controller: controller.deskripsiController,
-            hintText:
-                'Jelaskan secara detail masalah yang\nAnda temukan...',
-            hasError: controller.errorDeskripsi.value.isNotEmpty,
-            maxLines: 5,
-            maxLength: LaporFasilitasController.maxDeskripsiLength,
-            textInputAction: TextInputAction.done,
-          ),
-        ));
+    return Obx(
+      () => _FormFieldWrapper(
+        label: 'Deskripsi Masalah',
+        isRequired: true,
+        errorText: controller.errorDeskripsi.value,
+        child: _StyledTextField(
+          controller: controller.deskripsiController,
+          hintText: 'Jelaskan secara detail masalah yang\nAnda temukan...',
+          hasError: controller.errorDeskripsi.value.isNotEmpty,
+          maxLines: 5,
+          maxLength: LaporFasilitasController.maxDeskripsiLength,
+          textInputAction: TextInputAction.done,
+        ),
+      ),
+    );
   }
 
   // ============================================================
@@ -416,8 +436,10 @@ class LaporFasilitasView extends StatelessWidget {
                 width: double.infinity,
                 child: TextButton(
                   onPressed: () => Get.back(),
-                  child: const Text('Batal',
-                      style: TextStyle(color: _AppColors.textSecondary)),
+                  child: const Text(
+                    'Batal',
+                    style: TextStyle(color: _AppColors.textSecondary),
+                  ),
                 ),
               ),
             ],
@@ -431,43 +453,45 @@ class LaporFasilitasView extends StatelessWidget {
   // SUBMIT BUTTON
   // ============================================================
   Widget _buildSubmitButton(LaporFasilitasController controller) {
-    return Obx(() => SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton.icon(
-            onPressed:
-                controller.isSubmitting.value ? null : controller.onSubmitLaporan,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _AppColors.primary,
-              disabledBackgroundColor: _AppColors.primary.withOpacity(0.6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 2,
+    return Obx(
+      () => SizedBox(
+        width: double.infinity,
+        height: 52,
+        child: ElevatedButton.icon(
+          onPressed: controller.isSubmitting.value
+              ? null
+              : controller.onSubmitLaporan,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: _AppColors.primary,
+            disabledBackgroundColor: _AppColors.primary.withOpacity(0.6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
-            icon: controller.isSubmitting.value
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : const Icon(Icons.send_rounded,
-                    color: Colors.white, size: 18),
-            label: Text(
-              controller.isSubmitting.value
-                  ? 'Mengirim...'
-                  : controller.submitButtonLabel,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-              ),
+            elevation: 2,
+          ),
+          icon: controller.isSubmitting.value
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : const Icon(Icons.send_rounded, color: Colors.white, size: 18),
+          label: Text(
+            controller.isSubmitting.value
+                ? 'Mengirim...'
+                : controller.submitButtonLabel,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   // ============================================================
@@ -509,7 +533,7 @@ class LaporFasilitasView extends StatelessWidget {
             color: Colors.black.withOpacity(0.08),
             blurRadius: 12,
             offset: const Offset(0, -2),
-          )
+          ),
         ],
       ),
       child: SafeArea(
@@ -596,7 +620,7 @@ class _FormFieldWrapper extends StatelessWidget {
                     TextSpan(
                       text: ' *',
                       style: TextStyle(color: _AppColors.inputError),
-                    )
+                    ),
                   ]
                 : [],
           ),
@@ -608,8 +632,11 @@ class _FormFieldWrapper extends StatelessWidget {
           const SizedBox(height: 5),
           Row(
             children: [
-              const Icon(Icons.info_outline_rounded,
-                  size: 13, color: _AppColors.inputError),
+              const Icon(
+                Icons.info_outline_rounded,
+                size: 13,
+                color: _AppColors.inputError,
+              ),
               const SizedBox(width: 4),
               Text(
                 errorText!,
@@ -651,20 +678,16 @@ class _StyledTextField extends StatelessWidget {
       maxLines: maxLines,
       maxLength: maxLength,
       textInputAction: textInputAction,
-      style: const TextStyle(
-        fontSize: 14,
-        color: _AppColors.textPrimary,
-      ),
+      style: const TextStyle(fontSize: 14, color: _AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(
-          color: _AppColors.textLight,
-          fontSize: 14,
-        ),
+        hintStyle: const TextStyle(color: _AppColors.textLight, fontSize: 14),
         filled: true,
         fillColor: _AppColors.cardBg,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 13,
+        ),
         counterText: maxLength != null ? null : '',
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
@@ -707,8 +730,7 @@ class _FotoChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.image_outlined,
-              size: 14, color: _AppColors.primary),
+          const Icon(Icons.image_outlined, size: 14, color: _AppColors.primary),
           const SizedBox(width: 5),
           Text(
             shortName,
@@ -721,8 +743,11 @@ class _FotoChip extends StatelessWidget {
           const SizedBox(width: 5),
           GestureDetector(
             onTap: onRemove,
-            child: const Icon(Icons.close_rounded,
-                size: 14, color: _AppColors.textSecondary),
+            child: const Icon(
+              Icons.close_rounded,
+              size: 14,
+              color: _AppColors.textSecondary,
+            ),
           ),
         ],
       ),

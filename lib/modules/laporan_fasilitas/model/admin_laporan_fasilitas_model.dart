@@ -35,4 +35,3 @@ class LaporanFasilitas {
     required this.updatedAt,
   });
 }
-
