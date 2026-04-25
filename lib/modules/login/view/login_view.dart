@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:proyek_4_poki_polban_kita/modules/home/view/home_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/fasilitas_controller.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/laporan_fasilitas_screen.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -60,13 +64,12 @@ class _LoginViewState extends State<LoginView> {
         _webViewController = null;
       });
 
-
-
       return;
     }
 
     setState(() {
-      _status = 'Akun belum terdaftar lokal. Sinkronisasi dari website akademik...';
+      _status =
+          'Akun belum terdaftar lokal. Sinkronisasi dari website akademik...';
     });
 
     final controller = await authService.loginWebsite(
@@ -78,7 +81,8 @@ class _LoginViewState extends State<LoginView> {
 
         setState(() {
           _isLoading = false;
-          _status = 'Login website berhasil dan akun sudah tersimpan di MongoDB.';
+          _status =
+              'Login website berhasil dan akun sudah tersimpan di MongoDB.';
           _currentUrl = url;
           _webViewController = null;
         });
@@ -121,6 +125,25 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
+  void _openMahasiswaAccess() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeView()),
+    );
+  }
+
+  void _openAdminAccess() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => AdminFasilitasController(),
+          child: const AdminLaporanFasilitasScreen(),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -143,20 +166,29 @@ class _LoginViewState extends State<LoginView> {
                   enabled: !_isLoading, // Kunci input saat loading
                   decoration: const InputDecoration(labelText: 'Password'),
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 ElevatedButton(
                   onPressed: _isLoading ? null : _loginHandler,
                   child: const Text('Login'),
                 ),
-                
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _openMahasiswaAccess,
+                  child: const Text('Akses Mahasiswa'),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _openAdminAccess,
+                  child: const Text('Masuk sebagai Admin'),
+                ),
                 const SizedBox(height: 12),
 
                 if (_isLoading) const CircularProgressIndicator(),
-                
+
                 const SizedBox(height: 12),
-                
+
                 Text(
                   'Status: $_status',
                   style: TextStyle(
@@ -165,9 +197,9 @@ class _LoginViewState extends State<LoginView> {
                         : Colors.black,
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 Text('URL saat ini: $_currentUrl'),
               ],
             ),
