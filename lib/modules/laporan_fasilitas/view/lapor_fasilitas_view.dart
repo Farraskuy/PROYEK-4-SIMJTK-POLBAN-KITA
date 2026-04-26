@@ -518,10 +518,10 @@ class LaporFasilitasView extends StatelessWidget {
   // ============================================================
   Widget _buildBottomNavBar() {
     const items = [
-      {'label': 'HOME', 'icon': Icons.home_rounded, 'index': 0},
-      {'label': 'LAYANAN', 'icon': Icons.grid_view_rounded, 'index': 1},
-      {'label': 'ASPIRASI', 'icon': Icons.campaign_rounded, 'index': 2},
-      {'label': 'PROFIL', 'icon': Icons.person_rounded, 'index': 3},
+      {'label': 'Home', 'icon': Icons.home_rounded, 'index': 0},
+      {'label': 'Layanan', 'icon': Icons.grid_view_rounded, 'index': 1},
+      {'label': 'Aspirasi', 'icon': Icons.campaign_rounded, 'index': 2},
+      {'label': 'Profil', 'icon': Icons.person_rounded, 'index': 3},
     ];
     const activeIndex = 1; // Layanan aktif
 

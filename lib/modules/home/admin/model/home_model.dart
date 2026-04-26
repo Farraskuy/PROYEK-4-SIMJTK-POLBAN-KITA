@@ -270,9 +270,9 @@ class AdminNavItemModel {
   });
 
   static List<AdminNavItemModel> items() => const [
-        AdminNavItemModel(label: 'DASHBOARD', iconName: 'dashboard', index: 0),
-        AdminNavItemModel(label: 'FACILITIES', iconName: 'apartment', index: 1),
-        AdminNavItemModel(label: 'ASPIRATIONS', iconName: 'campaign', index: 2),
-        AdminNavItemModel(label: 'USERS', iconName: 'group', index: 3),
+        AdminNavItemModel(label: 'Home', iconName: 'dashboard', index: 0),
+        AdminNavItemModel(label: 'Layanan', iconName: 'apartment', index: 1),
+        AdminNavItemModel(label: 'Aspirasi', iconName: 'campaign', index: 2),
+        AdminNavItemModel(label: 'Profil', iconName: 'group', index: 3),
       ];
 }

@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import '../model/home_model.dart';
-import '../../../laporan_fasilitas/view/lapor_fasilitas_view.dart';
+import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import '../../../aspirasi/view/aspirasi_view.dart';
 
 class HomeController extends GetxController {
@@ -85,12 +85,8 @@ class HomeController extends GetxController {
         // Home - stay on home
         break;
       case 1:
-        // Layanan
-        Get.snackbar(
-          'Layanan',
-          'Menuju Layanan...',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        // Layanan - redirect ke Laporan Fasilitas Mahasiswa
+        Get.to(() => const LaporanFasilitasMahasiswaView());
         break;
       case 2:
         // Aspirasi
@@ -186,7 +182,7 @@ class HomeController extends GetxController {
     switch (route) {
       case AksesCepatRoute.laporFasilitas:
         // TODO: Get.toNamed(Routes.laporFasilitas)
-        Get.to(() => const LaporFasilitasView());
+        Get.to(() => const LaporanFasilitasMahasiswaView());
         break;
       case AksesCepatRoute.lostFound:
         Get.snackbar(

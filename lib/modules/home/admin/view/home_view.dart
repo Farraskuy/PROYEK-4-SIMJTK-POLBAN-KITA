@@ -437,32 +437,22 @@ class AdminDashboardView extends StatelessWidget {
         ));
   }
 
-  // ============================================================
-  // BOTTOM NAV BAR (dark background sesuai screenshot)
-  // ============================================================
   Widget _buildBottomNavBar(AdminDashboardController ctrl) {
-    const icons = [
+    final items = AdminNavItemModel.items();
+    final icons = [
       Icons.dashboard_rounded,
       Icons.apartment_rounded,
       Icons.campaign_rounded,
       Icons.group_rounded,
     ];
-    final items = AdminNavItemModel.items();
 
     return Obx(() => Container(
           decoration: BoxDecoration(
-            color: _C.navBg,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 12,
-                offset: const Offset(0, -2),
-              )
-            ],
+            color: Colors.white,
           ),
           child: SafeArea(
             child: SizedBox(
-              height: 62,
+              height: 60,
               child: Row(
                 children: List.generate(items.length, (i) {
                   final active = ctrl.selectedNavIndex.value == i;
@@ -473,33 +463,24 @@ class AdminDashboardView extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          if (active)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Icon(icons[i],
-                                  size: 20, color: Colors.white),
-                            )
-                          else
-                            Icon(icons[i],
-                                size: 22,
-                                color: Colors.white.withOpacity(0.5)),
-                          const SizedBox(height: 3),
+                          Icon(
+                            icons[i],
+                            size: 24,
+                            color: active
+                                ? _C.navActive
+                                : _C.navInactive,
+                          ),
+                          const SizedBox(height: 2),
                           Text(
                             items[i].label,
                             style: TextStyle(
-                              fontSize: 9,
+                              fontSize: 10,
                               fontWeight: active
-                                  ? FontWeight.w700
+                                  ? FontWeight.w600
                                   : FontWeight.w400,
                               color: active
-                                  ? Colors.white
-                                  : Colors.white.withOpacity(0.5),
-                              letterSpacing: 0.5,
+                                  ? _C.navActive
+                                  : _C.navInactive,
                             ),
                           ),
                         ],
