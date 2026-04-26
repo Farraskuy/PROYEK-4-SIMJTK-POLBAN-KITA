@@ -85,12 +85,8 @@ class HomeController extends GetxController {
         // Home - stay on home
         break;
       case 1:
-        // Layanan
-        Get.snackbar(
-          'Layanan',
-          'Menuju Layanan...',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        // Layanan - redirect ke Laporan Fasilitas Mahasiswa
+        Get.to(() => const LaporanFasilitasMahasiswaView());
         break;
       case 2:
         // Aspirasi
