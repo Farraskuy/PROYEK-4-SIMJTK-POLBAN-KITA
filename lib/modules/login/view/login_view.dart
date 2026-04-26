@@ -126,14 +126,14 @@ class _LoginViewState extends State<LoginView> {
   }
 
   void _openMahasiswaAccess() {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const HomeView()),
     );
   }
 
   void _openAdminAccess() {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ChangeNotifierProvider(
