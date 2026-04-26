@@ -10,7 +10,7 @@ void main() async {
 
   await dotenv.load(fileName: '.env.example');
 
-  await MonggoDBServices().connectToDatabase();
+  await MonggoDBServices().connect();
 
   runApp(const MyApp());
 }

@@ -15,7 +15,7 @@ class MonggoDBServices {
 
   bool get isConnected => _db?.state == State.open;
 
-  Future<void> connectToDatabase() async {
+  Future<void> connect() async {
     if (isConnected) {
       await LogService.writeLog(
         "Already connected to MongoDB",
@@ -50,7 +50,7 @@ class MonggoDBServices {
     }
   }
 
-  DbCollection _collection(String collectionName) {
+  DbCollection getCollection(String collectionName) {
     if (!isConnected) {
       throw Exception("Not connected to MongoDB");
     }
@@ -60,7 +60,7 @@ class MonggoDBServices {
 
   Future<void> insertData(String collectionName, Map<String, dynamic> data) async {
     try {
-      final collection = _collection(collectionName);
+      final collection = getCollection(collectionName);
       await collection.insertOne(data);
 
       await LogService.writeLog(
@@ -80,7 +80,7 @@ class MonggoDBServices {
 
   Future<List<Map<String, dynamic>>> fetch(String collection, SelectorBuilder filter) async {
     try {
-      final coll = _collection(collection);
+      final coll = getCollection(collection);
       final data = await coll.find(filter).toList();
 
       await LogService.writeLog(
@@ -102,7 +102,7 @@ class MonggoDBServices {
 
   Future<void> updateData(String collectionName, String id, Map<String, dynamic> newData) async {
     try {
-      final collection = _collection(collectionName);
+      final collection = getCollection(collectionName);
       await collection.updateOne({'_id': id}, {'\$set': newData});
 
       await LogService.writeLog(
@@ -126,7 +126,7 @@ class MonggoDBServices {
     Map<String, dynamic> newData,
   ) async {
     try {
-      final collection = _collection(collectionName);
+      final collection = getCollection(collectionName);
       await collection.updateOne(filter, newData);
   
       await LogService.writeLog(
@@ -146,7 +146,7 @@ class MonggoDBServices {
 
   Future<void> deleteData(String collectionName, String id) async {
     try {
-      final collection = _collection(collectionName);
+      final collection = getCollection(collectionName);
       await collection.deleteOne({'_id': id});
 
       await LogService.writeLog(
@@ -161,6 +161,17 @@ class MonggoDBServices {
       );
 
       rethrow;
+    }
+  }
+
+  Future<void> close() async {
+    if (isConnected) {
+      await _db!.close();
+
+      await LogService.writeLog(
+        "MongoDB connection closed",
+        source: "mongodb_service.dart",
+      );
     }
   }
 }

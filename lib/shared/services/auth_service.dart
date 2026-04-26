@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mongo_dart/mongo_dart.dart';
@@ -9,8 +10,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class AuthService {
   static const String _usersCollection = 'users';
-  static const String _academicLoginUrl =
-      'https://akademik.polban.ac.id/laman/login';
+  static const String _academicLoginUrl = 'https://akademik.polban.ac.id/laman/login';
   static const String _academicSuccessUrl = 'https://akademik.polban.ac.id/Mhs';
   static const String _usernameSelector = '.form-control[name="username"]';
   static const String _passwordSelector = '.form-control[name="password"]';
@@ -18,6 +18,30 @@ class AuthService {
       '.btn.btn-primary.btn-block.btn-flat[name="submit"]';
 
   static final AuthService _instance = AuthService._internal();
+
+  @visibleForTesting
+  static Future<List<Map<String, dynamic>>> Function(
+    String collection,
+    SelectorBuilder filter,
+  )? fetchUsersOverride;
+  
+  @visibleForTesting
+  static Future<UserModel> Function({
+    required String username,
+    required String password,
+    required Map<String, dynamic> profile,
+  })? registerUserOverride;
+  
+  @visibleForTesting
+  static Future<WebViewController> Function({
+    required String username,
+    required String password,
+    void Function(String url)? onUrlChanged,
+    void Function(String url)? onSuccess,
+    void Function(String errorMessage)? onFailure,
+    void Function(String errorMessage)? onHttpError,
+    Duration timeout,
+  })? loginWebsiteOverride;
 
   AuthService._internal();
 
@@ -69,10 +93,7 @@ class AuthService {
   /// Login menggunakan API (mengakses database Mongo)
   Future<bool> login(String username, String password) async {
     try {
-      final userList = await MonggoDBServices().fetch(
-        _usersCollection,
-        where.eq('username', username),
-      );
+      final userList = await _fetchUsers(where.eq('username', username));
 
       final userMap = userList.isNotEmpty ? userList.first : null;
       final storedPassword = userMap?['password']?.toString() ?? '';
@@ -106,45 +127,13 @@ class AuthService {
     }
   }
 
-  /// Registrasi menggunakan API (mengakses database Mongo)
-  Future<UserModel?> register(
-    String username,
-    String password, {
-    String? role,
-  }) async {
-    try {
-      // Check if username exists
-      final checkUser = await MonggoDBServices().fetch(
-        _usersCollection,
-        where.eq('username', username),
-      );
-
-      if (checkUser.isNotEmpty) {
-        throw Exception("Username sudah digunakan");
-      }
-
-      final newUserMap = {
-        '_id': ObjectId(),
-        'username': username,
-        'password': BCrypt.hashpw(password, BCrypt.gensalt()),
-        'role': role ?? 'mahasiswa',
-        'createdAt': DateTime.now().toIso8601String(),
-      };
-
-      await MonggoDBServices().insertData(_usersCollection, newUserMap);
-
-      final user = UserModel.fromJson(newUserMap);
-      await _saveUserSession(user);
-      return user;
-    } catch (e) {
-      await LogService.writeLog(
-        "AUTH: Register failed - $e",
-        source: "auth_service.dart",
-        level: 1,
-      );
-
-      rethrow;
+  Future<List<Map<String, dynamic>>> _fetchUsers(SelectorBuilder filter) async {
+    final override = fetchUsersOverride;
+    if (override != null) {
+      return override(_usersCollection, filter);
     }
+
+    return MonggoDBServices().fetch(_usersCollection, filter);
   }
 
   /// Logout - menghapus sesi
@@ -181,6 +170,19 @@ class AuthService {
     void Function(String errorMessage)? onHttpError,
     Duration timeout = const Duration(seconds: 25),
   }) async {
+    final override = loginWebsiteOverride;
+    if (override != null) {
+      return override(
+        username: username,
+        password: password,
+        onUrlChanged: onUrlChanged,
+        onSuccess: onSuccess,
+        onFailure: onFailure,
+        onHttpError: onHttpError,
+        timeout: timeout,
+      );
+    }
+
     late final WebViewController controller;
 
     bool hasAttemptedLogin = false;
@@ -230,14 +232,11 @@ class AuthService {
             final finishedUri = Uri.tryParse(url);
             if (finishedUri == null) return;
 
-            if (_isSuccessUrl(finishedUri, _academicSuccessUrl)) {
+            if (_isSameUrl(finishedUri, _academicSuccessUrl)) {
               try {
                 final profile = await _extractAcademicProfile(controller);
-                final user = await _syncWebsiteUserToMongo(
-                  fallbackUsername: username,
-                  rawPassword: password,
-                  profile: profile,
-                );
+
+                final user = await _register(username: username, password: password, profile: profile);
 
                 await _saveUserSession(user);
 
@@ -249,19 +248,19 @@ class AuthService {
                 completeSuccessOnce(url);
               } catch (e) {
                 await LogService.writeLog(
-                  'AUTH: Sinkronisasi user website gagal - $e',
+                  'AUTH: Register user website gagal - $e',
                   source: 'auth_service.dart',
                   level: 1,
                 );
 
                 completeFailureOnce(
-                  'Login website berhasil, tapi sinkronisasi akun ke database gagal.',
+                  'Login website berhasil, tapi register akun ke database gagal.',
                 );
               }
               return;
             }
 
-            if (!_isLoginUrl(finishedUri, _academicLoginUrl)) {
+            if (!_isSameUrl(finishedUri, _academicLoginUrl)) {
               return;
             }
 
@@ -330,26 +329,37 @@ class AuthService {
     return controller;
   }
 
-  bool _verifyPassword(String rawPassword, String storedPassword) {
+  @visibleForTesting
+  Future<void> completeAcademicWebsiteLoginForTest({
+    required String username,
+    required String password,
+    required Map<String, dynamic> profile,
+    void Function(String url)? onSuccess,
+  }) async {
+    final user = await _register(
+      username: username,
+      password: password,
+      profile: profile,
+    );
+
+    await _saveUserSession(user);
+    onSuccess?.call(_academicSuccessUrl);
+  }
+
+  bool _verifyPassword(String password, String storedPassword) {
     if (storedPassword.isEmpty) {
       return false;
     }
 
     try {
-      return BCrypt.checkpw(rawPassword, storedPassword);
+      return BCrypt.checkpw(password, storedPassword);
     } catch (_) {
       // Fallback untuk data lama yang mungkin masih plaintext.
-      return rawPassword == storedPassword;
+      return password == storedPassword;
     }
   }
 
-  bool _isLoginUrl(Uri current, String loginUrl) {
-    final expected = Uri.parse(loginUrl);
-    return current.host == expected.host &&
-        current.path.toLowerCase().startsWith(expected.path.toLowerCase());
-  }
-
-  bool _isSuccessUrl(Uri current, String successUrl) {
+  bool _isSameUrl(Uri current, String successUrl) {
     final expected = Uri.parse(successUrl);
     return current.host == expected.host &&
         current.path.toLowerCase().startsWith(expected.path.toLowerCase());
@@ -455,18 +465,27 @@ class AuthService {
     return <String, dynamic>{};
   }
 
-  Future<UserModel> _syncWebsiteUserToMongo({
-    required String fallbackUsername,
-    required String rawPassword,
+  Future<UserModel> _register({
+    required String username,
+    required String password,
     required Map<String, dynamic> profile,
   }) async {
+    final override = registerUserOverride;
+    if (override != null) {
+      return override(
+        username: username,
+        password: password,
+        profile: profile,
+      );
+    }
+
     final nimFromWebsite = (profile['nim'] ?? '').toString().trim();
     final usernameToStore = nimFromWebsite.isNotEmpty
         ? nimFromWebsite
-        : fallbackUsername;
+        : username;
 
     final now = DateTime.now().toIso8601String();
-    final passwordHash = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+    final passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
 
     final profilePatch = <String, dynamic>{
       'username': usernameToStore,
@@ -487,7 +506,6 @@ class AuthService {
 
     if (existingByUsername.isEmpty) {
       final newUserMap = <String, dynamic>{
-        '_id': ObjectId(),
         ...profilePatch,
         'createdAt': now,
       };
