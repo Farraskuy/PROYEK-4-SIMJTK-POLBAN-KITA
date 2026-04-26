@@ -78,7 +78,8 @@ class DaftarTugasView extends StatelessWidget {
             child: Obx(() {
               if (ctrl.isLoading.value) {
                 return const Center(
-                    child: CircularProgressIndicator(color: _C.primary));
+                  child: CircularProgressIndicator(color: _C.primary),
+                );
               }
 
               if (ctrl.tugasTampil.isEmpty) {
@@ -89,11 +90,9 @@ class DaftarTugasView extends StatelessWidget {
                 color: _C.primary,
                 onRefresh: ctrl.onRefresh,
                 child: ListView.separated(
-                  padding:
-                      const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   itemCount: ctrl.tugasTampil.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: 10),
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final item = ctrl.tugasTampil[index];
                     return _TugasListItem(
@@ -131,8 +130,11 @@ class DaftarTugasView extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () => Get.back(),
-                    icon: const Icon(Icons.menu_rounded,
-                        color: _C.textPrimary, size: 24),
+                    icon: const Icon(
+                      Icons.menu_rounded,
+                      color: _C.textPrimary,
+                      size: 24,
+                    ),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
@@ -189,41 +191,45 @@ class DaftarTugasView extends StatelessWidget {
           const Divider(height: 1, color: _C.divider),
           SizedBox(
             height: 52,
-            child: Obx(() => ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 10),
-                  children: FilterTugas.values.map((filter) {
-                    final isActive = ctrl.activeFilter.value == filter;
+            child: Obx(
+              () => ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                children: FilterTugas.values.map((filter) {
+                  final isActive = ctrl.activeFilter.value == filter;
 
-                    // Hitung jumlah per filter untuk badge
-                    int count;
-                    switch (filter) {
-                      case FilterTugas.semua:
-                        count = ctrl.countSemua;
-                        break;
-                      case FilterTugas.menunggu:
-                        count = ctrl.countMenunggu;
-                        break;
-                      case FilterTugas.diproses:
-                        count = ctrl.countDiproses;
-                        break;
-                      case FilterTugas.selesai:
-                        count = ctrl.countSelesai;
-                        break;
-                    }
+                  // Hitung jumlah per filter untuk badge
+                  int count;
+                  switch (filter) {
+                    case FilterTugas.semua:
+                      count = ctrl.countSemua;
+                      break;
+                    case FilterTugas.menunggu:
+                      count = ctrl.countMenunggu;
+                      break;
+                    case FilterTugas.diproses:
+                      count = ctrl.countDiproses;
+                      break;
+                    case FilterTugas.selesai:
+                      count = ctrl.countSelesai;
+                      break;
+                  }
 
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: _FilterChip(
-                        label: filter.label,
-                        count: count,
-                        isActive: isActive,
-                        onTap: () => ctrl.onFilterChanged(filter),
-                      ),
-                    );
-                  }).toList(),
-                )),
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _FilterChip(
+                      label: filter.label,
+                      count: count,
+                      isActive: isActive,
+                      onTap: () => ctrl.onFilterChanged(filter),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
         ],
       ),
@@ -241,65 +247,70 @@ class DaftarTugasView extends StatelessWidget {
       {'label': 'Profil', 'icon': Icons.person_rounded},
     ];
 
-    return Obx(() => Container(
-          decoration: BoxDecoration(
-            color: _C.white,
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, -2))
-            ],
-          ),
-          child: SafeArea(
-            child: SizedBox(
-              height: 62,
-              child: Row(
-                children: List.generate(navItems.length, (i) {
-                  final active = ctrl.selectedNavIndex.value == i;
-                  final icon = navItems[i]['icon'] as IconData;
-                  final label = navItems[i]['label'] as String;
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          color: _C.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: SizedBox(
+            height: 62,
+            child: Row(
+              children: List.generate(navItems.length, (i) {
+                final active = ctrl.selectedNavIndex.value == i;
+                final icon = navItems[i]['icon'] as IconData;
+                final label = navItems[i]['label'] as String;
 
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => ctrl.onNavTapped(i),
-                      behavior: HitTestBehavior.opaque,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (active)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: _C.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Icon(icon, size: 20, color: _C.navActive),
-                            )
-                          else
-                            Icon(icon, size: 22, color: _C.navInactive),
-                          const SizedBox(height: 3),
-                          Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: active
-                                  ? FontWeight.w700
-                                  : FontWeight.w400,
-                              color: active ? _C.navActive : _C.navInactive,
-                              letterSpacing: 0.3,
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => ctrl.onNavTapped(i),
+                    behavior: HitTestBehavior.opaque,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (active)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
                             ),
+                            decoration: BoxDecoration(
+                              color: _C.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Icon(icon, size: 20, color: _C.navActive),
+                          )
+                        else
+                          Icon(icon, size: 22, color: _C.navInactive),
+                        const SizedBox(height: 3),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: active
+                                ? FontWeight.w700
+                                : FontWeight.w400,
+                            color: active ? _C.navActive : _C.navInactive,
+                            letterSpacing: 0.3,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  );
-                }),
-              ),
+                  ),
+                );
+              }),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
 
@@ -341,18 +352,15 @@ class _FilterChip extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 13,
-                fontWeight:
-                    isActive ? FontWeight.w700 : FontWeight.w500,
-                color:
-                    isActive ? _C.chipActiveFg : _C.chipInactiveFg,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive ? _C.chipActiveFg : _C.chipInactiveFg,
               ),
             ),
             // Badge count
             if (count > 0) ...[
               const SizedBox(width: 6),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 6, vertical: 1),
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
                   color: isActive
                       ? Colors.white.withOpacity(0.25)
@@ -418,7 +426,7 @@ class _TugasListItem extends StatelessWidget {
               color: Colors.black.withOpacity(0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
-            )
+            ),
           ],
         ),
         child: IntrinsicHeight(
@@ -465,7 +473,9 @@ class _TugasListItem extends StatelessWidget {
                               if (!item.isSynced) ...[
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 6, vertical: 2),
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: _C.offlineBg,
                                     borderRadius: BorderRadius.circular(4),
@@ -507,14 +517,19 @@ class _TugasListItem extends StatelessWidget {
                       // Lokasi
                       Row(
                         children: [
-                          const Icon(Icons.location_on_outlined,
-                              size: 13, color: _C.textLight),
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 13,
+                            color: _C.textLight,
+                          ),
                           const SizedBox(width: 3),
                           Expanded(
                             child: Text(
                               item.lokasi,
                               style: const TextStyle(
-                                  fontSize: 12, color: _C.textSecondary),
+                                fontSize: 12,
+                                color: _C.textSecondary,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -533,12 +548,13 @@ class _TugasListItem extends StatelessWidget {
                             // Chip kategori
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
                               decoration: BoxDecoration(
                                 color: _C.surface,
                                 borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                    color: _C.divider, width: 1),
+                                border: Border.all(color: _C.divider, width: 1),
                               ),
                               child: Text(
                                 item.kategori,
@@ -550,25 +566,6 @@ class _TugasListItem extends StatelessWidget {
                               ),
                             ),
                             const Spacer(),
-
-                            // Tombol aksi sesuai status
-                            if (item.status ==
-                                    StatusLaporanTeknisi.assigned ||
-                                item.status == StatusLaporanTeknisi.pending)
-                              _AksiButton(
-                                label: 'Mulai Kerjakan',
-                                icon: Icons.play_arrow_rounded,
-                                color: _C.primary,
-                                onTap: onMulai,
-                              )
-                            else if (item.status ==
-                                StatusLaporanTeknisi.inProgress)
-                              _AksiButton(
-                                label: 'Tandai Selesai',
-                                icon: Icons.check_rounded,
-                                color: const Color(0xFF2E7D32),
-                                onTap: onSelesai,
-                              ),
                           ],
                         ),
                       ],
@@ -682,8 +679,7 @@ class _AksiButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(20),

@@ -24,8 +24,8 @@ class _C {
   static const navBg = Color(0xFFFFFFFF);
   static const navActive = Color(0xFF1A3A6B);
   static const navInactive = Color(0xFF9CA3AF);
-  static const selesaiBg = Color(0xFF1A3A6B);     // dark blue card
-  static const pendingBg = Color(0xFFEDF2FF);      // light blue card
+  static const selesaiBg = Color(0xFF1A3A6B); // dark blue card
+  static const pendingBg = Color(0xFFEDF2FF); // light blue card
   static const highPriorityBar = Color(0xFFE53935);
   static const medPriorityBar = Color(0xFF1A3A6B);
   static const lowPriorityBar = Color(0xFF9CA3AF);
@@ -110,7 +110,8 @@ class HomeTeknisiView extends StatelessWidget {
       body: Obx(() {
         if (ctrl.isLoading.value) {
           return const Center(
-              child: CircularProgressIndicator(color: _C.primary));
+            child: CircularProgressIndicator(color: _C.primary),
+          );
         }
         return RefreshIndicator(
           color: _C.primary,
@@ -177,17 +178,20 @@ class HomeTeknisiView extends StatelessWidget {
         // Avatar teknisi
         Padding(
           padding: const EdgeInsets.only(right: 14),
-          child: Obx(() => CircleAvatar(
-                radius: 19,
-                backgroundColor: _C.primary,
-                child: Text(
-                  ctrl.currentTeknisi.value.name[0].toUpperCase(),
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16),
+          child: Obx(
+            () => CircleAvatar(
+              radius: 19,
+              backgroundColor: _C.primary,
+              child: Text(
+                ctrl.currentTeknisi.value.name[0].toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
                 ),
-              )),
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -200,15 +204,17 @@ class HomeTeknisiView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Obx(() => Text(
-              'Hallo, ${ctrl.currentTeknisi.value.name}',
-              style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                color: _C.textPrimary,
-                height: 1.1,
-              ),
-            )),
+        Obx(
+          () => Text(
+            'Hallo, ${ctrl.currentTeknisi.value.name}',
+            style: const TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: _C.textPrimary,
+              height: 1.1,
+            ),
+          ),
+        ),
         const SizedBox(height: 4),
         Text(
           ctrl.sapaan,
@@ -236,7 +242,7 @@ class HomeTeknisiView extends StatelessWidget {
               color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 3),
-            )
+            ),
           ],
         ),
         child: Row(
@@ -251,8 +257,11 @@ class HomeTeknisiView extends StatelessWidget {
                   children: [
                     Row(
                       children: const [
-                        Icon(Icons.assignment_rounded,
-                            color: _C.primary, size: 18),
+                        Icon(
+                          Icons.assignment_rounded,
+                          color: _C.primary,
+                          size: 18,
+                        ),
                         SizedBox(width: 6),
                         Text(
                           'TUGAS HARI INI',
@@ -289,7 +298,9 @@ class HomeTeknisiView extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 18),
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
                     decoration: const BoxDecoration(
                       color: _C.selesaiBg,
                       borderRadius: BorderRadius.only(
@@ -328,8 +339,11 @@ class HomeTeknisiView extends StatelessWidget {
                                 color: Colors.white.withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(Icons.check_circle_outline_rounded,
-                                  color: Colors.white, size: 18),
+                              child: const Icon(
+                                Icons.check_circle_outline_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                             ),
                           ],
                         ),
@@ -341,7 +355,9 @@ class HomeTeknisiView extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 18),
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
                     decoration: const BoxDecoration(
                       color: _C.pendingBg,
                       borderRadius: BorderRadius.only(
@@ -380,8 +396,11 @@ class HomeTeknisiView extends StatelessWidget {
                                 color: _C.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(Icons.access_time_rounded,
-                                  color: _C.primary, size: 18),
+                              child: const Icon(
+                                Icons.access_time_rounded,
+                                color: _C.primary,
+                                size: 18,
+                              ),
                             ),
                           ],
                         ),
@@ -468,66 +487,72 @@ class HomeTeknisiView extends StatelessWidget {
       Icons.person_rounded,
     ];
 
-    return Obx(() => Container(
-          decoration: BoxDecoration(
-            color: _C.navBg,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 12,
-                offset: const Offset(0, -2),
-              )
-            ],
-          ),
-          child: SafeArea(
-            child: SizedBox(
-              height: 62,
-              child: Row(
-                children: List.generate(items.length, (i) {
-                  final active = ctrl.selectedNavIndex.value == i;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => ctrl.onNavTapped(i),
-                      behavior: HitTestBehavior.opaque,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Active: icon dalam rounded container biru
-                          if (active)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: _C.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Icon(icons[i],
-                                  size: 20, color: _C.navActive),
-                            )
-                          else
-                            Icon(icons[i],
-                                size: 22, color: _C.navInactive),
-                          const SizedBox(height: 3),
-                          Text(
-                            items[i].label,
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: active
-                                  ? FontWeight.w700
-                                  : FontWeight.w400,
-                              color: active ? _C.navActive : _C.navInactive,
-                              letterSpacing: 0.3,
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          color: _C.navBg,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: SizedBox(
+            height: 62,
+            child: Row(
+              children: List.generate(items.length, (i) {
+                final active = ctrl.selectedNavIndex.value == i;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => ctrl.onNavTapped(i),
+                    behavior: HitTestBehavior.opaque,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Active: icon dalam rounded container biru
+                        if (active)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 6,
                             ),
+                            decoration: BoxDecoration(
+                              color: _C.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Icon(
+                              icons[i],
+                              size: 20,
+                              color: _C.navActive,
+                            ),
+                          )
+                        else
+                          Icon(icons[i], size: 22, color: _C.navInactive),
+                        const SizedBox(height: 3),
+                        Text(
+                          items[i].label,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: active
+                                ? FontWeight.w700
+                                : FontWeight.w400,
+                            color: active ? _C.navActive : _C.navInactive,
+                            letterSpacing: 0.3,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  );
-                }),
-              ),
+                  ),
+                );
+              }),
             ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
 
@@ -596,7 +621,7 @@ class _TugasCard extends StatelessWidget {
               color: Colors.black.withOpacity(0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
-            )
+            ),
           ],
         ),
         child: IntrinsicHeight(
@@ -660,7 +685,9 @@ class _TugasCard extends StatelessWidget {
                             const SizedBox(width: 6),
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: _C.offlineBadge,
                                 borderRadius: BorderRadius.circular(4),
@@ -668,9 +695,10 @@ class _TugasCard extends StatelessWidget {
                               child: const Text(
                                 'Offline',
                                 style: TextStyle(
-                                    fontSize: 9,
-                                    color: _C.offlineText,
-                                    fontWeight: FontWeight.w700),
+                                  fontSize: 9,
+                                  color: _C.offlineText,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           ],
@@ -681,14 +709,19 @@ class _TugasCard extends StatelessWidget {
                       // Lokasi
                       Row(
                         children: [
-                          const Icon(Icons.location_on_outlined,
-                              size: 12, color: _C.textLight),
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 12,
+                            color: _C.textLight,
+                          ),
                           const SizedBox(width: 3),
                           Expanded(
                             child: Text(
                               tugas.lokasi,
                               style: const TextStyle(
-                                  fontSize: 12, color: _C.textSecondary),
+                                fontSize: 12,
+                                color: _C.textSecondary,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -703,7 +736,9 @@ class _TugasCard extends StatelessWidget {
                           // Badge prioritas
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 3),
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: _badgeBg,
                               borderRadius: BorderRadius.circular(4),
@@ -721,33 +756,23 @@ class _TugasCard extends StatelessWidget {
 
                           // Estimasi jam
                           if (tugas.estimasiSelesai != null) ...[
-                            const Icon(Icons.access_time_rounded,
-                                size: 12, color: _C.textLight),
+                            const Icon(
+                              Icons.access_time_rounded,
+                              size: 12,
+                              color: _C.textLight,
+                            ),
                             const SizedBox(width: 3),
                             Text(
                               tugas.jamEstimasi,
                               style: const TextStyle(
-                                  fontSize: 11,
-                                  color: _C.textSecondary,
-                                  fontWeight: FontWeight.w500),
+                                fontSize: 11,
+                                color: _C.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ],
 
                           const Spacer(),
-
-                          // Tombol aksi cepat
-                          if (tugas.status == StatusTugas.assigned)
-                            _ActionChip(
-                              label: 'Mulai',
-                              color: _C.primary,
-                              onTap: onMulai,
-                            )
-                          else if (tugas.status == StatusTugas.inProgress)
-                            _ActionChip(
-                              label: 'Selesai',
-                              color: const Color(0xFF2E7D32),
-                              onTap: onSelesai,
-                            ),
                         ],
                       ),
                     ],
@@ -816,15 +841,19 @@ class _EmptyMendesak extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
-          Icon(Icons.check_circle_outline_rounded,
-              size: 44, color: Color(0xFF81C784)),
+          Icon(
+            Icons.check_circle_outline_rounded,
+            size: 44,
+            color: Color(0xFF81C784),
+          ),
           SizedBox(height: 10),
           Text(
             'Tidak ada tugas mendesak',
             style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: _C.textSecondary),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: _C.textSecondary,
+            ),
           ),
           SizedBox(height: 4),
           Text(

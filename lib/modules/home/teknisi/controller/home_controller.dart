@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/home_model.dart';
 import '../../../tugas_teknisi/view/tugas_teknisi_view.dart';
+import '../../../laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import '../../../laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
 
 class HomeTeknisiController extends GetxController {
   // --------------------------------------------------------
@@ -89,7 +91,9 @@ class HomeTeknisiController extends GetxController {
     selectedNavIndex.value = index;
     // TODO: navigasi ke halaman lain
     switch (index) {
-      case 1: Get.to(() => const DaftarTugasView()); break;
+      case 1:
+        Get.to(() => const DaftarTugasView());
+        break;
     }
   }
 
@@ -101,15 +105,11 @@ class HomeTeknisiController extends GetxController {
   /// Tap pada kartu tugas mendesak → buka detail laporan
   /// Sesuai UC-07: Teknisi memperbarui status & tambah estimasi
   void onTugasTapped(TugasTeknisiModel tugas) {
-    // TODO: Get.to(() => DetailLaporanFasilitasView(id: tugas.id))
-    Get.snackbar(
-      'Detail Tugas',
-      tugas.judul,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      backgroundColor: const Color(0xFFE3F2FD),
-      colorText: const Color(0xFF1565C0),
-      duration: const Duration(seconds: 2),
+    Get.to(
+      () => DetailLaporanFasilitasView(
+        laporanId: tugas.id,
+        role: RoleUser.staff, // Petugas teknisi
+      ),
     );
   }
 
@@ -177,10 +177,11 @@ class HomeTeknisiController extends GetxController {
   }
 
   /// Jumlah tugas yang belum dikerjakan
-  int get jumlahTugasBelumDikerjakan =>
-      semuaTugas
-          .where((t) =>
-              t.status == StatusTugas.assigned ||
-              t.status == StatusTugas.inProgress)
-          .length;
+  int get jumlahTugasBelumDikerjakan => semuaTugas
+      .where(
+        (t) =>
+            t.status == StatusTugas.assigned ||
+            t.status == StatusTugas.inProgress,
+      )
+      .length;
 }

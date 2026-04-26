@@ -7,7 +7,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/tugas_teknisi_model.dart';
-import '../../home/teknisi/view/home_view.dart';
+import '../../laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import '../../laporan_fasilitas/view/selesaikan_tugas_view.dart';
+import '../../laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
 
 class DaftarTugasController extends GetxController {
   // --------------------------------------------------------
@@ -80,10 +82,9 @@ class DaftarTugasController extends GetxController {
         ..sort((a, b) => _sortOrder(a).compareTo(_sortOrder(b)));
       tugasTampil.assignAll(sorted);
     } else {
-      final filtered = _semuaTugas
-          .where((t) => t.status.filterGroup == filter)
-          .toList()
-        ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      final filtered =
+          _semuaTugas.where((t) => t.status.filterGroup == filter).toList()
+            ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
       tugasTampil.assignAll(filtered);
     }
   }
@@ -118,15 +119,11 @@ class DaftarTugasController extends GetxController {
 
   /// Tap pada item tugas → buka detail (UC-07)
   void onItemTapped(ItemTugasModel tugas) {
-    // TODO: Get.to(() => DetailTugasView(id: tugas.id))
-    Get.snackbar(
-      tugas.nomorRef,
-      tugas.judul,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      backgroundColor: const Color(0xFFE3F2FD),
-      colorText: const Color(0xFF1565C0),
-      duration: const Duration(seconds: 2),
+    Get.to(
+      () => DetailLaporanFasilitasView(
+        laporanId: tugas.id,
+        role: RoleUser.staff, // Petugas teknisi
+      ),
     );
   }
 
@@ -164,12 +161,50 @@ class DaftarTugasController extends GetxController {
 
   /// Selesaikan tugas → buka form upload foto bukti (UC-07)
   void onSelesaikan(ItemTugasModel tugas) {
-    // TODO: Get.to(() => SelesaikanTugasView(tugas: tugas))
-    Get.snackbar(
-      'Upload Foto Bukti',
-      'Lampirkan foto bukti untuk menyelesaikan "${tugas.judul}"',
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
+    // Konversi ItemTugasModel ke LaporanFasilitasModel untuk halaman selesaikan
+    final laporan = _convertToLaporanFasilitas(tugas);
+    Get.to(() => SelesaikanTugasView(laporan: laporan));
+  }
+
+  /// Konversi ItemTugasModel ke LaporanFasilitasModel
+  LaporanFasilitasModel _convertToLaporanFasilitas(ItemTugasModel tugas) {
+    // Mapping status
+    StatusLaporan status;
+    switch (tugas.status) {
+      case StatusLaporanTeknisi.pending:
+        status = StatusLaporan.pending;
+        break;
+      case StatusLaporanTeknisi.assigned:
+        status = StatusLaporan.assigned;
+        break;
+      case StatusLaporanTeknisi.inProgress:
+        status = StatusLaporan.inProgress;
+        break;
+      case StatusLaporanTeknisi.resolved:
+        status = StatusLaporan.resolved;
+        break;
+      case StatusLaporanTeknisi.rejected:
+        status = StatusLaporan.rejected;
+        break;
+    }
+
+    return LaporanFasilitasModel(
+      id: tugas.id,
+      judul: tugas.judul,
+      deskripsi: 'Tugas teknisi yang perlu diselesaikan', // Placeholder
+      kategoriId: 'kategori-id', // Placeholder
+      lokasiLabKelas: tugas.lokasi,
+      fotoUrls: [], // Kosong
+      status: status,
+      prioritas: tugas.prioritas,
+      pelaporId: 'pelapor-id', // Placeholder
+      handlerId: 'handler-id', // Placeholder
+      estimasiSelesai: tugas.estimasiSelesai,
+      syncStatus: tugas.isSynced ? SyncStatus.synced : SyncStatus.local,
+      createdAt: tugas.createdAt,
+      updatedAt: tugas.updatedAt,
+      tindakan: [], // Kosong
+      namaKategori: tugas.kategori,
     );
   }
 
