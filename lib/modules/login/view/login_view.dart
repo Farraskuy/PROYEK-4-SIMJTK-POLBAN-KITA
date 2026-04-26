@@ -5,6 +5,7 @@ import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/view/home_view.
 import 'package:proyek_4_poki_polban_kita/modules/home/admin/view/home_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/fasilitas_controller.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/laporan_fasilitas_screen.dart';
+import 'package:proyek_4_poki_polban_kita/modules/home/teknisi/view/home_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -134,6 +135,13 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
+  void _openTeknisiAccess() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeTeknisiView()),
+    );
+  }
+
   void _openAdminAccess() {
     Get.to(() => const AdminDashboardView());
   }
@@ -171,6 +179,11 @@ class _LoginViewState extends State<LoginView> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _openMahasiswaAccess,
                   child: const Text('Akses Mahasiswa'),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: _isLoading ? null : _openTeknisiAccess,
+                  child: const Text('Akses Teknisi'),
                 ),
                 const SizedBox(height: 12),
                 ElevatedButton(
