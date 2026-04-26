@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/view/home_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/home/admin/view/home_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/fasilitas_controller.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/laporan_fasilitas_screen.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
@@ -133,15 +135,7 @@ class _LoginViewState extends State<LoginView> {
   }
 
   void _openAdminAccess() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ChangeNotifierProvider(
-          create: (_) => AdminFasilitasController(),
-          child: const AdminLaporanFasilitasScreen(),
-        ),
-      ),
-    );
+    Get.to(() => const AdminDashboardView());
   }
 
   @override
@@ -158,7 +152,7 @@ class _LoginViewState extends State<LoginView> {
                 TextField(
                   controller: _nimController,
                   enabled: !_isLoading, // Kunci input saat loading
-                  decoration: const InputDecoration(labelText: 'NIM / NIM'),
+                  decoration: const InputDecoration(labelText: 'NIM / NIP'),
                 ),
                 TextField(
                   controller: _passwordController,

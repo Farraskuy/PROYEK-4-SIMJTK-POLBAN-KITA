@@ -188,13 +188,6 @@ class HomeView extends StatelessWidget {
     return Obx(() => Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 20),
-                blurRadius: 12,
-                offset: const Offset(0, -2),
-              )
-            ],
           ),
           child: SafeArea(
             child: SizedBox(

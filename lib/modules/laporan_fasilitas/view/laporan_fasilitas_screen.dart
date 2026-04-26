@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:proyek_4_poki_polban_kita/modules/home/admin/view/home_view.dart';
 import '../controller/fasilitas_controller.dart';
 import '../model/laporan_fasilitas_model.dart';
 import 'delegasi_screen.dart';
@@ -18,6 +20,7 @@ class _AdminLaporanFasilitasScreenState
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  int _selectedNavIndex = 1; // Default ke Facilities
 
   final List<Map<String, String>> _tabs = [
     {'label': 'Semua', 'key': 'semua'},
@@ -268,35 +271,82 @@ class _AdminLaporanFasilitasScreenState
   }
 
   Widget _buildBottomNav() {
-    return BottomNavigationBar(
-      currentIndex: 1,
-      selectedItemColor: const Color(0xFF1E3A5F),
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      selectedLabelStyle: const TextStyle(
-        fontWeight: FontWeight.w600,
-        fontSize: 11,
+    const icons = [
+      Icons.dashboard_rounded,
+      Icons.apartment_rounded,
+      Icons.campaign_rounded,
+      Icons.group_rounded,
+    ];
+    const labels = ['Home', 'Layanan', 'Aspirasi', 'Profil'];
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+
       ),
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard_outlined),
-          label: 'Dashboard',
+      child: SafeArea(
+        child: SizedBox(
+          height: 60,
+          child: Row(
+            children: List.generate(icons.length, (i) {
+              final active = _selectedNavIndex == i;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => _onNavTapped(i),
+                  behavior: HitTestBehavior.opaque,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        icons[i],
+                        size: 24,
+                        color: active
+                            ? const Color(0xFF1A3A6B)
+                            : const Color(0xFF9CA3AF),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        labels[i],
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: active
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: active
+                              ? const Color(0xFF1A3A6B)
+                              : const Color(0xFF9CA3AF),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.build_outlined),
-          label: 'Facilities',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.lightbulb_outline),
-          label: 'Aspirations',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.people_outline),
-          label: 'Users',
-        ),
-      ],
-      onTap: (i) {},
+      ),
     );
+  }
+
+  void _onNavTapped(int index) {
+    setState(() {
+      _selectedNavIndex = index;
+    });
+
+    switch (index) {
+      case 0: // Dashboard
+        Get.off(() => const AdminDashboardView());
+        break;
+      case 1: // Facilities (current)
+        // Stay on current page
+        break;
+      case 2: // Aspirations
+        // TODO: Implement navigation to aspirations
+        break;
+      case 3: // Users
+        // TODO: Implement navigation to users
+        break;
+    }
   }
 }
 

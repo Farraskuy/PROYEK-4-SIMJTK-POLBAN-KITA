@@ -131,10 +131,10 @@ class AspirasiView extends StatelessWidget {
   // ---- BOTTOM NAV ----
   Widget _buildBottomNavBar(AspirasiController ctrl) {
     const items = [
-      {'label': 'HOME', 'icon': Icons.home_rounded},
-      {'label': 'LAYANAN', 'icon': Icons.grid_view_rounded},
-      {'label': 'ASPIRASI', 'icon': Icons.campaign_rounded},
-      {'label': 'PROFIL', 'icon': Icons.person_rounded},
+      {'label': 'Home', 'icon': Icons.home_rounded},
+      {'label': 'Layanan', 'icon': Icons.grid_view_rounded},
+      {'label': 'Aspirasi', 'icon': Icons.campaign_rounded},
+      {'label': 'Profil', 'icon': Icons.person_rounded},
     ];
     const activeIndex = 2;
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/aspirasi_view.dart';
 import '../controller/lapor_fasilitas_controller.dart';
 import '../model/laporan_fasilitas_model.dart';
 import 'lapor_fasilitas_view.dart';
@@ -363,10 +364,10 @@ class _LaporanFasilitasMahasiswaViewState
 
   Widget _buildBottomNav() {
     const navItems = [
-      {'label': 'HOME', 'icon': Icons.home_rounded},
-      {'label': 'LAYANAN', 'icon': Icons.grid_view_rounded},
-      {'label': 'ASPIRASI', 'icon': Icons.campaign_rounded},
-      {'label': 'PROFIL', 'icon': Icons.person_rounded},
+      {'label': 'Home', 'icon': Icons.home_rounded},
+      {'label': 'Layanan', 'icon': Icons.grid_view_rounded},
+      {'label': 'Aspirasi', 'icon': Icons.campaign_rounded},
+      {'label': 'Profil', 'icon': Icons.person_rounded},
     ];
     const activeIdx = 1;
 
@@ -389,7 +390,11 @@ class _LaporanFasilitasMahasiswaViewState
               return Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    if (i == 0) Get.back();
+                    if (i == 0) {
+                      Get.back();
+                    } else if (i == 2) {
+                      Get.to(() => const AspirasiView());
+                    }
                   },
                   behavior: HitTestBehavior.opaque,
                   child: Column(
