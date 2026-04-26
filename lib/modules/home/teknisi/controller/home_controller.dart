@@ -10,6 +10,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/home_model.dart';
+import '../../../tugas_teknisi/view/tugas_teknisi_view.dart';
 
 class HomeTeknisiController extends GetxController {
   // --------------------------------------------------------
@@ -87,11 +88,9 @@ class HomeTeknisiController extends GetxController {
   void onNavTapped(int index) {
     selectedNavIndex.value = index;
     // TODO: navigasi ke halaman lain
-    // switch (index) {
-    //   case 1: Get.to(() => const TeknisiTugasView()); break;
-    //   case 2: Get.to(() => const TeknisiRiwayatView()); break;
-    //   case 3: Get.to(() => const TeknisiProfilView()); break;
-    // }
+    switch (index) {
+      case 1: Get.to(() => const DaftarTugasView()); break;
+    }
   }
 
   /// Notifikasi bell

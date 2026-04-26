@@ -245,9 +245,9 @@ class TeknisiNavItemModel {
   const TeknisiNavItemModel({required this.label, required this.index});
 
   static List<TeknisiNavItemModel> items() => const [
-        TeknisiNavItemModel(label: 'BERANDA', index: 0),
-        TeknisiNavItemModel(label: 'TUGAS', index: 1),
-        TeknisiNavItemModel(label: 'RIWAYAT', index: 2),
-        TeknisiNavItemModel(label: 'PROFIL', index: 3),
+        TeknisiNavItemModel(label: 'Home', index: 0),
+        TeknisiNavItemModel(label: 'Tugas', index: 1),
+        TeknisiNavItemModel(label: 'Riwayat', index: 2),
+        TeknisiNavItemModel(label: 'Profil', index: 3),
       ];
 }
