@@ -10,6 +10,8 @@ import '../model/tugas_teknisi_model.dart';
 import '../../laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import '../../laporan_fasilitas/view/selesaikan_tugas_view.dart';
 import '../../laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
+import '../../home/teknisi/view/home_view.dart';
+import '../../riwayat_tugas/view/riwayat_tugas_view.dart';
 
 class DaftarTugasController extends GetxController {
   // --------------------------------------------------------
@@ -211,6 +213,14 @@ class DaftarTugasController extends GetxController {
   /// Bottom nav tap
   void onNavTapped(int index) {
     selectedNavIndex.value = index;
-    if (index == 0) Get.back(); // kembali ke Beranda
+    // TODO: navigasi ke halaman lain
+    switch (index) {
+      case 0:
+        Get.to(() => const HomeTeknisiView());
+        break;
+      case 2:
+        Get.to(() => const RiwayatTugasView());
+        break;
+    }
   }
 }

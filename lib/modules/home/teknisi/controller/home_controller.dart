@@ -13,6 +13,7 @@ import '../model/home_model.dart';
 import '../../../tugas_teknisi/view/tugas_teknisi_view.dart';
 import '../../../laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import '../../../laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
+import '../../../riwayat_tugas/view/riwayat_tugas_view.dart';
 
 class HomeTeknisiController extends GetxController {
   // --------------------------------------------------------
@@ -93,6 +94,9 @@ class HomeTeknisiController extends GetxController {
     switch (index) {
       case 1:
         Get.to(() => const DaftarTugasView());
+        break;
+      case 2:
+        Get.to(() => const RiwayatTugasView());
         break;
     }
   }
