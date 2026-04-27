@@ -119,7 +119,7 @@ class HomeTeknisiView extends StatelessWidget {
           child: CustomScrollView(
             slivers: [
               // ---- APP BAR ----
-              _buildAppBar(ctrl),
+              _buildAppBar(ctrl, context),
 
               SliverToBoxAdapter(
                 child: Padding(
@@ -155,16 +155,17 @@ class HomeTeknisiView extends StatelessWidget {
   // ============================================================
   // APP BAR
   // ============================================================
-  SliverAppBar _buildAppBar(HomeTeknisiController ctrl) {
+  SliverAppBar _buildAppBar(HomeTeknisiController ctrl, BuildContext context) {
     return SliverAppBar(
       backgroundColor: _C.white,
       elevation: 0,
       floating: true,
       pinned: false,
       titleSpacing: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.menu_rounded, color: _C.textPrimary, size: 24),
-        onPressed: ctrl.onMenuTapped,
+      leading: IconButton(                          // ← replace the menu icon
+      icon: const Icon(Icons.arrow_back_ios_new_rounded,
+          color: _C.textPrimary, size: 22),
+      onPressed: () => Navigator.pop(context),    // ← pops back to LoginView
       ),
       title: const Text(
         'Technician Portal',
