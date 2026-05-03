@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/modules/kategori_fasilitas/model/kategori_fasilitas_model.dart';
 import '../controller/lapor_fasilitas_controller.dart';
 import '../model/laporan_fasilitas_model.dart';
 

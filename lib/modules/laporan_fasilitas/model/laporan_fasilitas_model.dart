@@ -1,3 +1,5 @@
+import 'package:proyek_4_poki_polban_kita/modules/kategori_fasilitas/model/kategori_fasilitas_model.dart';
+
 enum StatusLaporan {
   pending('pending', 'Menunggu'),
   assigned('assigned', 'Ditugaskan'),
@@ -56,67 +58,6 @@ enum SyncStatus {
 }
 
 enum RoleUser { mahasiswa, staff, admin }
-
-class KategoriFasilitasModel {
-  final String id;
-  final String namaKategori;
-  final String deskripsi;
-  final String iconUrl;
-
-  const KategoriFasilitasModel({
-    required this.id,
-    required this.namaKategori,
-    required this.deskripsi,
-    required this.iconUrl,
-  });
-
-  String get iconName => iconUrl;
-
-  static List<KategoriFasilitasModel> dummyList() => const [
-    KategoriFasilitasModel(
-      id: 'kat-001',
-      namaKategori: 'Jaringan Internet',
-      deskripsi: 'Masalah koneksi WiFi atau LAN di area JTK',
-      iconUrl: 'wifi',
-    ),
-    KategoriFasilitasModel(
-      id: 'kat-002',
-      namaKategori: 'Perangkat PC',
-      deskripsi: 'Kerusakan komputer, monitor, keyboard, atau mouse',
-      iconUrl: 'computer',
-    ),
-    KategoriFasilitasModel(
-      id: 'kat-003',
-      namaKategori: 'AC / Pendingin',
-      deskripsi: 'AC mati atau tidak berfungsi dengan baik',
-      iconUrl: 'ac_unit',
-    ),
-    KategoriFasilitasModel(
-      id: 'kat-004',
-      namaKategori: 'Kebersihan',
-      deskripsi: 'Masalah kebersihan di lab atau ruang kelas',
-      iconUrl: 'cleaning_services',
-    ),
-    KategoriFasilitasModel(
-      id: 'kat-005',
-      namaKategori: 'Furnitur',
-      deskripsi: 'Kursi, meja, atau lemari rusak',
-      iconUrl: 'chair',
-    ),
-    KategoriFasilitasModel(
-      id: 'kat-006',
-      namaKategori: 'Listrik & Proyektor',
-      deskripsi: 'Masalah listrik, lampu padam, atau proyektor rusak',
-      iconUrl: 'electrical_services',
-    ),
-    KategoriFasilitasModel(
-      id: 'kat-007',
-      namaKategori: 'Lainnya',
-      deskripsi: 'Kerusakan fasilitas lain yang tidak tercantum di atas',
-      iconUrl: 'build',
-    ),
-  ];
-}
 
 class TindakanFasilitas {
   final String id;
@@ -205,6 +146,94 @@ class LaporanFasilitasModel {
 
   String? get handlerName => handlerNama;
   set handlerName(String? value) => handlerNama = value;
+
+  factory LaporanFasilitasModel.fromJson(Map<String, dynamic> json) {
+    final rawFotoUrls = json['foto_urls'] ?? json['fotoUrls'] ?? const <dynamic>[];
+    final List<TindakanFasilitas> tindakanList = (json['tindakan'] as List<dynamic>?)
+        ?.map((item) => tindakanFasilitasFromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ))
+            .toList() ??
+        <TindakanFasilitas>[];
+
+    return LaporanFasilitasModel(
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      judul: (json['judul'] ?? '').toString(),
+      deskripsi: (json['deskripsi'] ?? '').toString(),
+      kategoriId: (json['kategori_id'] ?? json['kategoriId'] ?? '').toString(),
+      lokasiLabKelas:
+          (json['lokasi'] ?? json['lokasiLabKelas'] ?? '').toString(),
+        fotoUrls: (rawFotoUrls as List<dynamic>)
+          .map((value) => value.toString())
+          .toList(),
+      status: json['status'] ?? StatusLaporan.pending,
+      prioritas: json['prioritas'],
+      pelaporId: (json['pelapor_id'] ?? json['pelaporId'] ?? '').toString(),
+      handlerId: (json['teknisi_id'] ?? json['handlerId'] ?? '').toString().trim().isEmpty
+          ? null
+          : (json['teknisi_id'] ?? json['handlerId']).toString(),
+      estimasiSelesai: _parseDateTime(json['estimasi_selesai'] ?? json['estimasiSelesai']),
+      syncStatus: json['syncStatus'] ?? json['sync_status'],
+      createdAt: _parseDateTime(json['createdAt']) ?? DateTime.fromMillisecondsSinceEpoch(0),
+      updatedAt: _parseDateTime(json['updatedAt']) ?? DateTime.fromMillisecondsSinceEpoch(0),
+      tindakan: tindakanList,
+      namaKategori: (json['namaKategori'] ?? '').toString().isEmpty
+          ? null
+          : (json['namaKategori'] ?? '').toString(),
+      nomorMejaPc: (json['nomorMejaPc'] ?? '').toString().isEmpty
+          ? null
+          : (json['nomorMejaPc'] ?? '').toString(),
+      pelaporNama: (json['pelaporNama'] ?? '').toString().isEmpty
+          ? null
+          : (json['pelaporNama'] ?? '').toString(),
+      handlerNama: (json['handlerNama'] ?? '').toString().isEmpty
+          ? null
+          : (json['handlerNama'] ?? '').toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'id': id,
+      'judul': judul,
+      'deskripsi': deskripsi,
+      'kategori_id': kategoriId,
+      'kategoriId': kategoriId,
+      'lokasi': lokasiLabKelas,
+      'lokasiLabKelas': lokasiLabKelas,
+      'foto_urls': fotoUrls,
+      'fotoUrls': fotoUrls,
+      'status': status.value,
+      'prioritas': prioritas.value,
+      'pelapor_id': pelaporId,
+      'pelaporId': pelaporId,
+      'teknisi_id': handlerId,
+      'handlerId': handlerId,
+      'estimasi_selesai': estimasiSelesai?.toIso8601String(),
+      'syncStatus': syncStatus.value,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+      'tindakan': tindakan.map((item) => item.toJson()).toList(),
+      'namaKategori': namaKategori,
+      'nomorMejaPc': nomorMejaPc,
+      'pelaporNama': pelaporNama,
+      'handlerNama': handlerNama,
+    };
+  }
+
+  static DateTime? _parseDateTime(Object? value) {
+    if (value == null) {
+      return null;
+    }
+
+    final text = value.toString().trim();
+    if (text.isEmpty) {
+      return null;
+    }
+
+    return DateTime.tryParse(text);
+  }
 }
 
 typedef LaporanFasilitas = LaporanFasilitasModel;
@@ -258,4 +287,42 @@ class SubmitLaporanResult {
     required this.message,
     this.laporan,
   });
+}
+
+TindakanFasilitas tindakanFasilitasFromJson(Map<String, dynamic> json) {
+  return TindakanFasilitas(
+    id: (json['_id'] ?? json['id'] ?? '').toString(),
+    laporanId: (json['laporanId'] ?? json['laporan_id'] ?? '').toString(),
+    aktorId: (json['aktorId'] ?? json['aktor_id'] ?? '').toString(),
+    aktivitas: (json['aktivitas'] ?? '').toString(),
+    catatanPengerjaan: (json['catatanPengerjaan'] ?? '').toString().isEmpty
+        ? null
+        : (json['catatanPengerjaan'] ?? '').toString(),
+    fotoBuktiUrls: (json['fotoBuktiUrls'] as List<dynamic>?)
+        ?.map((value) => value.toString())
+        .toList(),
+    timestamp: DateTime.tryParse((json['timestamp'] ?? '').toString()) ??
+        DateTime.fromMillisecondsSinceEpoch(0),
+    aktorNama: (json['aktorNama'] ?? '').toString().isEmpty
+        ? null
+        : (json['aktorNama'] ?? '').toString(),
+  );
+}
+
+extension TindakanFasilitasJson on TindakanFasilitas {
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'id': id,
+      'laporanId': laporanId,
+      'laporan_id': laporanId,
+      'aktorId': aktorId,
+      'aktor_id': aktorId,
+      'aktivitas': aktivitas,
+      'catatanPengerjaan': catatanPengerjaan,
+      'fotoBuktiUrls': fotoBuktiUrls,
+      'timestamp': timestamp.toIso8601String(),
+      'aktorNama': aktorNama,
+    };
+  }
 }
