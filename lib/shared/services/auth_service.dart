@@ -11,8 +11,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class AuthService {
   static const String _usersCollection = 'users';
-  static const String _academicLoginUrl =
-      'https://akademik.polban.ac.id/laman/login';
+  static const String _academicLoginUrl = 'https://akademik.polban.ac.id/laman/login';
   static const String _academicSuccessUrl = 'https://akademik.polban.ac.id/Mhs';
   static const String _usernameSelector = '.form-control[name="username"]';
   static const String _passwordSelector = '.form-control[name="password"]';
@@ -25,17 +24,15 @@ class AuthService {
   static Future<List<Map<String, dynamic>>> Function(
     String collection,
     SelectorBuilder filter,
-  )?
-  fetchUsersOverride;
-
+  )? fetchUsersOverride;
+  
   @visibleForTesting
   static Future<UserModel> Function({
     required String username,
     required String password,
     required Map<String, dynamic> profile,
-  })?
-  registerUserOverride;
-
+  })? registerUserOverride;
+  
   @visibleForTesting
   static Future<WebViewController> Function({
     required String username,
@@ -45,8 +42,7 @@ class AuthService {
     void Function(String errorMessage)? onFailure,
     void Function(String errorMessage)? onHttpError,
     Duration timeout,
-  })?
-  loginWebsiteOverride;
+  })? loginWebsiteOverride;
 
   AuthService._internal();
 
@@ -98,10 +94,10 @@ class AuthService {
   /// Login menggunakan API (mengakses database Mongo)
   Future<bool> login(String username, String password) async {
     try {
-      final loginId = username.trim();
-      final userList = await _fetchUsers(
-        where.eq('username', loginId).or(where.eq('nomor_induk', loginId)),
-      );
+      var userList = await _fetchUsers(where.eq('username', username));
+      if (userList.isEmpty) {
+        userList = await _fetchUsers(where.eq('nomor_induk', username));
+      }
 
       final userMap = userList.isNotEmpty ? userList.first : null;
       final storedPassword =
@@ -124,7 +120,7 @@ class AuthService {
         await _saveUserSession(user);
 
         final userId = userMap['_id'];
-        if (userId != null && fetchUsersOverride == null) {
+        if (userId != null) {
           try {
             await MonggoDBServices().updateOneByFilter(
               _usersCollection,
@@ -264,11 +260,7 @@ class AuthService {
               try {
                 final profile = await _extractAcademicProfile(controller);
 
-                final user = await _register(
-                  username: username,
-                  password: password,
-                  profile: profile,
-                );
+                final user = await _register(username: username, password: password, profile: profile);
 
                 await _saveUserSession(user);
 
@@ -504,7 +496,11 @@ class AuthService {
   }) async {
     final override = registerUserOverride;
     if (override != null) {
-      return override(username: username, password: password, profile: profile);
+      return override(
+        username: username,
+        password: password,
+        profile: profile,
+      );
     }
 
     final nimFromWebsite = (profile['nim'] ?? '').toString().trim();
@@ -530,14 +526,12 @@ class AuthService {
       'lastLoginAt': now,
     };
 
-    final existingByIdentity = await MonggoDBServices().fetch(
+    final existingByUsername = await MonggoDBServices().fetch(
       _usersCollection,
-      where
-          .eq('username', usernameToStore)
-          .or(where.eq('nomor_induk', usernameToStore)),
+      where.eq('username', usernameToStore),
     );
 
-    if (existingByIdentity.isEmpty) {
+    if (existingByUsername.isEmpty) {
       final newUserMap = <String, dynamic>{
         '_id': usernameToStore,
         ...profilePatch,
@@ -548,10 +542,10 @@ class AuthService {
       return UserModel.fromJson(newUserMap);
     }
 
-    final existing = existingByIdentity.first;
+    final existing = existingByUsername.first;
     final existingId = existing['_id'];
 
-    if (existingId != null) {
+    if (existingId is ObjectId) {
       await MonggoDBServices().updateOneByFilter(
         _usersCollection,
         where.eq('_id', existingId),

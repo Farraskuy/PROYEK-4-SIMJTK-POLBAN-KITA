@@ -5,7 +5,7 @@ import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage
 import 'package:flutter_test/flutter_test.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/role_navigation_service.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/user_credential_seeder.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/role_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_platform_interface/webview_flutter_platform_interface.dart';
@@ -21,7 +21,7 @@ class _FakeWebViewPlatform extends WebViewPlatform {
 
 class _FakePlatformWebViewController extends PlatformWebViewController {
   _FakePlatformWebViewController(PlatformWebViewControllerCreationParams params)
-    : super.implementation(params);
+      : super.implementation(params);
 }
 
 void main() {
@@ -33,11 +33,11 @@ void main() {
   final authService = AuthService();
 
   setUpAll(() {
-    dotenv.loadFromString(envString: 'LOG_LEVEL=0\nLOG_MUTE=');
-
-    FlutterSecureStoragePlatform.instance = TestFlutterSecureStoragePlatform(
-      storageData,
+    dotenv.loadFromString(
+      envString: 'LOG_LEVEL=0\nLOG_MUTE=',
     );
+
+    FlutterSecureStoragePlatform.instance = TestFlutterSecureStoragePlatform(storageData);
     WebViewPlatform.instance = _FakeWebViewPlatform();
 
     AuthService.fetchUsersOverride = (collection, filter) async {
@@ -64,51 +64,49 @@ void main() {
       ];
     };
 
-    AuthService.registerUserOverride =
-        ({
-          required String username,
-          required String password,
-          required Map<String, dynamic> profile,
-        }) async {
-          return UserModel.fromJson(<String, dynamic>{
-            'id': 'website-test-user',
-            'username': profile['nim'] ?? username,
-            'nomor_induk': profile['nim'] ?? username,
-            'email': '241511010@students.example',
-            'name': profile['name'] ?? 'Mahasiswa Polban',
-            'role': 'mahasiswa',
-            'isActive': true,
-            'password_hash': BCrypt.hashpw(password, BCrypt.gensalt()),
-            'programStudy': profile['programStudy'] ?? 'D4 Teknik Informatika',
-            'photoUrl': profile['photoUrl'] ?? '',
-            'source': 'website',
-          });
-        };
+    AuthService.registerUserOverride = ({
+      required String username,
+      required String password,
+      required Map<String, dynamic> profile,
+    }) async {
+      return UserModel.fromJson(<String, dynamic>{
+        'id': 'website-test-user',
+        'username': profile['nim'] ?? username,
+        'nomor_induk': profile['nim'] ?? username,
+        'email': '241511010@students.example',
+        'name': profile['name'] ?? 'Mahasiswa Polban',
+        'role': 'mahasiswa',
+        'isActive': true,
+        'password_hash': BCrypt.hashpw(password, BCrypt.gensalt()),
+        'programStudy': profile['programStudy'] ?? 'D4 Teknik Informatika',
+        'photoUrl': profile['photoUrl'] ?? '',
+        'source': 'website',
+      });
+    };
 
-    AuthService.loginWebsiteOverride =
-        ({
-          required String username,
-          required String password,
-          void Function(String url)? onUrlChanged,
-          void Function(String url)? onSuccess,
-          void Function(String errorMessage)? onFailure,
-          void Function(String errorMessage)? onHttpError,
-          Duration timeout = const Duration(seconds: 25),
-        }) async {
-          await authService.completeAcademicWebsiteLoginForTest(
-            username: username,
-            password: password,
-            profile: <String, dynamic>{
-              'nim': nim,
-              'name': 'Mahasiswa Polban',
-              'programStudy': 'D4 Teknik Informatika',
-              'photoUrl': 'https://example.test/photo.png',
-            },
-            onSuccess: onSuccess,
-          );
+    AuthService.loginWebsiteOverride = ({
+      required String username,
+      required String password,
+      void Function(String url)? onUrlChanged,
+      void Function(String url)? onSuccess,
+      void Function(String errorMessage)? onFailure,
+      void Function(String errorMessage)? onHttpError,
+      Duration timeout = const Duration(seconds: 25),
+    }) async {
+      await authService.completeAcademicWebsiteLoginForTest(
+        username: username,
+        password: password,
+        profile: <String, dynamic>{
+          'nim': nim,
+          'name': 'Mahasiswa Polban',
+          'programStudy': 'D4 Teknik Informatika',
+          'photoUrl': 'https://example.test/photo.png',
+        },
+        onSuccess: onSuccess,
+      );
 
-          return WebViewController();
-        };
+      return WebViewController();
+    };
   });
 
   setUp(() async {
@@ -133,41 +131,46 @@ void main() {
     expect(storageData[sessionKey], isNotNull);
   });
 
-  test(
-    'login menerima nomor_induk dan menormalkan role staff menjadi teknisi',
-    () async {
-      AuthService.fetchUsersOverride = (collection, filter) async {
-        if (collection != 'users') {
-          return <Map<String, dynamic>>[];
-        }
+  test('login menerima nomor_induk dan menormalkan role staff menjadi teknisi', () async {
+    var fetchCount = 0;
 
-        final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        return <Map<String, dynamic>>[
-          <String, dynamic>{
-            '_id': 'user-teknisi-001',
-            'nomor_induk': 'T-045',
-            'name': 'Budi Santoso',
-            'role': 'staff',
-            'isActive': true,
-            'password_hash': hashedPassword,
-            'email': 'budi@polban.ac.id',
-            'source': 'test',
-          },
-        ];
-      };
+    AuthService.fetchUsersOverride = (collection, filter) async {
+      if (collection != 'users') {
+        return <Map<String, dynamic>>[];
+      }
 
-      final success = await authService.login('T-045', password);
+      fetchCount += 1;
+      if (fetchCount == 1) {
+        return <Map<String, dynamic>>[];
+      }
 
-      expect(success, isTrue);
-      expect(authService.currentUser, isNotNull);
-      expect(authService.currentUser!.username, equals('T-045'));
-      expect(authService.currentUser!.role, equals('teknisi'));
-      expect(
-        RoleNavigationService.resolveDestination(authService.currentUser!.role),
-        equals(HomeDestination.teknisi),
-      );
-    },
-  );
+      final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+      return <Map<String, dynamic>>[
+        <String, dynamic>{
+          '_id': 'user-teknisi-001',
+          'nomor_induk': 'T-045',
+          'name': 'Budi Santoso',
+          'role': 'staff',
+          'isActive': true,
+          'password_hash': hashedPassword,
+          'email': 'budi@polban.ac.id',
+          'source': 'test',
+        },
+      ];
+    };
+
+    final success = await authService.login('T-045', password);
+
+    expect(success, isTrue);
+    expect(fetchCount, equals(2));
+    expect(authService.currentUser, isNotNull);
+    expect(authService.currentUser!.username, equals('T-045'));
+    expect(authService.currentUser!.role, equals('teknisi'));
+    expect(
+      RoleNavigationService.resolveDestination(authService.currentUser!.role),
+      equals(HomeDestination.teknisi),
+    );
+  });
 
   test('logout menghapus session auth', () async {
     final success = await authService.login(nim, password);
@@ -200,9 +203,32 @@ void main() {
     expect(storageData[sessionKey], isNotNull);
   });
 
-  for (final credential in UserCredentialSeeder.defaultCredentials) {
-    final roleUsername = credential.username;
-    final roleName = credential.role;
+  final roleCases = <Map<String, String>>[
+    {
+      'username': '2415110001',
+      'role': AccessControlService.roleMahasiswa,
+    },
+    {
+      'username': 'DSN001',
+      'role': AccessControlService.roleDosen,
+    },
+    {
+      'username': 'TKS001',
+      'role': AccessControlService.roleTeknisi,
+    },
+    {
+      'username': 'TU001',
+      'role': AccessControlService.roleTu,
+    },
+    {
+      'username': 'ADM001',
+      'role': AccessControlService.roleAdmin,
+    },
+  ];
+
+  for (final roleCase in roleCases) {
+    final roleUsername = roleCase['username']!;
+    final roleName = roleCase['role']!;
 
     test('login manual MongoDB berhasil untuk role $roleName', () async {
       AuthService.fetchUsersOverride = (collection, filter) async {
@@ -210,10 +236,7 @@ void main() {
           return <Map<String, dynamic>>[];
         }
 
-        final hashedPassword = BCrypt.hashpw(
-          credential.password,
-          BCrypt.gensalt(),
-        );
+        final hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
         return <Map<String, dynamic>>[
           <String, dynamic>{
             '_id': 'seed-$roleUsername',
@@ -232,10 +255,7 @@ void main() {
         ];
       };
 
-      final success = await authService.login(
-        roleUsername,
-        credential.password,
-      );
+      final success = await authService.login(roleUsername, password);
 
       expect(success, isTrue);
       expect(authService.currentUser, isNotNull);
