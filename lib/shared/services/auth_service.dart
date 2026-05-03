@@ -6,11 +6,13 @@ import 'package:mongo_dart/mongo_dart.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/log_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/role_service.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class AuthService {
   static const String _usersCollection = 'users';
-  static const String _academicLoginUrl = 'https://akademik.polban.ac.id/laman/login';
+  static const String _academicLoginUrl =
+      'https://akademik.polban.ac.id/laman/login';
   static const String _academicSuccessUrl = 'https://akademik.polban.ac.id/Mhs';
   static const String _usernameSelector = '.form-control[name="username"]';
   static const String _passwordSelector = '.form-control[name="password"]';
@@ -23,15 +25,17 @@ class AuthService {
   static Future<List<Map<String, dynamic>>> Function(
     String collection,
     SelectorBuilder filter,
-  )? fetchUsersOverride;
-  
+  )?
+  fetchUsersOverride;
+
   @visibleForTesting
   static Future<UserModel> Function({
     required String username,
     required String password,
     required Map<String, dynamic> profile,
-  })? registerUserOverride;
-  
+  })?
+  registerUserOverride;
+
   @visibleForTesting
   static Future<WebViewController> Function({
     required String username,
@@ -41,7 +45,8 @@ class AuthService {
     void Function(String errorMessage)? onFailure,
     void Function(String errorMessage)? onHttpError,
     Duration timeout,
-  })? loginWebsiteOverride;
+  })?
+  loginWebsiteOverride;
 
   AuthService._internal();
 
@@ -93,23 +98,46 @@ class AuthService {
   /// Login menggunakan API (mengakses database Mongo)
   Future<bool> login(String username, String password) async {
     try {
-      final userList = await _fetchUsers(where.eq('username', username));
+      final loginId = username.trim();
+      final userList = await _fetchUsers(
+        where.eq('username', loginId).or(where.eq('nomor_induk', loginId)),
+      );
 
       final userMap = userList.isNotEmpty ? userList.first : null;
-      final storedPassword = userMap?['password']?.toString() ?? '';
+      final storedPassword =
+          userMap?['password_hash']?.toString() ??
+          userMap?['password']?.toString() ??
+          '';
 
       if (userMap != null && _verifyPassword(password, storedPassword)) {
         final user = UserModel.fromJson(userMap);
 
+        if (!user.isActive) {
+          await LogService.writeLog(
+            "AUTH: User tidak aktif (${user.nomorInduk})",
+            source: "auth_service.dart",
+            level: 1,
+          );
+          return false;
+        }
+
         await _saveUserSession(user);
 
         final userId = userMap['_id'];
-        if (userId is ObjectId) {
-          await MonggoDBServices().updateOneByFilter(
-            _usersCollection,
-            where.eq('_id', userId),
-            {'lastLoginAt': DateTime.now().toIso8601String()},
-          );
+        if (userId != null && fetchUsersOverride == null) {
+          try {
+            await MonggoDBServices().updateOneByFilter(
+              _usersCollection,
+              where.eq('_id', userId),
+              {'lastLoginAt': DateTime.now().toIso8601String()},
+            );
+          } catch (e) {
+            await LogService.writeLog(
+              'AUTH: Gagal update lastLoginAt untuk $username - $e',
+              source: 'auth_service.dart',
+              level: 1,
+            );
+          }
         }
 
         return true;
@@ -236,7 +264,11 @@ class AuthService {
               try {
                 final profile = await _extractAcademicProfile(controller);
 
-                final user = await _register(username: username, password: password, profile: profile);
+                final user = await _register(
+                  username: username,
+                  password: password,
+                  profile: profile,
+                );
 
                 await _saveUserSession(user);
 
@@ -472,11 +504,7 @@ class AuthService {
   }) async {
     final override = registerUserOverride;
     if (override != null) {
-      return override(
-        username: username,
-        password: password,
-        profile: profile,
-      );
+      return override(username: username, password: password, profile: profile);
     }
 
     final nimFromWebsite = (profile['nim'] ?? '').toString().trim();
@@ -489,23 +517,29 @@ class AuthService {
 
     final profilePatch = <String, dynamic>{
       'username': usernameToStore,
+      'nomor_induk': usernameToStore,
       'name': (profile['name'] ?? '').toString().trim(),
       'programStudy': (profile['programStudy'] ?? '').toString().trim(),
       'photoUrl': (profile['photoUrl'] ?? '').toString().trim(),
+      'password_hash': passwordHash,
       'password': passwordHash,
-      'role': 'mahasiswa',
+      'role': AccessControlService.roleMahasiswa,
       'source': 'website',
+      'isActive': true,
       'updatedAt': now,
       'lastLoginAt': now,
     };
 
-    final existingByUsername = await MonggoDBServices().fetch(
+    final existingByIdentity = await MonggoDBServices().fetch(
       _usersCollection,
-      where.eq('username', usernameToStore),
+      where
+          .eq('username', usernameToStore)
+          .or(where.eq('nomor_induk', usernameToStore)),
     );
 
-    if (existingByUsername.isEmpty) {
+    if (existingByIdentity.isEmpty) {
       final newUserMap = <String, dynamic>{
+        '_id': usernameToStore,
         ...profilePatch,
         'createdAt': now,
       };
@@ -514,10 +548,10 @@ class AuthService {
       return UserModel.fromJson(newUserMap);
     }
 
-    final existing = existingByUsername.first;
+    final existing = existingByIdentity.first;
     final existingId = existing['_id'];
 
-    if (existingId is ObjectId) {
+    if (existingId != null) {
       await MonggoDBServices().updateOneByFilter(
         _usersCollection,
         where.eq('_id', existingId),

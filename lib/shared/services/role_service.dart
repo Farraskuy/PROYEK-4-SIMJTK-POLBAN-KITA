@@ -2,6 +2,13 @@ class AccessControlService {
   // Struktur Penyimpanan RBAC
   static final Map<String, Map<String, List<String>>> _rolePermissions = {};
 
+  // --- Konstanta Role ---
+  static const String roleMahasiswa = 'mahasiswa';
+  static const String roleDosen = 'dosen';
+  static const String roleTeknisi = 'teknisi';
+  static const String roleTu = 'tu';
+  static const String roleAdmin = 'admin';
+
   // --- Konstanta Action Standar ---
   static const String create = 'create';
   static const String read = 'read';
@@ -23,25 +30,27 @@ class AccessControlService {
 
   /// Inisialisasi Role & Hak Akses berdasarkan Dokumen SIMJTK V3
   static void initSimjtkRoles() {
+    _rolePermissions.clear();
+
     // 1. ROLE: MAHASISWA
     // Bisa baca kalender, buat/edit laporan, buat aspirasi, serta upvote/downvote.
-    grantPermissions(role: 'mahasiswa', feature: 'kalender', permissions: [read]);
+    grantPermissions(role: roleMahasiswa, feature: 'kalender', permissions: [read]);
     grantPermissions(
-      role: 'mahasiswa', 
+      role: roleMahasiswa,
       feature: 'laporan', 
       permissions: [create, read, upvote, downvote, readOwn, updateOwn, deleteOwn] // update/delete hanya jika masih 'pending'
     );
     grantPermissions(
-      role: 'mahasiswa', 
+      role: roleMahasiswa,
       feature: 'aspirasi', 
       permissions: [create, read, upvote, downvote, readOwn, updateOwn, deleteOwn]
     );
 
     // 2. ROLE: DOSEN
     // Hak lapor setara mahasiswa, dapat melihat kalender, tanpa fitur aspirasi/voting.
-    grantPermissions(role: 'dosen', feature: 'kalender', permissions: [read]);
+    grantPermissions(role: roleDosen, feature: 'kalender', permissions: [read]);
     grantPermissions(
-      role: 'dosen', 
+      role: roleDosen,
       feature: 'laporan', 
       permissions: [create, read, readOwn, updateOwn, deleteOwn]
     );
@@ -49,17 +58,17 @@ class AccessControlService {
     // 3. ROLE: ADMIN
     // Mengelola user, moderasi laporan global (paksa selesai/hapus hoaks), dan menanggapi aspirasi.
     grantPermissions(
-      role: 'admin', 
+      role: roleAdmin,
       feature: 'users', 
       permissions: [create, read, update, delete] 
     );
     grantPermissions(
-      role: 'admin', 
+      role: roleAdmin,
       feature: 'laporan', 
       permissions: [read, update, delete] // Moderasi global, fitur delegate dihapus
     );
     grantPermissions(
-      role: 'admin', 
+      role: roleAdmin,
       feature: 'aspirasi', 
       permissions: [read, update, delete, respond] 
     );
@@ -67,36 +76,36 @@ class AccessControlService {
     // 4. ROLE: TEKNISI
     // Mengambil laporan mandiri (claim), mengisi dokumen kontrol/analisa/usulan, dan mengisi log harian.
     grantPermissions(
-      role: 'teknisi', 
+      role: roleTeknisi,
       feature: 'laporan', 
       permissions: [read, claim] 
     );
     grantPermissions(
-      role: 'teknisi', 
+      role: roleTeknisi,
       feature: 'dokumen_teknisi', 
       permissions: [create, read, update, process] // process: eksekusi step-by-step
     );
     grantPermissions(
-      role: 'teknisi', 
+      role: roleTeknisi,
       feature: 'log_harian', 
       permissions: [create, read, readOwn, updateOwn, deleteOwn] 
     );
 
     // 5. ROLE: TU (TATA USAHA)
     // Mencetak laporan, BAP dokumen teknisi, rekap log, dan mengelola agenda kalender.
-    grantPermissions(role: 'tu', feature: 'laporan', permissions: [read]);
+    grantPermissions(role: roleTu, feature: 'laporan', permissions: [read]);
     grantPermissions(
-      role: 'tu', 
+      role: roleTu,
       feature: 'dokumen_teknisi', 
       permissions: [read, export] 
     );
     grantPermissions(
-      role: 'tu', 
+      role: roleTu,
       feature: 'log_harian', 
       permissions: [read, export] 
     );
     grantPermissions(
-      role: 'tu', 
+      role: roleTu,
       feature: 'kalender', 
       permissions: [create, read, update, delete] 
     );
@@ -116,7 +125,8 @@ class AccessControlService {
 
   /// Mengecek apakah role bisa melakukan suatu aksi
   static bool canPerform(String role, String feature, String action, {bool isOwner = false}) {
-    final featurePermissions = _rolePermissions[role]?[feature] ?? [];
+    final normalizedRole = normalizeRole(role);
+    final featurePermissions = _rolePermissions[normalizedRole]?[feature] ?? [];
 
     if (featurePermissions.contains(action)) {
       return true;
@@ -130,5 +140,15 @@ class AccessControlService {
     }
 
     return false;
+  }
+
+  static String normalizeRole(String? role) {
+    final normalized = (role ?? '').trim().toLowerCase();
+
+    if (normalized == 'staff') {
+      return roleTeknisi;
+    }
+
+    return normalized;
   }
 }

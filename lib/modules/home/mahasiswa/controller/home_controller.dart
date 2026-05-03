@@ -12,11 +12,12 @@ class HomeController extends GetxController {
   /// Data user yang sedang login
   final Rx<UserModel> currentUser = const UserModel(
     id: 'usr-001',
-    username: '241511006',
-    email: 'budi@student.polban.ac.id',
     name: 'Budi',
+    nomorInduk: '241511006',
+    passwordHash: '',
     role: 'mahasiswa',
     isActive: true,
+    email: 'budi@student.polban.ac.id',
   ).obs;
 
   /// List agenda kalender yang ditampilkan di carousel

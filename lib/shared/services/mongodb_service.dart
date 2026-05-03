@@ -85,18 +85,6 @@ class MonggoDBServices {
       await connect();
       return;
     }
-
-    try {
-      await _db?.executeDbAdminCommand({'ping': 1});
-    } catch (e) {
-      await LogService.writeLog(
-        "MongoDB ping failed, reconnecting: $e",
-        source: "mongodb_service.dart",
-        level: 1,
-      );
-
-      await _reconnect();
-    }
   }
 
   Future<void> _reconnect() async {
@@ -149,7 +137,10 @@ class MonggoDBServices {
     return _db!.collection(collectionName);
   }
 
-  Future<void> insertData(String collectionName, Map<String, dynamic> data) async {
+  Future<void> insertData(
+    String collectionName,
+    Map<String, dynamic> data,
+  ) async {
     try {
       await _executeWithReconnect(() async {
         final collection = getCollection(collectionName);
@@ -171,7 +162,10 @@ class MonggoDBServices {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetch(String collection, SelectorBuilder filter) async {
+  Future<List<Map<String, dynamic>>> fetch(
+    String collection,
+    SelectorBuilder filter,
+  ) async {
     try {
       final data = await _executeWithReconnect(() async {
         final coll = getCollection(collection);
@@ -195,7 +189,11 @@ class MonggoDBServices {
     }
   }
 
-  Future<void> updateData(String collectionName, String id, Map<String, dynamic> newData) async {
+  Future<void> updateData(
+    String collectionName,
+    String id,
+    Map<String, dynamic> newData,
+  ) async {
     try {
       await _executeWithReconnect(() async {
         final collection = getCollection(collectionName);
@@ -225,9 +223,9 @@ class MonggoDBServices {
     try {
       await _executeWithReconnect(() async {
         final collection = getCollection(collectionName);
-        await collection.updateOne(filter, newData);
+        await collection.updateOne(filter, _asSetUpdate(newData));
       }, action: "Update data by filter di $collectionName");
-  
+
       await LogService.writeLog(
         "Data updated in $collectionName by filter",
         source: "mongodb_service.dart",
@@ -241,6 +239,16 @@ class MonggoDBServices {
 
       rethrow;
     }
+  }
+
+  Map<String, dynamic> _asSetUpdate(Map<String, dynamic> data) {
+    final hasOperator = data.keys.any((key) => key.startsWith(r'$'));
+    if (hasOperator) {
+      return data;
+    }
+
+    final fields = Map<String, dynamic>.from(data)..remove('_id');
+    return {r'$set': fields};
   }
 
   Future<void> deleteData(String collectionName, String id) async {

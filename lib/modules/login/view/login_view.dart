@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/view/home_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/admin/view/home_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/fasilitas_controller.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/laporan_fasilitas_screen.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/teknisi/view/home_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/role_navigation_service.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class LoginView extends StatefulWidget {
@@ -25,6 +20,11 @@ class _LoginViewState extends State<LoginView> {
   bool _isLoading = false;
   String _status = 'Silakan isi NIM dan password.';
   String _currentUrl = '-';
+
+  void _navigateByRole() {
+    final role = AuthService().currentUser?.role;
+    Get.offAll(() => RoleNavigationService.buildHomeByRole(role));
+  }
 
   @override
   void dispose() {
@@ -67,89 +67,30 @@ class _LoginViewState extends State<LoginView> {
         _webViewController = null;
       });
 
+      _navigateByRole();
       return;
     }
 
     setState(() {
-      _status =
-          'Akun belum terdaftar lokal. Sinkronisasi dari website akademik...';
+      _isLoading = false;
+      _status = 'Login gagal. Cek username/password MongoDB Anda.';
+      _currentUrl = '-';
+      _webViewController = null;
     });
 
-    final controller = await authService.loginWebsite(
-      username: nim,
-      password: password,
-
-      onSuccess: (url) {
-        if (!mounted) return;
-
-        setState(() {
-          _isLoading = false;
-          _status =
-              'Login website berhasil dan akun sudah tersimpan di MongoDB.';
-          _currentUrl = url;
-          _webViewController = null;
-        });
-      },
-
-      onFailure: (errorMessage) {
-        if (!mounted) return;
-
-        setState(() {
-          _isLoading = false;
-          _status = errorMessage;
-          _webViewController = null;
-        });
-
-        // Menampilkan pesan error di bawah layar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
-        );
-      },
-
-      onHttpError: (errorMessage) async {
-        if (!mounted) return;
-
-        setState(() {
-          _isLoading = false;
-          _status = errorMessage;
-          _webViewController = null;
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
-        );
-      },
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Login manual MongoDB gagal.'),
+        backgroundColor: Colors.red,
+      ),
     );
-
-    if (mounted) {
-      setState(() {
-        _webViewController = controller;
-      });
-    }
-  }
-
-  void _openMahasiswaAccess() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeView()),
-    );
-  }
-
-  void _openTeknisiAccess() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeTeknisiView()),
-    );
-  }
-
-  void _openAdminAccess() {
-    Get.to(() => const AdminDashboardView());
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Login Akademik')),
+      appBar: AppBar(title: const Text('Login Manual MongoDB')),
       body: Stack(
         children: [
           Padding(
@@ -174,21 +115,6 @@ class _LoginViewState extends State<LoginView> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _loginHandler,
                   child: const Text('Login'),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _openMahasiswaAccess,
-                  child: const Text('Akses Mahasiswa'),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _openTeknisiAccess,
-                  child: const Text('Akses Teknisi'),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _openAdminAccess,
-                  child: const Text('Masuk sebagai Admin'),
                 ),
                 const SizedBox(height: 12),
 

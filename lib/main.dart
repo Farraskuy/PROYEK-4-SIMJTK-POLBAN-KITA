@@ -1,20 +1,26 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/log_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/role_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/user_credential_seeder.dart';
 
 import 'modules/login/view/login_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: '.env.example');
+  final envFile = File('.env');
+  await dotenv.load(fileName: envFile.existsSync() ? '.env' : '.env.example');
+  AccessControlService.initSimjtkRoles();
 
   try {
     await MonggoDBServices().connect();
+    await UserCredentialSeeder.seedDefaults();
   } catch (e) {
     await LogService.writeLog(
       "Initial MongoDB connection failed: $e",
