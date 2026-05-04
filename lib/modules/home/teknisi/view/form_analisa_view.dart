@@ -1,7 +1,6 @@
 // lib/modules/teknisi/analisa_kerusakan/view/form_analisa_view.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../controller/analisa_kerusakan_controller.dart';
 import '../model/analisa_kerusakan_model.dart';
@@ -10,155 +9,84 @@ class FormAnalisaView extends StatelessWidget {
   const FormAnalisaView({super.key});
 
   static const Color _primary = Color(0xFF1E3A5F);
+  static const Color _accent = Color(0xFFE8720C); // POLBAN orange
+  static const Color _bg = Color(0xFFF5F6FA);
 
   @override
   Widget build(BuildContext context) {
     final ctrl = Get.find<AnalisaKerusakanController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: _primary),
-          onPressed: () => _confirmBack(ctrl),
-        ),
-        title: const Text(
-          'Tambah Analisa Kerusakan',
-          style: TextStyle(
-              color: _primary, fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-      ),
+      backgroundColor: _bg,
+      appBar: _buildAppBar(ctrl),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Section 1: Pilih Laporan ────────────────────────────
-            _SectionCard(
-              title: 'PILIH LAPORAN',
+            // ── Kop Formulir ────────────────────────────────────────────────
+            _buildFormHeader(),
+            const SizedBox(height: 16),
+
+            // ── Pilih Laporan ────────────────────────────────────────────────
+            _buildSectionCard(
+              title: 'Pilih Laporan',
               icon: Icons.assignment_outlined,
-              child: _buildPilihLaporan(ctrl),
+              child: _LaporanPicker(ctrl: ctrl),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            // ── Section 2: Diagnosa Teknis ──────────────────────────
-            _SectionCard(
-              title: 'DIAGNOSA TEKNIS',
+            // ── Identitas Alat ───────────────────────────────────────────────
+            _buildSectionCard(
+              title: 'Identitas Alat',
+              icon: Icons.inventory_2_outlined,
+              child: _IdentitasAlatSection(ctrl: ctrl),
+            ),
+            const SizedBox(height: 12),
+
+            // ── Analisa Masalah ──────────────────────────────────────────────
+            _buildSectionCard(
+              title: 'Analisa Masalah',
               icon: Icons.search_outlined,
-              child: Column(
-                children: [
-                  _buildTextField(
-                    label: 'Diagnosa Masalah',
-                    hint:
-                        'Jelaskan hasil pemeriksaan teknis secara detail...',
-                    controller: ctrl.diagnosaMasalahCtrl,
-                    maxLines: 4,
-                    isRequired: true,
-                  ),
-                  const SizedBox(height: 14),
-                  _buildTextField(
-                    label: 'Komponen/Bagian yang Rusak',
-                    hint: 'Cth: Lampu proyektor, Motherboard, Kapasitor...',
-                    controller: ctrl.komponenRusakCtrl,
-                    isRequired: true,
-                  ),
-                ],
+              child: _TextAreaField(
+                controller: ctrl.analisaMasalahCtrl,
+                hint: 'Tuliskan hasil diagnosa dan temuan teknis secara lengkap...',
+                minLines: 5,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            // ── Section 3: Kategori & Tingkat ───────────────────────
-            _SectionCard(
-              title: 'KLASIFIKASI KERUSAKAN',
-              icon: Icons.category_outlined,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Kategori kerusakan
-                  _fieldLabel('Kategori Kerusakan', isRequired: true),
-                  const SizedBox(height: 8),
-                  _buildKategoriSelector(ctrl),
-                  const SizedBox(height: 16),
-
-                  // Tingkat kerusakan
-                  _fieldLabel('Tingkat Kerusakan', isRequired: true),
-                  const SizedBox(height: 8),
-                  _buildTingkatSelector(ctrl),
-                ],
+            // ── Rekomendasi Perbaikan ────────────────────────────────────────
+            _buildSectionCard(
+              title: 'Rekomendasi Perbaikan',
+              icon: Icons.build_outlined,
+              child: _TextAreaField(
+                controller: ctrl.rekomendasiPerbaikanCtrl,
+                hint: 'Tuliskan tindakan perbaikan yang direkomendasikan...',
+                minLines: 4,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            // ── Section 4: Rekomendasi ──────────────────────────────
-            _SectionCard(
-              title: 'REKOMENDASI TINDAKAN',
-              icon: Icons.recommend_outlined,
-              child: Column(
-                children: [
-                  _buildTextField(
-                    label: 'Tindakan yang Direkomendasikan',
-                    hint:
-                        'Cth: Penggantian komponen, Perbaikan, Penghapusan barang...',
-                    controller: ctrl.tindakanCtrl,
-                    maxLines: 3,
-                    isRequired: true,
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Estimasi dalam satu row
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextField(
-                          label: 'Estimasi Waktu (Hari)',
-                          hint: 'Cth: 3',
-                          controller: ctrl.estimasiHariCtrl,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          prefixIcon: Icons.schedule_outlined,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildTextField(
-                          label: 'Estimasi Biaya (Rp)',
-                          hint: 'Cth: 1500000',
-                          controller: ctrl.estimasiBiayaCtrl,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly
-                          ],
-                          prefixIcon: Icons.payments_outlined,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-
-                  _buildTextField(
-                    label: 'Catatan Tambahan (Opsional)',
-                    hint:
-                        'Informasi tambahan yang perlu diketahui...',
-                    controller: ctrl.catatanCtrl,
-                    maxLines: 2,
-                  ),
-                ],
+            // ── Rekomendasi Tempat Perbaikan ────────────────────────────────
+            _buildSectionCard(
+              title: 'Rekomendasi Tempat Perbaikan',
+              icon: Icons.location_on_outlined,
+              child: _TextAreaField(
+                controller: ctrl.rekomendasiTempatCtrl,
+                hint: 'Contoh: Bengkel TK POLBAN / Service Center Resmi...',
+                minLines: 3,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            // ── Section 5: Foto Analisa ─────────────────────────────
-            _SectionCard(
-              title: 'FOTO DOKUMENTASI',
-              icon: Icons.camera_alt_outlined,
-              child: _buildFotoSection(),
+            // ── Info Tambahan (opsional) ────────────────────────────────────
+            _buildSectionCard(
+              title: 'Informasi Tambahan',
+              icon: Icons.info_outline,
+              isOptional: true,
+              child: _InfoTambahanSection(ctrl: ctrl),
             ),
-
-            const SizedBox(height: 100),
           ],
         ),
       ),
@@ -166,30 +94,323 @@ class FormAnalisaView extends StatelessWidget {
     );
   }
 
-  // ── Pilih Laporan ─────────────────────────────────────────────────────────
+  PreferredSizeWidget _buildAppBar(AnalisaKerusakanController ctrl) {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: _primary),
+        onPressed: () => Get.back(),
+      ),
+      titleSpacing: 0,
+      title: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Formulir Analisa',
+              style: TextStyle(
+                  color: _primary,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold)),
+          Text('Analisa Masalah Kerusakan',
+              style: TextStyle(color: Colors.grey, fontSize: 11)),
+        ],
+      ),
+    );
+  }
 
-  Widget _buildPilihLaporan(AnalisaKerusakanController ctrl) {
-    return Obx(() {
-      final laporanList = ctrl.laporanBelumDianalisa;
-
-      if (laporanList.isEmpty) {
-        return Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.06),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.green.withOpacity(0.2)),
+  /// Kop surat bergaya formulir POLBAN
+  Widget _buildFormHeader() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Kop atas
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Logo POLBAN
+                Container(
+                  width: 80,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    border: Border(
+                        right: BorderSide(color: Colors.grey.shade300)),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: _primary,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(Icons.school,
+                            color: Colors.white, size: 28),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text('POLBAN',
+                          style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: _primary)),
+                    ],
+                  ),
+                ),
+                // Judul
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('JURUSAN TEKNIK KOMPUTER',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: _primary),
+                            textAlign: TextAlign.center),
+                        const SizedBox(height: 2),
+                        const Text('POLITEKNIK NEGERI BANDUNG',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                                color: _primary),
+                            textAlign: TextAlign.center),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: const Row(
+
+          Divider(height: 1, color: Colors.grey.shade300),
+
+          // Sub-header: FORMULIR | ANALISA MASALAH KERUSAKAN
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  width: 80,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border(
+                        right: BorderSide(color: Colors.grey.shade300)),
+                  ),
+                  child: const Center(
+                    child: Text('FORMULIR',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 10,
+                            color: _primary)),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: const Center(
+                      child: Text('ANALISA MASALAH KERUSAKAN',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: _primary),
+                          textAlign: TextAlign.center),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required Widget child,
+    bool isOptional = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header — mirip label tabel di surat
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: _primary.withOpacity(0.05),
+              border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade200)),
+              borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(12)),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, size: 16, color: _primary),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: _primary,
+                      decoration: TextDecoration.underline),
+                ),
+                if (isOptional) ...[
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 7, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text('Opsional',
+                        style: TextStyle(
+                            fontSize: 9, color: Colors.grey)),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: child,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomBar(AnalisaKerusakanController ctrl) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 10,
+              offset: const Offset(0, -3)),
+        ],
+      ),
+      child: Obx(() => Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: ctrl.isSubmitting.value
+                      ? null
+                      : () {
+                          ctrl.resetForm();
+                          Get.back();
+                        },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: _primary,
+                    side: const BorderSide(color: _primary),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text('Batal'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: ElevatedButton(
+                  onPressed: ctrl.isSubmitting.value
+                      ? null
+                      : ctrl.submitAnalisa,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    elevation: 0,
+                  ),
+                  child: ctrl.isSubmitting.value
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.save_outlined, size: 18),
+                            SizedBox(width: 8),
+                            Text('Simpan Formulir',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                ),
+              ),
+            ],
+          )),
+    );
+  }
+}
+
+// ── Laporan Picker ────────────────────────────────────────────────────────────
+
+class _LaporanPicker extends StatelessWidget {
+  final AnalisaKerusakanController ctrl;
+  const _LaporanPicker({required this.ctrl});
+
+  static const Color _primary = Color(0xFF1E3A5F);
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final belum = ctrl.laporanBelumDianalisa;
+      if (belum.isEmpty) {
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.green.shade50,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
             children: [
               Icon(Icons.check_circle_outline,
-                  color: Colors.green, size: 18),
-              SizedBox(width: 8),
-              Text('Semua laporan sudah dianalisa',
-                  style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500)),
+                  color: Colors.green.shade600, size: 18),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Semua laporan aktif sudah memiliki analisa',
+                  style: TextStyle(color: Colors.green, fontSize: 12),
+                ),
+              ),
             ],
           ),
         );
@@ -198,392 +419,379 @@ class FormAnalisaView extends StatelessWidget {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${laporanList.length} laporan menunggu analisa',
-            style: TextStyle(color: Colors.grey[500], fontSize: 12),
-          ),
-          const SizedBox(height: 10),
-          ...laporanList.map((laporan) {
-            final isSelected =
-                ctrl.selectedLaporan.value?.id == laporan.id;
-            return GestureDetector(
-              onTap: () => ctrl.setLaporan(laporan),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFF1E3A5F).withOpacity(0.05)
-                      : Colors.grey[50],
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF1E3A5F)
-                        : Colors.grey.shade200,
-                    width: isSelected ? 1.5 : 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0xFF1E3A5F)
-                            : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.assignment_outlined,
-                        size: 18,
-                        color: isSelected
-                            ? Colors.white
-                            : Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(laporan.judul,
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                  color: isSelected
-                                      ? const Color(0xFF1E3A5F)
-                                      : Colors.black87)),
-                          const SizedBox(height: 2),
-                          Text(
-                            laporan.lokasi,
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 11),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(laporan.kategori,
-                                style: const TextStyle(
-                                    color: Colors.orange,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600)),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (isSelected)
-                      const Icon(Icons.check_circle,
-                          color: Color(0xFF1E3A5F), size: 20),
-                  ],
-                ),
+          // Selected display
+          if (ctrl.selectedLaporan.value != null)
+            Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: _primary.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: _primary.withOpacity(0.2)),
               ),
-            );
-          }),
+              child: Row(
+                children: [
+                  const Icon(Icons.assignment_turned_in_outlined,
+                      color: _primary, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(ctrl.selectedLaporan.value!.judul,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: _primary)),
+                        Text(ctrl.selectedLaporan.value!.lokasi,
+                            style: const TextStyle(
+                                color: Colors.grey, fontSize: 11)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+          // Daftar laporan
+          ...belum.map((lap) => _LaporanTile(
+                laporan: lap,
+                isSelected:
+                    ctrl.selectedLaporan.value?.id == lap.id,
+                onTap: () => ctrl.setLaporan(lap),
+              )),
         ],
       );
     });
   }
+}
 
-  // ── Kategori Selector ─────────────────────────────────────────────────────
+class _LaporanTile extends StatelessWidget {
+  final LaporanSingkat laporan;
+  final bool isSelected;
+  final VoidCallback onTap;
 
-  Widget _buildKategoriSelector(AnalisaKerusakanController ctrl) {
-    return Obx(() => Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: KategoriKerusakan.values.map((k) {
-            final isSelected = ctrl.kategoriKerusakan.value == k;
-            final color = _kategoriColor(k);
-            return GestureDetector(
-              onTap: () => ctrl.setKategoriKerusakan(k),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 9),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? color.withOpacity(0.12)
-                      : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected ? color : Colors.transparent,
-                    width: 1.5,
-                  ),
-                ),
-                child: Text(
-                  k.label,
-                  style: TextStyle(
-                      color: isSelected ? color : Colors.grey.shade500,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            );
-          }).toList(),
-        ));
-  }
+  const _LaporanTile({
+    required this.laporan,
+    required this.isSelected,
+    required this.onTap,
+  });
 
-  // ── Tingkat Selector ──────────────────────────────────────────────────────
+  static const Color _primary = Color(0xFF1E3A5F);
 
-  Widget _buildTingkatSelector(AnalisaKerusakanController ctrl) {
-    return Obx(() => Column(
-          children: TingkatKerusakan.values.map((t) {
-            final isSelected = ctrl.tingkatKerusakan.value == t;
-            final color = _tingkatColor(t);
-            return GestureDetector(
-              onTap: () => ctrl.setTingkatKerusakan(t),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.only(bottom: 8),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? color.withOpacity(0.07)
-                      : Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: isSelected ? color : Colors.grey.shade200,
-                    width: isSelected ? 1.5 : 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color:
-                            isSelected ? color : Colors.grey.shade300,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            t.label,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 13,
-                                color: isSelected
-                                    ? color
-                                    : Colors.black87),
-                          ),
-                          Text(
-                            t.deskripsi,
-                            style: TextStyle(
-                                fontSize: 11,
-                                color: isSelected
-                                    ? color.withOpacity(0.8)
-                                    : Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (isSelected)
-                      Icon(Icons.check_circle,
-                          color: color, size: 18),
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
-        ));
-  }
-
-  // ── Foto Section ──────────────────────────────────────────────────────────
-
-  Widget _buildFotoSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Foto saat melakukan diagnosa (opsional)',
-            style: TextStyle(color: Colors.grey[500], fontSize: 12)),
-        const SizedBox(height: 10),
-        GestureDetector(
-          onTap: () {
-            Get.snackbar('Info', 'Fitur kamera akan diintegrasikan',
-                snackPosition: SnackPosition.BOTTOM,
-                margin: const EdgeInsets.all(16));
-          },
-          child: Container(
-            width: double.infinity,
-            height: 90,
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                  color: Colors.grey.shade300,
-                  style: BorderStyle.solid),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.camera_alt_outlined,
-                    color: Colors.grey[400], size: 28),
-                const SizedBox(height: 6),
-                Text('Ketuk untuk unggah foto',
-                    style: TextStyle(
-                        color: Colors.grey[400], fontSize: 12)),
-              ],
-            ),
-          ),
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isSelected ? _primary.withOpacity(0.08) : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+              color: isSelected ? _primary : Colors.grey.shade200,
+              width: isSelected ? 1.5 : 1),
         ),
-      ],
-    );
-  }
-
-  // ── Bottom Bar ────────────────────────────────────────────────────────────
-
-  Widget _buildBottomBar(AnalisaKerusakanController ctrl) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
-      child: Obx(() => SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed:
-                  ctrl.isSubmitting.value ? null : ctrl.submitAnalisa,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _primary,
-                disabledBackgroundColor: _primary.withOpacity(0.5),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-              child: ctrl.isSubmitting.value
-                  ? const SizedBox(
-                      height: 22,
-                      width: 22,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2.5))
-                  : const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.save_outlined,
-                            color: Colors.white, size: 18),
-                        SizedBox(width: 8),
-                        Text('Simpan Analisa',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15)),
-                      ],
-                    ),
+        child: Row(
+          children: [
+            Radio<String>(
+              value: laporan.id,
+              groupValue: isSelected ? laporan.id : null,
+              onChanged: (_) => onTap(),
+              activeColor: _primary,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
             ),
-          )),
-    );
-  }
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
-  void _confirmBack(AnalisaKerusakanController ctrl) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Batalkan Analisa?'),
-        content: const Text(
-            'Data yang sudah diisi akan hilang. Yakin ingin kembali?'),
-        actions: [
-          TextButton(
-              onPressed: () => Get.back(),
-              child: const Text('Lanjut Isi')),
-          TextButton(
-            onPressed: () {
-              ctrl.resetForm();
-              Get.back();
-              Get.back();
-            },
-            child: const Text('Ya, Batalkan',
-                style: TextStyle(color: Colors.red)),
-          ),
-        ],
+            const SizedBox(width: 6),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(laporan.judul,
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: isSelected ? _primary : Colors.black87)),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on_outlined,
+                          size: 11, color: Colors.grey.shade500),
+                      const SizedBox(width: 2),
+                      Expanded(
+                        child: Text(laporan.lokasi,
+                            style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey.shade500),
+                            overflow: TextOverflow.ellipsis),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _fieldLabel(String label, {bool isRequired = false}) {
-    return Row(
-      children: [
-        Text(label,
-            style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-                color: Colors.black87)),
-        if (isRequired)
-          const Text(' *',
-              style: TextStyle(color: Colors.red, fontSize: 13)),
-      ],
-    );
-  }
+// ── Identitas Alat Section ────────────────────────────────────────────────────
 
-  Widget _buildTextField({
-    required String label,
-    required String hint,
-    required TextEditingController controller,
-    int maxLines = 1,
-    TextInputType? keyboardType,
-    List<TextInputFormatter>? inputFormatters,
-    IconData? prefixIcon,
-    bool isRequired = false,
-  }) {
+class _IdentitasAlatSection extends StatelessWidget {
+  final AnalisaKerusakanController ctrl;
+  const _IdentitasAlatSection({required this.ctrl});
+
+  static const Color _primary = Color(0xFF1E3A5F);
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _fieldLabel(label, isRequired: isRequired),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          style: const TextStyle(fontSize: 13),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(fontSize: 13, color: Colors.grey[400]),
-            prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, size: 18, color: Colors.grey)
-                : null,
-            filled: true,
-            fillColor: Colors.grey[50],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colors.grey[300]!),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide:
-                  const BorderSide(color: _primary, width: 1.5),
-            ),
-            contentPadding: const EdgeInsets.all(14),
-          ),
+        // ── Dasar Pemeriksaan ──────────────────────────────────────────────
+        _FormRow(
+          label: 'Dasar Pemeriksaan',
+          child: Obx(() => Wrap(
+                spacing: 12,
+                children: DasarPemeriksaan.values.map((d) {
+                  final sel = ctrl.dasarPemeriksaan.value == d;
+                  return GestureDetector(
+                    onTap: () => ctrl.setDasarPemeriksaan(d),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Radio<DasarPemeriksaan>(
+                          value: d,
+                          groupValue: ctrl.dasarPemeriksaan.value,
+                          onChanged: (_) => ctrl.setDasarPemeriksaan(d),
+                          activeColor: _primary,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        Text(d.label,
+                            style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: sel
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                color:
+                                    sel ? _primary : Colors.grey.shade700)),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              )),
+        ),
+
+        const _FormDivider(),
+
+        // ── Nama Alat ──────────────────────────────────────────────────────
+        _FormRow(
+          label: 'Nama Alat',
+          child: _InlineTextField(
+              controller: ctrl.namaAlatCtrl,
+              hint: 'Contoh: Proyektor Epson EB-X41'),
+        ),
+
+        const _FormDivider(),
+
+        // ── Kode Alat ──────────────────────────────────────────────────────
+        _FormRow(
+          label: 'Kode Alat',
+          child: _InlineTextField(
+              controller: ctrl.kodeAlatCtrl,
+              hint: 'Contoh: PRY-LAB-C-001'),
+        ),
+
+        const _FormDivider(),
+
+        // ── No. Inventaris ─────────────────────────────────────────────────
+        _FormRow(
+          label: 'No. Inventaris',
+          child: _InlineTextField(
+              controller: ctrl.noInventarisCtrl,
+              hint: 'Contoh: INV/2021/PRY/003'),
+        ),
+
+        const _FormDivider(),
+
+        // ── Lokasi (otomatis dari laporan) ─────────────────────────────────
+        Obx(() => _FormRow(
+              label: 'Lokasi',
+              child: ctrl.selectedLaporan.value != null
+                  ? Text(
+                      ctrl.selectedLaporan.value!.lokasi,
+                      style: const TextStyle(
+                          fontSize: 13,
+                          color: _primary,
+                          fontWeight: FontWeight.w500),
+                    )
+                  : Text('— (pilih laporan terlebih dahulu)',
+                      style: TextStyle(
+                          fontSize: 12, color: Colors.grey.shade400)),
+            )),
+
+        const _FormDivider(),
+
+        // ── No. Kerusakan ──────────────────────────────────────────────────
+        _FormRow(
+          label: 'No. Kerusakan',
+          child: _InlineTextField(
+              controller: ctrl.noKerusakanCtrl,
+              hint: 'Contoh: KRS-2024-0042'),
         ),
       ],
     );
   }
+}
 
-  Color _kategoriColor(KategoriKerusakan k) {
-    switch (k) {
-      case KategoriKerusakan.hardware: return Colors.blue;
-      case KategoriKerusakan.software: return Colors.purple;
-      case KategoriKerusakan.jaringan: return Colors.teal;
-      case KategoriKerusakan.instalasi: return Colors.orange;
-      case KategoriKerusakan.lainnya: return Colors.grey;
-    }
+// ── Informasi Tambahan (opsional) ─────────────────────────────────────────────
+
+class _InfoTambahanSection extends StatelessWidget {
+  final AnalisaKerusakanController ctrl;
+  const _InfoTambahanSection({required this.ctrl});
+
+  static const Color _primary = Color(0xFF1E3A5F);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Kategori Kerusakan
+        const Text('Kategori Kerusakan',
+            style: TextStyle(fontSize: 12, color: Colors.grey)),
+        const SizedBox(height: 6),
+        Obx(() => Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: KategoriKerusakan.values.map((k) {
+                final sel = ctrl.kategoriKerusakan.value == k;
+                return GestureDetector(
+                  onTap: () => ctrl.setKategoriKerusakan(k),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: sel ? _primary : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                          color: sel ? _primary : Colors.grey.shade200),
+                    ),
+                    child: Text(k.label,
+                        style: TextStyle(
+                            fontSize: 12,
+                            color:
+                                sel ? Colors.white : Colors.grey.shade600,
+                            fontWeight: sel
+                                ? FontWeight.bold
+                                : FontWeight.normal)),
+                  ),
+                );
+              }).toList(),
+            )),
+
+        const SizedBox(height: 14),
+
+        // Tingkat Kerusakan
+        const Text('Tingkat Kerusakan',
+            style: TextStyle(fontSize: 12, color: Colors.grey)),
+        const SizedBox(height: 6),
+        Obx(() => Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: TingkatKerusakan.values.map((t) {
+                final sel = ctrl.tingkatKerusakan.value == t;
+                final color = _tingkatColor(t);
+                return GestureDetector(
+                  onTap: () => ctrl.setTingkatKerusakan(t),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 7),
+                    decoration: BoxDecoration(
+                      color:
+                          sel ? color.withOpacity(0.12) : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                          color:
+                              sel ? color : Colors.grey.shade200,
+                          width: sel ? 1.5 : 1),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(t.label,
+                            style: TextStyle(
+                                fontSize: 12,
+                                color:
+                                    sel ? color : Colors.grey.shade600,
+                                fontWeight: sel
+                                    ? FontWeight.bold
+                                    : FontWeight.normal)),
+                        Text(t.deskripsi,
+                            style: TextStyle(
+                                fontSize: 9,
+                                color: sel
+                                    ? color.withOpacity(0.8)
+                                    : Colors.grey.shade400)),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            )),
+
+        const SizedBox(height: 14),
+
+        // Estimasi Waktu & Biaya
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Estimasi Hari',
+                      style:
+                          TextStyle(fontSize: 12, color: Colors.grey)),
+                  const SizedBox(height: 6),
+                  _InlineTextField(
+                    controller: ctrl.estimasiHariCtrl,
+                    hint: 'Hari',
+                    keyboardType: TextInputType.number,
+                    suffix: 'hari',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Estimasi Biaya',
+                      style:
+                          TextStyle(fontSize: 12, color: Colors.grey)),
+                  const SizedBox(height: 6),
+                  _InlineTextField(
+                    controller: ctrl.estimasiBiayaCtrl,
+                    hint: '0',
+                    keyboardType: TextInputType.number,
+                    prefix: 'Rp',
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   Color _tingkatColor(TingkatKerusakan t) {
@@ -596,59 +804,125 @@ class FormAnalisaView extends StatelessWidget {
   }
 }
 
-// ── Section Card ──────────────────────────────────────────────────────────────
+// ── Helper Widgets ────────────────────────────────────────────────────────────
 
-class _SectionCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
+/// Row dengan label kiri (seperti tabel surat) + konten kanan
+class _FormRow extends StatelessWidget {
+  final String label;
   final Widget child;
 
-  const _SectionCard(
-      {required this.title, required this.icon, required this.child});
-
-  static const Color _primary = Color(0xFF1E3A5F);
+  const _FormRow({required this.label, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2)),
-        ],
-      ),
-      child: Column(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section header
-          Row(
-            children: [
-              Container(
-                width: 3,
-                height: 16,
-                decoration: BoxDecoration(
-                    color: _primary,
-                    borderRadius: BorderRadius.circular(2)),
-              ),
-              const SizedBox(width: 8),
-              Icon(icon, size: 15, color: _primary),
-              const SizedBox(width: 6),
-              Text(title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: _primary,
-                      letterSpacing: 0.8)),
-            ],
+          SizedBox(
+            width: 130,
+            child: Text(
+              label,
+              style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500),
+            ),
           ),
-          const SizedBox(height: 16),
-          child,
+          const Text(': ',
+              style: TextStyle(fontSize: 12, color: Colors.black54)),
+          Expanded(child: child),
         ],
+      ),
+    );
+  }
+}
+
+class _FormDivider extends StatelessWidget {
+  const _FormDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Divider(height: 12, color: Colors.grey.shade100);
+  }
+}
+
+/// Input satu baris (digunakan dalam _FormRow)
+class _InlineTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final TextInputType keyboardType;
+  final String? prefix;
+  final String? suffix;
+
+  const _InlineTextField({
+    required this.controller,
+    required this.hint,
+    this.keyboardType = TextInputType.text,
+    this.prefix,
+    this.suffix,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: const TextStyle(fontSize: 13),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle:
+            TextStyle(fontSize: 12, color: Colors.grey.shade400),
+        prefixText: prefix != null ? '$prefix ' : null,
+        prefixStyle: const TextStyle(fontSize: 13, color: Colors.black54),
+        suffixText: suffix,
+        suffixStyle:
+            const TextStyle(fontSize: 12, color: Colors.grey),
+        isDense: true,
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
+        border: InputBorder.none,
+        enabledBorder: UnderlineInputBorder(
+          borderSide:
+              BorderSide(color: Colors.grey.shade300, width: 1),
+        ),
+        focusedBorder: const UnderlineInputBorder(
+          borderSide:
+              BorderSide(color: Color(0xFF1E3A5F), width: 1.5),
+        ),
+      ),
+    );
+  }
+}
+
+/// Textarea multi-baris (Analisa Masalah, Rekomendasi)
+class _TextAreaField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final int minLines;
+
+  const _TextAreaField({
+    required this.controller,
+    required this.hint,
+    this.minLines = 4,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      minLines: minLines,
+      maxLines: null,
+      keyboardType: TextInputType.multiline,
+      style: const TextStyle(fontSize: 13, height: 1.6),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle:
+            TextStyle(fontSize: 12, color: Colors.grey.shade400),
+        isDense: true,
+        contentPadding: EdgeInsets.zero,
+        border: InputBorder.none,
       ),
     );
   }

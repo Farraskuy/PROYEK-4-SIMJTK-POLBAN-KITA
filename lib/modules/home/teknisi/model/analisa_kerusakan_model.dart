@@ -6,21 +6,25 @@ class AnalisaKerusakanModel {
   final String teknisiId; // Reference ke users._id
   final String teknisiName;
 
-  // Info laporan (denormalized untuk display)
-  final String judulLaporan;
-  final String lokasiLaporan;
-  final String kategoriLaporan;
+  // ── Identitas Alat (sesuai Formulir POLBAN) ───────────────────────────────
+  final DasarPemeriksaan dasarPemeriksaan; // Pemeriksaan Berkala / Keluhan Pemakai
+  final String namaAlat;       // Nama Alat
+  final String kodeAlat;       // Kode Alat
+  final String noInventaris;   // No. Inventaris
+  final String lokasi;         // Lokasi
+  final String noKerusakan;    // No. Kerusakan
 
-  // Field analisa teknis
-  final String diagnosaMasalah; // Hasil diagnosa teknisi
-  final String komponenRusak; // Komponen/bagian yang rusak
+  // ── Isi Formulir ──────────────────────────────────────────────────────────
+  final String analisaMasalah;           // Analisa Masalah (diagnosa teknis)
+  final String rekomendasiPerbaikan;     // Rekomendasi Perbaikan
+  final String rekomendasiTempatPerbaikan; // Rekomendasi Tempat Perbaikan
+
+  // ── Field tambahan (internal / display) ──────────────────────────────────
+  final String judulLaporan;     // denormalized dari laporan
+  final String kategoriLaporan;
   final KategoriKerusakan kategoriKerusakan;
   final TingkatKerusakan tingkatKerusakan;
-  final String tindakanDirekomendasikan; // Perbaikan / Penggantian / Penghapusan
-  final String? catatanTambahan;
-  final List<String> fotoAnalisaUrls; // Foto saat diagnosa
-
-  // Estimasi
+  final List<String> fotoAnalisaUrls;
   final int? estimasiWaktuPerbaikanHari;
   final double? estimasiBiaya;
 
@@ -33,15 +37,19 @@ class AnalisaKerusakanModel {
     required this.laporanId,
     required this.teknisiId,
     required this.teknisiName,
+    required this.dasarPemeriksaan,
+    required this.namaAlat,
+    required this.kodeAlat,
+    required this.noInventaris,
+    required this.lokasi,
+    required this.noKerusakan,
+    required this.analisaMasalah,
+    required this.rekomendasiPerbaikan,
+    required this.rekomendasiTempatPerbaikan,
     required this.judulLaporan,
-    required this.lokasiLaporan,
     required this.kategoriLaporan,
-    required this.diagnosaMasalah,
-    required this.komponenRusak,
     required this.kategoriKerusakan,
     required this.tingkatKerusakan,
-    required this.tindakanDirekomendasikan,
-    this.catatanTambahan,
     this.fotoAnalisaUrls = const [],
     this.estimasiWaktuPerbaikanHari,
     this.estimasiBiaya,
@@ -51,17 +59,21 @@ class AnalisaKerusakanModel {
   });
 
   AnalisaKerusakanModel copyWith({
-    String? diagnosaMasalah,
-    String? komponenRusak,
+    DasarPemeriksaan? dasarPemeriksaan,
+    String? namaAlat,
+    String? kodeAlat,
+    String? noInventaris,
+    String? lokasi,
+    String? noKerusakan,
+    String? analisaMasalah,
+    String? rekomendasiPerbaikan,
+    String? rekomendasiTempatPerbaikan,
     KategoriKerusakan? kategoriKerusakan,
     TingkatKerusakan? tingkatKerusakan,
-    String? tindakanDirekomendasikan,
-    String? catatanTambahan,
     List<String>? fotoAnalisaUrls,
     int? estimasiWaktuPerbaikanHari,
     double? estimasiBiaya,
     String? syncStatus,
-    DateTime? createdAt,
     DateTime? updatedAt,
   }) {
     return AnalisaKerusakanModel(
@@ -70,21 +82,25 @@ class AnalisaKerusakanModel {
       teknisiId: teknisiId,
       teknisiName: teknisiName,
       judulLaporan: judulLaporan,
-      lokasiLaporan: lokasiLaporan,
       kategoriLaporan: kategoriLaporan,
-      diagnosaMasalah: diagnosaMasalah ?? this.diagnosaMasalah,
-      komponenRusak: komponenRusak ?? this.komponenRusak,
+      dasarPemeriksaan: dasarPemeriksaan ?? this.dasarPemeriksaan,
+      namaAlat: namaAlat ?? this.namaAlat,
+      kodeAlat: kodeAlat ?? this.kodeAlat,
+      noInventaris: noInventaris ?? this.noInventaris,
+      lokasi: lokasi ?? this.lokasi,
+      noKerusakan: noKerusakan ?? this.noKerusakan,
+      analisaMasalah: analisaMasalah ?? this.analisaMasalah,
+      rekomendasiPerbaikan: rekomendasiPerbaikan ?? this.rekomendasiPerbaikan,
+      rekomendasiTempatPerbaikan:
+          rekomendasiTempatPerbaikan ?? this.rekomendasiTempatPerbaikan,
       kategoriKerusakan: kategoriKerusakan ?? this.kategoriKerusakan,
       tingkatKerusakan: tingkatKerusakan ?? this.tingkatKerusakan,
-      tindakanDirekomendasikan:
-          tindakanDirekomendasikan ?? this.tindakanDirekomendasikan,
-      catatanTambahan: catatanTambahan ?? this.catatanTambahan,
       fotoAnalisaUrls: fotoAnalisaUrls ?? this.fotoAnalisaUrls,
       estimasiWaktuPerbaikanHari:
           estimasiWaktuPerbaikanHari ?? this.estimasiWaktuPerbaikanHari,
       estimasiBiaya: estimasiBiaya ?? this.estimasiBiaya,
       syncStatus: syncStatus ?? this.syncStatus,
-      createdAt: createdAt ?? this.createdAt,
+      createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
@@ -95,24 +111,37 @@ class AnalisaKerusakanModel {
         'teknisi_id': teknisiId,
         'teknisi_name': teknisiName,
         'judul_laporan': judulLaporan,
-        'lokasi_laporan': lokasiLaporan,
         'kategori_laporan': kategoriLaporan,
-        'diagnosa_masalah': diagnosaMasalah,
-        'komponen_rusak': komponenRusak,
+        'dasar_pemeriksaan': dasarPemeriksaan.value,
+        'nama_alat': namaAlat,
+        'kode_alat': kodeAlat,
+        'no_inventaris': noInventaris,
+        'lokasi': lokasi,
+        'no_kerusakan': noKerusakan,
+        'analisa_masalah': analisaMasalah,
+        'rekomendasi_perbaikan': rekomendasiPerbaikan,
+        'rekomendasi_tempat_perbaikan': rekomendasiTempatPerbaikan,
         'kategori_kerusakan': kategoriKerusakan.value,
         'tingkat_kerusakan': tingkatKerusakan.value,
-        'tindakan_direkomendasikan': tindakanDirekomendasikan,
-        'catatan_tambahan': catatanTambahan,
         'foto_analisa_urls': fotoAnalisaUrls,
         'estimasi_waktu_perbaikan_hari': estimasiWaktuPerbaikanHari,
         'estimasi_biaya': estimasiBiaya,
-        'syncStatus': syncStatus,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
+        'sync_status': syncStatus,
+        'created_at': createdAt.toIso8601String(),
+        'updated_at': updatedAt.toIso8601String(),
       };
 }
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
+
+enum DasarPemeriksaan {
+  pemeriksaanBerkala('pemeriksaan_berkala', '1. Pemeriksaan Berkala'),
+  keluhanPemakai('keluhan_pemakai', '2. Keluhan Pemakai');
+
+  final String value;
+  final String label;
+  const DasarPemeriksaan(this.value, this.label);
+}
 
 enum KategoriKerusakan {
   hardware('hardware', 'Hardware'),
@@ -138,8 +167,7 @@ enum TingkatKerusakan {
   const TingkatKerusakan(this.value, this.label, this.deskripsi);
 }
 
-// ── Dummy laporan yang bisa dianalisa (status in_progress) ───────────────────
-// Sesuai struktur laporan_fasilitas dari Zidan
+// ── Dummy laporan aktif ───────────────────────────────────────────────────────
 
 class LaporanSingkat {
   final String id;
@@ -200,7 +228,8 @@ final List<LaporanSingkat> dummyLaporanAktif = [
   ),
 ];
 
-// Dummy data analisa yang sudah dibuat
+// ── Dummy analisa list ────────────────────────────────────────────────────────
+
 List<AnalisaKerusakanModel> dummyAnalisaList = [
   AnalisaKerusakanModel(
     id: 'analisa-uuid-001',
@@ -208,14 +237,24 @@ List<AnalisaKerusakanModel> dummyAnalisaList = [
     teknisiId: 'user-t1',
     teknisiName: 'Budi Santoso',
     judulLaporan: 'Proyektor Lab Komputer Tidak Menyala',
-    lokasiLaporan: 'Lab Komputer C, Gedung A',
     kategoriLaporan: 'Proyektor',
-    diagnosaMasalah:
-        'Lampu proyektor sudah melebihi batas jam penggunaan (3000 jam). Ballast rusak dan tidak dapat menyalakan lampu.',
-    komponenRusak: 'Lampu proyektor, Ballast',
+    dasarPemeriksaan: DasarPemeriksaan.keluhanPemakai,
+    namaAlat: 'Proyektor Epson EB-X41',
+    kodeAlat: 'PRY-LAB-C-001',
+    noInventaris: 'INV/2021/PRY/003',
+    lokasi: 'Lab Komputer C, Gedung A',
+    noKerusakan: 'KRS-2024-0042',
+    analisaMasalah:
+        'Lampu proyektor sudah melebihi batas jam penggunaan (3000 jam). '
+        'Ballast rusak dan tidak dapat menyalakan lampu. '
+        'Indikator lampu berkedip merah 3 kali yang menandakan umur lampu habis.',
+    rekomendasiPerbaikan:
+        'Penggantian lampu proyektor (part no. ELPLP88) dan ballast. '
+        'Estimasi penggantian 3 hari kerja.',
+    rekomendasiTempatPerbaikan:
+        'Bengkel Teknik Komputer POLBAN / Authorized Service Center Epson Bandung.',
     kategoriKerusakan: KategoriKerusakan.hardware,
     tingkatKerusakan: TingkatKerusakan.berat,
-    tindakanDirekomendasikan: 'Penggantian lampu dan ballast proyektor',
     estimasiWaktuPerbaikanHari: 3,
     estimasiBiaya: 1500000,
     syncStatus: 'local',

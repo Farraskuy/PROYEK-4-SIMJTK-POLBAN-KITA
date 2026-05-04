@@ -28,7 +28,7 @@ class AnalisaKerusakanView extends StatelessWidget {
           onRefresh: ctrl.loadData,
           child: CustomScrollView(
             slivers: [
-              // ── Header stats ────────────────────────────────────────
+              // ── Header stats ─────────────────────────────────────────────
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
@@ -44,7 +44,7 @@ class AnalisaKerusakanView extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Diagnosa teknis terhadap barang yang rusak',
+                        'Formulir Analisa Masalah Kerusakan — POLBAN',
                         style: TextStyle(
                             color: Colors.grey[500], fontSize: 13),
                       ),
@@ -61,7 +61,7 @@ class AnalisaKerusakanView extends StatelessWidget {
                       _buildFilterChips(ctrl),
                       const SizedBox(height: 4),
                       Obx(() => Text(
-                            '${ctrl.filteredAnalisa.length} analisa ditemukan',
+                            '${ctrl.filteredAnalisa.length} formulir ditemukan',
                             style: const TextStyle(
                                 color: Colors.grey, fontSize: 12),
                           )),
@@ -70,15 +70,17 @@ class AnalisaKerusakanView extends StatelessWidget {
                 ),
               ),
 
-              // ── List analisa ────────────────────────────────────────
+              // ── List analisa ──────────────────────────────────────────────
               Obx(() => ctrl.filteredAnalisa.isEmpty
                   ? SliverFillRemaining(child: _buildEmpty())
                   : SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                      padding:
+                          const EdgeInsets.fromLTRB(16, 8, 16, 32),
                       sliver: SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (ctx, i) => _AnalisaCard(
                             analisa: ctrl.filteredAnalisa[i],
+                            formatRupiah: ctrl.formatRupiah,
                           ),
                           childCount: ctrl.filteredAnalisa.length,
                         ),
@@ -95,7 +97,7 @@ class AnalisaKerusakanView extends StatelessWidget {
         },
         backgroundColor: _primary,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Tambah Analisa',
+        label: const Text('Tambah Formulir',
             style: TextStyle(
                 color: Colors.white, fontWeight: FontWeight.w600)),
       ),
@@ -116,7 +118,8 @@ class AnalisaKerusakanView extends StatelessWidget {
           const CircleAvatar(
             radius: 16,
             backgroundColor: _primary,
-            child: Icon(Icons.engineering, color: Colors.white, size: 18),
+            child:
+                Icon(Icons.engineering, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 10),
           const Column(
@@ -181,10 +184,10 @@ class AnalisaKerusakanView extends StatelessWidget {
       return Row(
         children: [
           _StatChip(
-              label: 'Total Analisa',
+              label: 'Total Formulir',
               count: total,
               color: _primary,
-              icon: Icons.analytics_outlined),
+              icon: Icons.description_outlined),
           const SizedBox(width: 10),
           _StatChip(
               label: 'Kerusakan Berat',
@@ -224,7 +227,7 @@ class AnalisaKerusakanView extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    '${ctrl.laporanBelumDianalisa.length} laporan menunggu analisa teknis',
+                    '${ctrl.laporanBelumDianalisa.length} laporan menunggu formulir analisa',
                     style: const TextStyle(
                         color: Colors.orange,
                         fontSize: 12,
@@ -266,13 +269,15 @@ class AnalisaKerusakanView extends StatelessWidget {
                       color: isActive ? _primary : Colors.white,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                          color:
-                              isActive ? _primary : Colors.grey.shade300),
+                          color: isActive
+                              ? _primary
+                              : Colors.grey.shade300),
                     ),
                     child: Text(
                       f['label']!,
                       style: TextStyle(
-                          color: isActive ? Colors.white : Colors.grey,
+                          color:
+                              isActive ? Colors.white : Colors.grey,
                           fontSize: 12,
                           fontWeight: FontWeight.w600),
                     ),
@@ -289,9 +294,10 @@ class AnalisaKerusakanView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off_outlined, size: 64, color: Colors.grey[300]),
+          Icon(Icons.description_outlined,
+              size: 64, color: Colors.grey[300]),
           const SizedBox(height: 12),
-          Text('Belum ada analisa kerusakan',
+          Text('Belum ada formulir analisa',
               style: TextStyle(color: Colors.grey[400], fontSize: 14)),
           const SizedBox(height: 4),
           Text('Ketuk tombol + untuk menambahkan',
@@ -345,8 +351,8 @@ class _StatChip extends StatelessWidget {
                           fontSize: 16,
                           color: color)),
                   Text(label,
-                      style: const TextStyle(
-                          color: Colors.grey, fontSize: 9),
+                      style:
+                          const TextStyle(color: Colors.grey, fontSize: 9),
                       overflow: TextOverflow.ellipsis),
                 ],
               ),
@@ -362,8 +368,10 @@ class _StatChip extends StatelessWidget {
 
 class _AnalisaCard extends StatelessWidget {
   final AnalisaKerusakanModel analisa;
+  final String Function(double?) formatRupiah;
 
-  const _AnalisaCard({required this.analisa});
+  const _AnalisaCard(
+      {required this.analisa, required this.formatRupiah});
 
   static const Color _primary = Color(0xFF1E3A5F);
 
@@ -379,7 +387,8 @@ class _AnalisaCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: analisa.tingkatKerusakan == TingkatKerusakan.total ||
                 analisa.tingkatKerusakan == TingkatKerusakan.berat
-            ? Border.all(color: Colors.red.withOpacity(0.2), width: 1.5)
+            ? Border.all(
+                color: Colors.red.withOpacity(0.2), width: 1.5)
             : null,
         boxShadow: [
           BoxShadow(
@@ -393,7 +402,7 @@ class _AnalisaCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top row: kategori + tingkat kerusakan
+            // ── Top: kategori + tingkat ───────────────────────────────────
             Row(
               children: [
                 Container(
@@ -409,6 +418,26 @@ class _AnalisaCard extends StatelessWidget {
                           fontSize: 11,
                           fontWeight: FontWeight.w700)),
                 ),
+                const SizedBox(width: 8),
+                // Dasar pemeriksaan badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    analisa.dasarPemeriksaan ==
+                            DasarPemeriksaan.pemeriksaanBerkala
+                        ? 'Berkala'
+                        : 'Keluhan Pemakai',
+                    style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500),
+                  ),
+                ),
                 const Spacer(),
                 // Tingkat kerusakan badge
                 Container(
@@ -423,7 +452,8 @@ class _AnalisaCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.circle, size: 6, color: tingkatColor),
+                      Icon(Icons.circle,
+                          size: 6, color: tingkatColor),
                       const SizedBox(width: 4),
                       Text(analisa.tingkatKerusakan.label,
                           style: TextStyle(
@@ -435,56 +465,91 @@ class _AnalisaCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
 
-            // ID
-            Text(
-              '#ANA-${analisa.id.substring(analisa.id.length > 8 ? analisa.id.length - 8 : 0).toUpperCase()}',
-              style: const TextStyle(
-                  color: Colors.grey, fontSize: 10, fontWeight: FontWeight.w500),
+            // ── No. Kerusakan + Nama Alat ─────────────────────────────────
+            Row(
+              children: [
+                Text(
+                  'No. ${analisa.noKerusakan}',
+                  style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(width: 8),
+                Text('·',
+                    style: TextStyle(
+                        color: Colors.grey.shade300, fontSize: 10)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    analisa.kodeAlat,
+                    style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 4),
 
-            // Judul laporan
-            Text(analisa.judulLaporan,
+            // Nama Alat (judul utama)
+            Text(analisa.namaAlat,
                 style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
                     color: _primary)),
-            const SizedBox(height: 6),
+            const SizedBox(height: 2),
 
-            // Diagnosa singkat
+            // Laporan terkait
             Text(
-              analisa.diagnosaMasalah,
+              'Laporan: ${analisa.judulLaporan}',
               style: TextStyle(
-                  color: Colors.grey[500], fontSize: 12, height: 1.4),
-              maxLines: 2,
+                  color: Colors.grey.shade500,
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic),
+              maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
 
-            // Meta info row
-            Wrap(
-              spacing: 12,
-              runSpacing: 4,
-              children: [
-                _metaItem(Icons.location_on_outlined,
-                    analisa.lokasiLaporan),
-                _metaItem(Icons.build_outlined,
-                    'Komponen: ${analisa.komponenRusak}'),
-                if (analisa.estimasiWaktuPerbaikanHari != null)
-                  _metaItem(Icons.schedule_outlined,
-                      '${analisa.estimasiWaktuPerbaikanHari} hari'),
-                if (analisa.estimasiBiaya != null)
-                  _metaItem(
-                    Icons.payments_outlined,
-                    _formatRupiah(analisa.estimasiBiaya!),
+            // ── Analisa Masalah (ringkasan) ───────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('ANALISA MASALAH',
+                      style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                          letterSpacing: 0.5)),
+                  const SizedBox(height: 4),
+                  Text(
+                    analisa.analisaMasalah,
+                    style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 12,
+                        height: 1.4),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
-            // Tindakan rekomendasi
+            // ── Rekomendasi Perbaikan ─────────────────────────────────────
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(10),
@@ -493,36 +558,83 @@ class _AnalisaCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: _primary.withOpacity(0.1)),
               ),
-              child: Row(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.recommend_outlined,
-                      size: 14, color: _primary),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      analisa.tindakanDirekomendasikan,
-                      style: const TextStyle(
-                          fontSize: 12,
-                          color: _primary,
-                          fontWeight: FontWeight.w500),
-                    ),
+                  Row(
+                    children: [
+                      const Icon(Icons.build_outlined,
+                          size: 11, color: _primary),
+                      const SizedBox(width: 4),
+                      const Text('REKOMENDASI PERBAIKAN',
+                          style: TextStyle(
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                              color: _primary,
+                              letterSpacing: 0.5)),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    analisa.rekomendasiPerbaikan,
+                    style: const TextStyle(
+                        fontSize: 12,
+                        color: _primary,
+                        fontWeight: FontWeight.w500),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 8),
 
+            // ── Rekomendasi Tempat ────────────────────────────────────────
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.location_on_outlined,
+                    size: 12, color: Colors.grey),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    analisa.rekomendasiTempatPerbaikan,
+                    style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 11),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // ── Meta info ─────────────────────────────────────────────────
+            Wrap(
+              spacing: 12,
+              runSpacing: 4,
+              children: [
+                _metaItem(Icons.tag, 'Inv: ${analisa.noInventaris}'),
+                if (analisa.estimasiWaktuPerbaikanHari != null)
+                  _metaItem(Icons.schedule_outlined,
+                      '${analisa.estimasiWaktuPerbaikanHari} hari'),
+                if (analisa.estimasiBiaya != null)
+                  _metaItem(Icons.payments_outlined,
+                      formatRupiah(analisa.estimasiBiaya)),
+              ],
+            ),
             const SizedBox(height: 10),
 
-            // Sync status + tanggal
+            // ── Footer: sync + tanggal ────────────────────────────────────
             Row(
               children: [
                 _SyncBadge(status: analisa.syncStatus),
                 const Spacer(),
                 Text(
                   _fmtDate(analisa.createdAt),
-                  style: const TextStyle(
-                      color: Colors.grey, fontSize: 11),
+                  style:
+                      const TextStyle(color: Colors.grey, fontSize: 11),
                 ),
               ],
             ),
@@ -536,7 +648,7 @@ class _AnalisaCard extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 12, color: Colors.grey),
+        Icon(icon, size: 11, color: Colors.grey),
         const SizedBox(width: 3),
         Text(text,
             style: const TextStyle(color: Colors.grey, fontSize: 11),
@@ -564,18 +676,6 @@ class _AnalisaCard extends StatelessWidget {
     }
   }
 
-  String _formatRupiah(double val) {
-    final s = val.toStringAsFixed(0);
-    final buf = StringBuffer();
-    int count = 0;
-    for (int i = s.length - 1; i >= 0; i--) {
-      if (count > 0 && count % 3 == 0) buf.write('.');
-      buf.write(s[i]);
-      count++;
-    }
-    return 'Rp ${buf.toString().split('').reversed.join()}';
-  }
-
   String _fmtDate(DateTime dt) {
     final diff = DateTime.now().difference(dt);
     if (diff.inMinutes < 60) return '${diff.inMinutes}m lalu';
@@ -595,7 +695,9 @@ class _SyncBadge extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
-          isSynced ? Icons.cloud_done_outlined : Icons.cloud_off_outlined,
+          isSynced
+              ? Icons.cloud_done_outlined
+              : Icons.cloud_off_outlined,
           size: 12,
           color: isSynced ? Colors.green : Colors.orange,
         ),

@@ -13,39 +13,58 @@ class AnalisaKerusakanController extends GetxController {
   final RxString errorMessage = ''.obs;
   final RxString filterKategori = 'semua'.obs;
 
-  // Form state (untuk FormAnalisaView)
+  // ── Form state (sesuai Formulir POLBAN) ───────────────────────────────────
   final Rx<LaporanSingkat?> selectedLaporan = Rx<LaporanSingkat?>(null);
-  final RxString diagnosaMasalah = ''.obs;
-  final RxString komponenRusak = ''.obs;
+
+  // Identitas alat
+  final Rx<DasarPemeriksaan> dasarPemeriksaan =
+      DasarPemeriksaan.keluhanPemakai.obs;
+  final RxString namaAlat = ''.obs;
+  final RxString kodeAlat = ''.obs;
+  final RxString noInventaris = ''.obs;
+  // lokasi otomatis dari laporan
+  final RxString noKerusakan = ''.obs;
+
+  // Isi formulir
+  final RxString analisaMasalah = ''.obs;
+  final RxString rekomendasiPerbaikan = ''.obs;
+  final RxString rekomendasiTempatPerbaikan = ''.obs;
+
+  // Metadata tambahan
   final Rx<KategoriKerusakan> kategoriKerusakan =
       KategoriKerusakan.hardware.obs;
   final Rx<TingkatKerusakan> tingkatKerusakan =
       TingkatKerusakan.sedang.obs;
-  final RxString tindakanDirekomendasikan = ''.obs;
-  final RxString catatanTambahan = ''.obs;
   final RxInt estimasiHari = 0.obs;
   final RxDouble estimasiBiaya = 0.0.obs;
+
   final RxBool isSubmitting = false.obs;
 
-  // TextEditingControllers (dibuat di sini agar bisa di-dispose)
-  late final TextEditingController diagnosaMasalahCtrl;
-  late final TextEditingController komponenRusakCtrl;
-  late final TextEditingController tindakanCtrl;
-  late final TextEditingController catatanCtrl;
+  // ── TextEditingControllers ────────────────────────────────────────────────
+  late final TextEditingController namaAlatCtrl;
+  late final TextEditingController kodeAlatCtrl;
+  late final TextEditingController noInventarisCtrl;
+  late final TextEditingController noKerusakanCtrl;
+  late final TextEditingController analisaMasalahCtrl;
+  late final TextEditingController rekomendasiPerbaikanCtrl;
+  late final TextEditingController rekomendasiTempatCtrl;
   late final TextEditingController estimasiHariCtrl;
   late final TextEditingController estimasiBiayaCtrl;
 
-  // Info teknisi yang login (sesuai user TKS001 dari info proyek)
+  // Info teknisi yang login
   final String teknisiId = 'user-tks001';
   final String teknisiName = 'Teknisi';
 
   @override
   void onInit() {
     super.onInit();
-    diagnosaMasalahCtrl = TextEditingController();
-    komponenRusakCtrl = TextEditingController();
-    tindakanCtrl = TextEditingController();
-    catatanCtrl = TextEditingController();
+    namaAlatCtrl = TextEditingController();
+    kodeAlatCtrl = TextEditingController();
+    noInventarisCtrl = TextEditingController();
+    noKerusakanCtrl = TextEditingController();
+    analisaMasalahCtrl = TextEditingController();
+    rekomendasiPerbaikanCtrl = TextEditingController();
+    rekomendasiTempatCtrl = TextEditingController();
     estimasiHariCtrl = TextEditingController();
     estimasiBiayaCtrl = TextEditingController();
     loadData();
@@ -53,10 +72,13 @@ class AnalisaKerusakanController extends GetxController {
 
   @override
   void onClose() {
-    diagnosaMasalahCtrl.dispose();
-    komponenRusakCtrl.dispose();
-    tindakanCtrl.dispose();
-    catatanCtrl.dispose();
+    namaAlatCtrl.dispose();
+    kodeAlatCtrl.dispose();
+    noInventarisCtrl.dispose();
+    noKerusakanCtrl.dispose();
+    analisaMasalahCtrl.dispose();
+    rekomendasiPerbaikanCtrl.dispose();
+    rekomendasiTempatCtrl.dispose();
     estimasiHariCtrl.dispose();
     estimasiBiayaCtrl.dispose();
     super.onClose();
@@ -88,10 +110,8 @@ class AnalisaKerusakanController extends GetxController {
         .toList();
   }
 
-  /// Laporan yang belum punya analisa
   List<LaporanSingkat> get laporanBelumDianalisa {
-    final sudahDianalisa =
-        analisaList.map((a) => a.laporanId).toSet();
+    final sudahDianalisa = analisaList.map((a) => a.laporanId).toSet();
     return laporanAktif
         .where((l) => !sudahDianalisa.contains(l.id))
         .toList();
@@ -100,14 +120,22 @@ class AnalisaKerusakanController extends GetxController {
   bool laporanSudahDianalisa(String laporanId) =>
       analisaList.any((a) => a.laporanId == laporanId);
 
+  // Lokasi diambil langsung dari laporan yang dipilih
+  String get lokasiDariLaporan =>
+      selectedLaporan.value?.lokasi ?? '';
+
   // ── Form ───────────────────────────────────────────────────────────────────
 
   void resetForm() {
     selectedLaporan.value = null;
-    diagnosaMasalahCtrl.clear();
-    komponenRusakCtrl.clear();
-    tindakanCtrl.clear();
-    catatanCtrl.clear();
+    dasarPemeriksaan.value = DasarPemeriksaan.keluhanPemakai;
+    namaAlatCtrl.clear();
+    kodeAlatCtrl.clear();
+    noInventarisCtrl.clear();
+    noKerusakanCtrl.clear();
+    analisaMasalahCtrl.clear();
+    rekomendasiPerbaikanCtrl.clear();
+    rekomendasiTempatCtrl.clear();
     estimasiHariCtrl.clear();
     estimasiBiayaCtrl.clear();
     kategoriKerusakan.value = KategoriKerusakan.hardware;
@@ -117,6 +145,10 @@ class AnalisaKerusakanController extends GetxController {
 
   void setLaporan(LaporanSingkat laporan) {
     selectedLaporan.value = laporan;
+  }
+
+  void setDasarPemeriksaan(DasarPemeriksaan d) {
+    dasarPemeriksaan.value = d;
   }
 
   void setKategoriKerusakan(KategoriKerusakan k) {
@@ -130,21 +162,36 @@ class AnalisaKerusakanController extends GetxController {
   // ── Submit ─────────────────────────────────────────────────────────────────
 
   Future<void> submitAnalisa() async {
-    // Validasi
     if (selectedLaporan.value == null) {
       _showError('Pilih laporan terlebih dahulu');
       return;
     }
-    if (diagnosaMasalahCtrl.text.trim().isEmpty) {
-      _showError('Isi diagnosa masalah');
+    if (namaAlatCtrl.text.trim().isEmpty) {
+      _showError('Isi nama alat');
       return;
     }
-    if (komponenRusakCtrl.text.trim().isEmpty) {
-      _showError('Isi komponen yang rusak');
+    if (kodeAlatCtrl.text.trim().isEmpty) {
+      _showError('Isi kode alat');
       return;
     }
-    if (tindakanCtrl.text.trim().isEmpty) {
-      _showError('Isi tindakan yang direkomendasikan');
+    if (noInventarisCtrl.text.trim().isEmpty) {
+      _showError('Isi nomor inventaris');
+      return;
+    }
+    if (noKerusakanCtrl.text.trim().isEmpty) {
+      _showError('Isi nomor kerusakan');
+      return;
+    }
+    if (analisaMasalahCtrl.text.trim().isEmpty) {
+      _showError('Isi analisa masalah');
+      return;
+    }
+    if (rekomendasiPerbaikanCtrl.text.trim().isEmpty) {
+      _showError('Isi rekomendasi perbaikan');
+      return;
+    }
+    if (rekomendasiTempatCtrl.text.trim().isEmpty) {
+      _showError('Isi rekomendasi tempat perbaikan');
       return;
     }
 
@@ -159,20 +206,24 @@ class AnalisaKerusakanController extends GetxController {
         teknisiId: teknisiId,
         teknisiName: teknisiName,
         judulLaporan: selectedLaporan.value!.judul,
-        lokasiLaporan: selectedLaporan.value!.lokasi,
         kategoriLaporan: selectedLaporan.value!.kategori,
-        diagnosaMasalah: diagnosaMasalahCtrl.text.trim(),
-        komponenRusak: komponenRusakCtrl.text.trim(),
+        dasarPemeriksaan: dasarPemeriksaan.value,
+        namaAlat: namaAlatCtrl.text.trim(),
+        kodeAlat: kodeAlatCtrl.text.trim(),
+        noInventaris: noInventarisCtrl.text.trim(),
+        lokasi: selectedLaporan.value!.lokasi,
+        noKerusakan: noKerusakanCtrl.text.trim(),
+        analisaMasalah: analisaMasalahCtrl.text.trim(),
+        rekomendasiPerbaikan: rekomendasiPerbaikanCtrl.text.trim(),
+        rekomendasiTempatPerbaikan: rekomendasiTempatCtrl.text.trim(),
         kategoriKerusakan: kategoriKerusakan.value,
         tingkatKerusakan: tingkatKerusakan.value,
-        tindakanDirekomendasikan: tindakanCtrl.text.trim(),
-        catatanTambahan: catatanCtrl.text.trim().isEmpty
-            ? null
-            : catatanCtrl.text.trim(),
         estimasiWaktuPerbaikanHari:
             int.tryParse(estimasiHariCtrl.text),
         estimasiBiaya: double.tryParse(
-            estimasiBiayaCtrl.text.replaceAll('.', '').replaceAll(',', '.')),
+            estimasiBiayaCtrl.text
+                .replaceAll('.', '')
+                .replaceAll(',', '.')),
         syncStatus: 'local',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -181,10 +232,10 @@ class AnalisaKerusakanController extends GetxController {
       // TODO: simpan ke MongoDB via service
       analisaList.insert(0, newAnalisa);
 
-      Get.back(); // kembali ke list
+      Get.back();
       Get.snackbar(
         'Berhasil',
-        'Analisa kerusakan berhasil disimpan',
+        'Formulir analisa kerusakan berhasil disimpan',
         backgroundColor: Colors.green.shade100,
         colorText: Colors.green.shade900,
         snackPosition: SnackPosition.BOTTOM,
