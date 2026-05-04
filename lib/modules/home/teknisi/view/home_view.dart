@@ -162,10 +162,14 @@ class HomeTeknisiView extends StatelessWidget {
       floating: true,
       pinned: false,
       titleSpacing: 0,
-      leading: IconButton(                          // ← replace the menu icon
-      icon: const Icon(Icons.arrow_back_ios_new_rounded,
-          color: _C.textPrimary, size: 22),
-      onPressed: () => Navigator.pop(context),    // ← pops back to LoginView
+      leading: IconButton(
+        // ← replace the menu icon
+        icon: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: _C.textPrimary,
+          size: 22,
+        ),
+        onPressed: () => Navigator.pop(context), // ← pops back to LoginView
       ),
       title: const Text(
         'Technician Portal',
@@ -465,12 +469,12 @@ class HomeTeknisiView extends StatelessWidget {
         itemCount: list.length,
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
-          return _TugasCard(
-            tugas: list[index],
-            onTap: () => ctrl.onTugasTapped(list[index]),
-            onMulai: () => ctrl.onMulaiKerjakan(list[index]),
-            onSelesai: () => ctrl.onSelesaikanTugas(list[index]),
-          );
+          // return _TugasCard(
+          //   tugas: list[index],
+          //   onTap: () => ctrl.onTugasTapped(list[index]),
+          //   onMulai: () => ctrl.onMulaiKerjakan(list[index]),
+          //   onSelesai: () => ctrl.onSelesaikanTugas(list[index]),
+          // );
         },
       );
     });

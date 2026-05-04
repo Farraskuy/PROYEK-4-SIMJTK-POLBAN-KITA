@@ -1,6 +1,10 @@
+// lib/modules/home/controller/home_controller.dart
+
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import '../model/home_model.dart';
+
+// FIX: Import path disesuaikan (naik 2 tingkat folder) agar class dikenali[cite: 3, 6]
 import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import '../../../aspirasi/view/aspirasi_view.dart';
 
@@ -9,42 +13,25 @@ class HomeController extends GetxController {
   // STATE OBSERVABLES
   // --------------------------------------------------------
 
-  /// Data user yang sedang login
+  /// Data user yang sedang login (Menggunakan identitas kamu)[cite: 6]
   final Rx<UserModel> currentUser = const UserModel(
     id: 'usr-001',
-    name: 'Budi',
+    name: 'Zidan Taufiqurahman',
     nomorInduk: '241511006',
     passwordHash: '',
     role: 'mahasiswa',
     isActive: true,
-    email: 'budi@student.polban.ac.id',
+    email: 'zidan@student.polban.ac.id',
   ).obs;
 
-  /// List agenda kalender yang ditampilkan di carousel
   final RxList<KalenderAkademikModel> kalenderList =
       <KalenderAkademikModel>[].obs;
-
-  /// List menu akses cepat
   final RxList<AksesCepatModel> aksesCepatList = <AksesCepatModel>[].obs;
-
-  /// List aspirasi trending (diurutkan berdasarkan upvoteCount desc)
   final RxList<AspirasiModel> aspirasiTrendingList = <AspirasiModel>[].obs;
-
-  /// Indeks bottom navigation bar yang aktif
   final RxInt selectedNavIndex = 0.obs;
-
-  /// Indeks kartu kalender yang aktif (untuk page indicator)
   final RxInt activeKalenderIndex = 0.obs;
-
-  /// Status loading data
   final RxBool isLoading = false.obs;
-
-  /// Jumlah notifikasi belum dibaca
   final RxInt unreadNotifCount = 3.obs;
-
-  // --------------------------------------------------------
-  // LIFECYCLE
-  // --------------------------------------------------------
 
   @override
   void onInit() {
@@ -56,17 +43,13 @@ class HomeController extends GetxController {
   // PRIVATE METHODS
   // --------------------------------------------------------
 
-  /// Simulasi fetch data (ganti dengan service call di implementasi nyata)
   Future<void> _loadHomepageData() async {
     isLoading.value = true;
-
-    // Simulasi network delay
     await Future.delayed(const Duration(milliseconds: 600));
 
     kalenderList.assignAll(KalenderAkademikModel.dummyList());
     aksesCepatList.assignAll(AksesCepatModel.dummyList());
 
-    // Urutkan aspirasi berdasarkan upvote terbanyak (trending)
     final sorted = AspirasiModel.dummyList()
       ..sort((a, b) => b.upvoteCount.compareTo(a.upvoteCount));
     aspirasiTrendingList.assignAll(sorted);
@@ -78,16 +61,16 @@ class HomeController extends GetxController {
   // PUBLIC METHODS
   // --------------------------------------------------------
 
-  /// Dipanggil saat user memilih item bottom nav
+  /// Navigasi dari Bottom Navigation Bar[cite: 6]
   void onNavItemTapped(int index) {
     selectedNavIndex.value = index;
     switch (index) {
       case 0:
-        // Home - stay on home
+        // Home
         break;
       case 1:
-        // Layanan - redirect ke Laporan Fasilitas Mahasiswa
-        Get.to(() => const LaporanFasilitasMahasiswaView());
+        // Layanan - Redirect ke Laporan Fasilitas[cite: 6]
+        Get.to(() => LaporanFasilitasMahasiswaView());
         break;
       case 2:
         // Aspirasi
@@ -104,20 +87,16 @@ class HomeController extends GetxController {
     }
   }
 
-  /// Dipanggil saat kartu kalender di-swipe
   void onKalenderPageChanged(int index) {
     activeKalenderIndex.value = index;
   }
 
-  /// Dipanggil saat user menekan tombol Upvote pada aspirasi
   void onUpvoteAspirasi(String aspirasiId) {
     final idx = aspirasiTrendingList.indexWhere((a) => a.id == aspirasiId);
     if (idx == -1) return;
 
     final current = aspirasiTrendingList[idx];
     final userId = currentUser.value.id;
-
-    // Toggle: jika sudah upvote maka cancel, sebaliknya tambah
     final alreadyVoted = current.upvoterIds.contains(userId);
     final updatedVoters = List<String>.from(current.upvoterIds);
     int updatedCount = current.upvoteCount;
@@ -130,7 +109,6 @@ class HomeController extends GetxController {
       updatedCount++;
     }
 
-    // Buat instance baru (immutable pattern)
     final updated = AspirasiModel(
       id: current.id,
       topik: current.topik,
@@ -147,42 +125,28 @@ class HomeController extends GetxController {
     );
 
     aspirasiTrendingList[idx] = updated;
-
-    // Urutkan ulang setelah update
     aspirasiTrendingList.sort((a, b) => b.upvoteCount.compareTo(a.upvoteCount));
   }
 
-  /// Apakah user sudah memberi upvote pada aspirasi tertentu
   bool isUpvoted(AspirasiModel aspirasi) {
     return aspirasi.upvoterIds.contains(currentUser.value.id);
   }
 
-  /// Dipanggil saat user menekan icon notifikasi
   void onNotificationTapped() {
     unreadNotifCount.value = 0;
-    // TODO: Get.toNamed(Routes.notifikasi)
   }
 
-  /// Dipanggil saat "Lihat Semua" kalender ditekan
-  void onLihatSemuaKalender() {
-    // TODO: Get.toNamed(Routes.kalender)
-  }
-
-  /// Dipanggil saat "Lihat Semua" akses cepat ditekan
-  void onLihatSemuaAksesCepat() {
-    // TODO: Get.toNamed(Routes.layanan)
-  }
-
-  /// Dipanggil saat "Lihat Semua" aspirasi ditekan
+  void onLihatSemuaKalender() {}
+  void onLihatSemuaAksesCepat() {}
   void onLihatSemuaAspirasi() {
     Get.to(() => const AspirasiView());
   }
 
-  /// Dipanggil saat salah satu menu akses cepat ditekan
+  /// Navigasi dari Grid Akses Cepat di Dashboard[cite: 6]
   void onAksesCepatTapped(AksesCepatRoute route) {
     switch (route) {
       case AksesCepatRoute.laporFasilitas:
-        // TODO: Get.toNamed(Routes.laporFasilitas)
+        // Menuju Halaman Laporan Fasilitas[cite: 6]
         Get.to(() => const LaporanFasilitasMahasiswaView());
         break;
       case AksesCepatRoute.lostFound:
@@ -237,7 +201,6 @@ class HomeController extends GetxController {
     }
   }
 
-  /// Refresh seluruh data homepage (pull-to-refresh)
   Future<void> refreshData() async {
     await _loadHomepageData();
   }

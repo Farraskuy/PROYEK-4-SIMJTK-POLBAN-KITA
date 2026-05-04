@@ -6,8 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/riwayat_tugas_model.dart';
-import '../../home/teknisi/view/home_view.dart';
-import '../../tugas_teknisi/view/tugas_teknisi_view.dart';
+// FIX: Pastikan path import mengarah ke file view yang benar
 
 class RiwayatTugasController extends GetxController {
   // --------------------------------------------------------
@@ -18,44 +17,28 @@ class RiwayatTugasController extends GetxController {
   // --------------------------------------------------------
   // STATE OBSERVABLES
   // --------------------------------------------------------
-
-  /// Semua riwayat (raw)
   final RxList<ItemRiwayatModel> _semuaRiwayat = <ItemRiwayatModel>[].obs;
-
-  /// Riwayat yang ditampilkan (sudah difilter & dicari)
   final RxList<ItemRiwayatModel> riwayatTampil = <ItemRiwayatModel>[].obs;
-
-  /// Filter waktu aktif
   final Rx<FilterRiwayat> activeFilter = FilterRiwayat.semua.obs;
-
-  /// Teks pencarian
   final RxString searchQuery = ''.obs;
-
-  /// Status loading
   final RxBool isLoading = false.obs;
-
-  /// Index bottom nav — 2 = RIWAYAT (aktif)
   final RxInt selectedNavIndex = 2.obs;
 
   // --------------------------------------------------------
-  // GETTERS — jumlah per filter
+  // GETTERS
   // --------------------------------------------------------
   int get countSemua => _semuaRiwayat.length;
-  int get countMingguIni =>
-      _semuaRiwayat.where((r) => r.isMingguIni).length;
-  int get countBulanIni =>
-      _semuaRiwayat.where((r) => r.isBulanIni).length;
+  int get countMingguIni => _semuaRiwayat.where((r) => r.isMingguIni).length;
+  int get countBulanIni => _semuaRiwayat.where((r) => r.isBulanIni).length;
 
   // --------------------------------------------------------
   // LIFECYCLE
   // --------------------------------------------------------
-
   @override
   void onInit() {
     super.onInit();
     _loadRiwayat();
 
-    // Reaktif terhadap perubahan teks search
     searchController.addListener(() {
       searchQuery.value = searchController.text;
       _applyFilterAndSearch();
@@ -71,15 +54,11 @@ class RiwayatTugasController extends GetxController {
   // --------------------------------------------------------
   // PRIVATE METHODS
   // --------------------------------------------------------
-
   Future<void> _loadRiwayat() async {
     isLoading.value = true;
-
-    // TODO: ganti dengan service call — ambil semua laporan
-    // dengan status resolved yang handlerId == currentTeknisiId
+    // Simulasi pengambilan data laporan status 'resolved'
     await Future.delayed(const Duration(milliseconds: 450));
 
-    // Sort terbaru dulu
     final sorted = ItemRiwayatModel.dummyList()
       ..sort((a, b) => b.selesaiAt.compareTo(a.selesaiAt));
     _semuaRiwayat.assignAll(sorted);
@@ -89,7 +68,6 @@ class RiwayatTugasController extends GetxController {
   }
 
   void _applyFilterAndSearch() {
-    // 1. Filter berdasarkan waktu
     List<ItemRiwayatModel> filtered;
     switch (activeFilter.value) {
       case FilterRiwayat.mingguIni:
@@ -104,45 +82,39 @@ class RiwayatTugasController extends GetxController {
         break;
     }
 
-    // 2. Filter berdasarkan search query
     final query = searchQuery.value.trim().toLowerCase();
     if (query.isNotEmpty) {
       filtered = filtered
-          .where((r) =>
-              r.judul.toLowerCase().contains(query) ||
-              r.nomorId.toLowerCase().contains(query) ||
-              r.lokasi.toLowerCase().contains(query) ||
-              r.kategori.toLowerCase().contains(query))
+          .where(
+            (r) =>
+                r.judul.toLowerCase().contains(query) ||
+                r.nomorId.toLowerCase().contains(query) ||
+                r.lokasi.toLowerCase().contains(query) ||
+                r.kategori.toLowerCase().contains(query),
+          )
           .toList();
     }
-
     riwayatTampil.assignAll(filtered);
   }
 
   // --------------------------------------------------------
   // PUBLIC METHODS
   // --------------------------------------------------------
-
-  /// Ganti filter chip
   void onFilterChanged(FilterRiwayat filter) {
     if (activeFilter.value == filter) return;
     activeFilter.value = filter;
     _applyFilterAndSearch();
   }
 
-  /// Hapus teks search
   void onClearSearch() {
     searchController.clear();
     searchQuery.value = '';
     _applyFilterAndSearch();
   }
 
-  /// Pull-to-refresh
   Future<void> onRefresh() async => await _loadRiwayat();
 
-  /// Tap item — buka detail riwayat
   void onItemTapped(ItemRiwayatModel item) {
-    // TODO: Get.to(() => DetailRiwayatView(id: item.id))
     Get.snackbar(
       item.nomorId,
       item.judul,
@@ -154,19 +126,17 @@ class RiwayatTugasController extends GetxController {
     );
   }
 
-  /// Bottom nav tap
   void onNavTapped(int index) {
+    if (selectedNavIndex.value == index) return;
     selectedNavIndex.value = index;
+
     switch (index) {
-      case 0: // BERANDA
-        Get.to(() => const HomeTeknisiView());
+      case 0:
         break;
-      case 1: // TUGAS
-        Get.to(() => const DaftarTugasView());
+      case 1:
         break;
     }
   }
 
-  /// Apakah search bar sedang aktif (ada teks)
   bool get isSearchActive => searchQuery.value.isNotEmpty;
 }

@@ -1,64 +1,52 @@
+// lib/modules/laporan_fasilitas/service/detail_laporan_fasilitas_service.dart
+
+import 'package:mongo_dart/mongo_dart.dart';
 import '../model/laporan_fasilitas_model.dart';
+import '../../../shared/services/mongodb_service.dart';
 
 class DetailLaporanFasilitasService {
-  // TODO: Ganti dengan Dio/http call ke API atau query Hive lokal
+  static const String collectionName = 'laporan_fasilitas';
 
-  Future<LaporanFasilitasModel> getLaporanById(String id) async {
-    await Future.delayed(const Duration(milliseconds: 300));
+  /// Mengambil data laporan secara spesifik berdasarkan ID (_id)
+  Future<LaporanFasilitasModel?> getLaporanById(String id) async {
+    try {
+      // Menggunakan fetch dengan filter selector pada field _id
+      final result = await MonggoDBServices().fetch(
+        collectionName,
+        where.eq('_id', id),
+      );
 
-    return LaporanFasilitasModel(
-      id: id,
-      judul: 'AC Central Mati Total & Meneteskan Air',
-      deskripsi:
-          'AC tiba-tiba mati saat sedang digunakan rapat. Ada rembesan air cukup deras dari celah ventilasi. Harap segera ditangani karena ruangan akan digunakan kembali siang ini.',
-      kategoriId: 'kat-003',
-      lokasiLabKelas: 'Ruang Rapat Eksekutif, Lt. 3 Gedung A',
-      fotoUrls: [],
-      status: StatusLaporan.inProgress,
-      prioritas: 'high',
-      pelaporNama: 'Bpk. Sudirman (Div. HRD)',
-      pelaporId: 'user-001',
-      handlerNama: 'Ahmad Sapri',
-      handlerId: 'teknisi-001',
-      estimasiSelesai: DateTime.now().add(const Duration(hours: 2)),
-      createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-      updatedAt: DateTime.now().subtract(const Duration(minutes: 20)),
-      riwayat: [
-        TindakanFasilitas(
-          id: 'tindakan-001',
-          laporanId: id,
-          aktorId: 'system',
-          aktivitas: 'Laporan Dibuat',
-          catatanPengerjaan: 'Laporan berhasil diterima oleh sistem.',
-          timestamp: DateTime.now().subtract(const Duration(hours: 1)),
-          aktorNama: 'Sistem',
-        ),
-        TindakanFasilitas(
-          id: 'tindakan-002',
-          laporanId: id,
-          aktorId: 'admin-001',
-          aktivitas: 'Ditugaskan ke Teknisi',
-          catatanPengerjaan:
-              'Teknisi Ahmad Sapri ditugaskan untuk menangani laporan ini.',
-          timestamp: DateTime.now().subtract(const Duration(minutes: 45)),
-          aktorNama: 'Admin',
-        ),
-        TindakanFasilitas(
-          id: 'tindakan-003',
-          laporanId: id,
-          aktorId: 'teknisi-001',
-          aktivitas: 'Sedang Diperbaiki',
-          catatanPengerjaan:
-              'Teknisi sedang melakukan pengecekan dan penggantian komponen di lokasi.',
-          timestamp: DateTime.now().subtract(const Duration(minutes: 20)),
-          aktorNama: 'Ahmad Sapri',
-        ),
-      ],
-    );
+      if (result.isNotEmpty) {
+        return LaporanFasilitasModel.fromJson(result.first);
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Gagal mengambil detail laporan: $e');
+    }
   }
 
+  /// Melakukan update pada teknisi_id dan status (delegasi)[cite: 8, 9]
   Future<void> delegasikanLaporan(String laporanId, String teknisiId) async {
-    // TODO: PATCH /laporan/{id}/delegasi
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      // Data yang di-update disesuaikan dengan skema snake_case[cite: 8]
+      final updateData = {
+        'teknisi_id': teknisiId,
+        'status': StatusLaporan.in_progress.value,
+        'updatedAt': DateTime.now().toIso8601String(),
+      };
+
+      await MonggoDBServices().updateOneByFilter(
+        collectionName,
+        where.eq('_id', laporanId),
+        updateData,
+      );
+    } catch (e) {
+      throw Exception('Gagal mendelegasikan laporan: $e');
+    }
   }
+
+  /* 
+  // [Komentar]: Kode lama yang menggunakan data dummy dihapus 
+  // agar sinkron dengan database MongoDB.
+  */
 }
