@@ -265,7 +265,7 @@ class AuthService {
                 await _saveUserSession(user);
 
                 await LogService.writeLog(
-                  'AUTH: Login website sukses dan akun tersinkron ke MongoDB (${profile['nim'] ?? username})',
+                  'AUTH: Login website sukses dan akun tersinkron ke MongoDB. Username: ${user.toString()}',
                   source: 'auth_service.dart',
                 );
 
