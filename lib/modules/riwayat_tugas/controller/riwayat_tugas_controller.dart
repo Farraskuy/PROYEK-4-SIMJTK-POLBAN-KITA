@@ -77,7 +77,6 @@ class RiwayatTugasController extends GetxController {
         filtered = _semuaRiwayat.where((r) => r.isBulanIni).toList();
         break;
       case FilterRiwayat.semua:
-      default:
         filtered = List.from(_semuaRiwayat);
         break;
     }

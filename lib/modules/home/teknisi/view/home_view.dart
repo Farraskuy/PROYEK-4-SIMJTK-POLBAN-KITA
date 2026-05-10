@@ -588,6 +588,7 @@ class HomeTeknisiView extends StatelessWidget {
           //   onMulai: () => ctrl.onMulaiKerjakan(list[index]),
           //   onSelesai: () => ctrl.onSelesaikanTugas(list[index]),
           // );
+          return const SizedBox.shrink();
         },
       );
     });

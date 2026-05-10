@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/view/home_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/fasilitas_controller.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/laporan_fasilitas_screen.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -132,18 +130,6 @@ class _LoginViewState extends State<LoginView> {
     );
   }
 
-  void _openAdminAccess() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ChangeNotifierProvider(
-          create: (_) => AdminFasilitasController(),
-          child: const AdminLaporanFasilitasScreen(),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,11 +165,11 @@ class _LoginViewState extends State<LoginView> {
                   child: const Text('Akses Mahasiswa'),
                 ),
                 const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _openAdminAccess,
-                  child: const Text('Masuk sebagai Admin'),
-                ),
-                const SizedBox(height: 12),
+                // ElevatedButton(
+                //   onPressed: _isLoading ? null : _openAdminAccess,
+                //   child: const Text('Masuk sebagai Admin'),
+                // ),
+                // const SizedBox(height: 12),
 
                 if (_isLoading) const CircularProgressIndicator(),
 

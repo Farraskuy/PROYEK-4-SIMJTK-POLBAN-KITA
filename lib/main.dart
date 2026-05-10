@@ -1,21 +1,20 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/log_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/role_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/user_credential_seeder.dart';
 
-import 'modules/login/view/login_view.dart';
+import 'modules/onboarding/view/onboarding_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final envFile = File('.env');
-  await dotenv.load(fileName: envFile.existsSync() ? '.env' : '.env.example');
+  await dotenv.load();
   AccessControlService.initSimjtkRoles();
 
   try {
@@ -82,9 +81,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           primary: const Color(0xFF1E3A5F),
         ),
         useMaterial3: true,
-        fontFamily: 'Roboto',
+        textTheme: GoogleFonts.poppinsTextTheme(),
+        primaryTextTheme: GoogleFonts.poppinsTextTheme(),
       ),
-      home: const LoginView(),
+      home: const OnboardingView(),
     );
   }
 }
