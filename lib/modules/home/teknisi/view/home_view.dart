@@ -7,7 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/home_controller.dart';
 import '../model/home_model.dart';
-
+import '../view/analisa_kerusakan_view.dart';
+import '../view/kontrol_barang_view.dart';
+import '../view/usulan_pemeliharaan_view.dart';
+import '../view/penghapusan_view.dart';
+import '../../../log_harian_teknis/view/log_harian_teknis_view.dart';
 // ============================================================
 // DESIGN TOKENS
 // ============================================================
@@ -95,6 +99,92 @@ Color _kategoriIconBg(String kategori) {
   }
 }
 
+
+// Widget section Modul Maintenance
+class ModulMaintenanceSection extends StatelessWidget {
+  const ModulMaintenanceSection({super.key});
+
+  static const _menus = [
+    {'label': 'Analisa\nKerusakan',   'icon': Icons.analytics_rounded,        'color': Color(0xFFE53935), 'route': 'analisa'},
+    {'label': 'Kontrol\nBarang/Alat', 'icon': Icons.inventory_2_outlined,      'color': Color(0xFF1565C0), 'route': 'kontrol'},
+    {'label': 'Usulan\nPemeliharaan', 'icon': Icons.build_circle_outlined,     'color': Color(0xFF2E7D32), 'route': 'pemeliharaan'},
+    {'label': 'Usulan\nPenghapusan',  'icon': Icons.delete_outline_rounded,    'color': Color(0xFFF57C00), 'route': 'penghapusan'},
+    {'label': 'Log\nHarian',          'icon': Icons.note_alt_outlined,         'color': Color(0xFF6A1B9A), 'route': 'log'},
+  ];
+
+  void _navigate(String route) {
+    switch (route) {
+      case 'analisa':
+        Get.to(() => const AnalisaKerusakanView());
+        break;
+      case 'kontrol':
+        Get.to(() => const DataKontrolBarangView());
+        break;
+      case 'pemeliharaan':
+        Get.to(() => const UsulanPemeliharaanView());
+        break;
+      case 'penghapusan':
+        Get.to(() => const UsulanPenghapusanView());
+        break;
+      case 'log':
+        Get.to(() => LogHarianTeknisView ());
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Modul Maintenance', 
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Color(0xFF1A1A2E))
+        ),
+        const SizedBox(height: 12),
+        GridView.count(
+          crossAxisCount: 5,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          children: _menus.map((m) {
+            final color = m['color'] as Color;
+            return GestureDetector(
+              onTap: () => _navigate(m['route'] as String),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: color.withOpacity(0.2)),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(m['icon'] as IconData, color: color, size: 22),
+                    const SizedBox(height: 4),
+                    Text(
+                      m['label'] as String,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 8.5, // Sedikit diperkecil agar pas di grid 5 kolom
+                        color: color, 
+                        fontWeight: FontWeight.w700, 
+                        height: 1.1
+                      )
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+
 // ============================================================
 // HOME TEKNISI VIEW
 // ============================================================
@@ -135,6 +225,9 @@ class HomeTeknisiView extends StatelessWidget {
                       _buildStatistik(ctrl),
                       const SizedBox(height: 28),
 
+                      const ModulMaintenanceSection(), 
+                      const SizedBox(height: 28),
+
                       // ---- TUGAS MENDESAK ----
                       _buildTugasMendesakHeader(),
                       const SizedBox(height: 12),
@@ -162,10 +255,14 @@ class HomeTeknisiView extends StatelessWidget {
       floating: true,
       pinned: false,
       titleSpacing: 0,
-      leading: IconButton(                          // ← replace the menu icon
-      icon: const Icon(Icons.arrow_back_ios_new_rounded,
-          color: _C.textPrimary, size: 22),
-      onPressed: () => Navigator.pop(context),    // ← pops back to LoginView
+      leading: IconButton(
+        // ← replace the menu icon
+        icon: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: _C.textPrimary,
+          size: 22,
+        ),
+        onPressed: () => Navigator.pop(context), // ← pops back to LoginView
       ),
       title: const Text(
         'Technician Portal',
@@ -420,6 +517,9 @@ class HomeTeknisiView extends StatelessWidget {
   // ============================================================
   // TUGAS MENDESAK HEADER
   // ============================================================
+  // ============================================================
+  // TUGAS MENDESAK HEADER
+  // ============================================================
   Widget _buildTugasMendesakHeader() {
     return Row(
       children: [
@@ -432,16 +532,33 @@ class HomeTeknisiView extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: const Color(0xFFFFEBEE),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(
-            Icons.warning_amber_rounded,
-            color: Color(0xFFD32F2F),
-            size: 18,
+        // MENGGANTI ICON STATIS MENJADI TOMBOL ANALISA
+        GestureDetector(
+          onTap: () => Get.to(() => const AnalisaKerusakanView()),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFEBEE),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: const [
+                Icon(
+                  Icons.analytics_rounded, // Icon yang lebih relevan untuk analisa
+                  color: Color(0xFFD32F2F),
+                  size: 16,
+                ),
+                SizedBox(width: 4),
+                Text(
+                  "Analisa",
+                  style: TextStyle(
+                    color: Color(0xFFD32F2F),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -465,12 +582,12 @@ class HomeTeknisiView extends StatelessWidget {
         itemCount: list.length,
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
-          return _TugasCard(
-            tugas: list[index],
-            onTap: () => ctrl.onTugasTapped(list[index]),
-            onMulai: () => ctrl.onMulaiKerjakan(list[index]),
-            onSelesai: () => ctrl.onSelesaikanTugas(list[index]),
-          );
+          // return _TugasCard(
+          //   tugas: list[index],
+          //   onTap: () => ctrl.onTugasTapped(list[index]),
+          //   onMulai: () => ctrl.onMulaiKerjakan(list[index]),
+          //   onSelesai: () => ctrl.onSelesaikanTugas(list[index]),
+          // );
         },
       );
     });

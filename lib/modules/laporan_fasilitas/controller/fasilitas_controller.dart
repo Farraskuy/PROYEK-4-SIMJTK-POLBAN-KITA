@@ -1,222 +1,62 @@
+// lib/modules/laporan_fasilitas/controller/fasilitas_controller.dart
+
 import 'package:flutter/material.dart';
-import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
+import 'package:get/get.dart';
 import '../model/laporan_fasilitas_model.dart';
+import '../service/laporan_fasilitas_service.dart';
 
-class AdminFasilitasController extends ChangeNotifier {
-  List<LaporanFasilitas> _allLaporan = [];
-  List<UserModel> _allTeknisi = [];
-  bool _isLoading = false;
-  String _errorMessage = '';
-  String _filterStatus = 'semua';
+class FasilitasController extends GetxController {
+  final LaporanFasilitasService _service = LaporanFasilitasService();
 
-  bool get isLoading => _isLoading;
-  String get errorMessage => _errorMessage;
-  String get filterStatus => _filterStatus;
-  List<UserModel> get allTeknisi => _allTeknisi;
+  // State untuk daftar laporan dan kategori
+  var listLaporan = <LaporanFasilitasModel>[].obs;
+  var isLoading = false.obs;
 
-  List<LaporanFasilitas> get filteredLaporan {
-    if (_filterStatus == 'semua') return _allLaporan;
-    if (_filterStatus == 'baru') {
-      return _allLaporan
-          .where((l) => l.status == StatusLaporan.pending)
-          .toList();
-    }
-    if (_filterStatus == 'ditugaskan') {
-      return _allLaporan
-          .where(
-            (l) =>
-                l.status == StatusLaporan.assigned ||
-                l.status == StatusLaporan.inProgress,
-          )
-          .toList();
-    }
-    return _allLaporan.where((l) => l.status.value == _filterStatus).toList();
+  // Master data untuk dropdown kategori sesuai skema kategori_fasilitas
+  var daftarKategori = <Map<String, dynamic>>[].obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    refreshData();
   }
 
-  int get totalLaporan => _allLaporan.length;
-  int get totalTeknisiAktif => _allTeknisi.where((t) => t.isActive).length;
-  int get laporanPending =>
-      _allLaporan.where((l) => l.status == StatusLaporan.pending).length;
-  int get laporanInProgress =>
-      _allLaporan.where((l) => l.status == StatusLaporan.inProgress).length;
-  int get laporanResolved =>
-      _allLaporan.where((l) => l.status == StatusLaporan.resolved).length;
-
-  Future<void> loadData() async {
-    _setLoading(true);
-    await Future.delayed(const Duration(milliseconds: 400)); // simulate load
-    _seedMockData();
-    _setLoading(false);
-  }
-
-  Future<bool> delegasikanLaporan({
-    required String laporanId,
-    required String teknisiId,
-    required String prioritas,
-    DateTime? deadline,
-    String? catatan,
-    required String adminId,
-    required String adminName,
-    required String teknisiName,
-  }) async {
+  /// Mengambil data terbaru dari service[cite: 7, 11]
+  Future<void> refreshData() async {
+    isLoading.value = true;
     try {
-      await Future.delayed(
-        const Duration(milliseconds: 800),
-      ); // simulate network
-
-      final idx = _allLaporan.indexWhere((l) => l.id == laporanId);
-      if (idx == -1) return false;
-
-      _allLaporan[idx].handlerId = teknisiId;
-      _allLaporan[idx].handlerName = teknisiName;
-      _allLaporan[idx].prioritas = PrioritasLaporan.fromValue(prioritas);
-      _allLaporan[idx].status = StatusLaporan.assigned;
-      _allLaporan[idx].estimasiSelesai = deadline;
-      _allLaporan[idx].updatedAt = DateTime.now();
-
-      notifyListeners();
-      return true;
+      final data = await _service.getAll();
+      listLaporan.assignAll(data);
     } catch (e) {
-      _errorMessage = 'Gagal mendelegasikan: $e';
-      notifyListeners();
-      return false;
+      Get.snackbar("Error", "Gagal menyegarkan data: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  Future<bool> tolakLaporan({
-    required String laporanId,
-    required String alasan,
-    required String adminId,
-    required String adminName,
-  }) async {
-    try {
-      await Future.delayed(const Duration(milliseconds: 600));
+  /// Mencari laporan berdasarkan ID (_id)[cite: 7, 8]
+  LaporanFasilitasModel? findLaporanById(String id) {
+    return listLaporan.firstWhereOrNull((l) => l.id == id);
+  }
 
-      final idx = _allLaporan.indexWhere((l) => l.id == laporanId);
-      if (idx == -1) return false;
+  /// Update status laporan (misal: membatalkan laporan)[cite: 8, 11]
+  Future<void> updateStatusLaporan(String id, StatusLaporan newStatus) async {
+    final index = listLaporan.indexWhere((l) => l.id == id);
+    if (index != -1) {
+      try {
+        final updatedLaporan = listLaporan[index];
+        updatedLaporan.status = newStatus;
+        updatedLaporan.updatedAt = DateTime.now();
 
-      _allLaporan[idx].status = StatusLaporan.rejected;
-      _allLaporan[idx].updatedAt = DateTime.now();
-
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _errorMessage = 'Gagal menolak laporan: $e';
-      notifyListeners();
-      return false;
+        await _service.update(updatedLaporan); // Sync ke MongoDB[cite: 7]
+        listLaporan[index] = updatedLaporan;
+        listLaporan.refresh();
+      } catch (e) {
+        Get.snackbar("Gagal", "Gagal memperbarui status: $e");
+      }
     }
   }
 
-  void setFilter(String status) {
-    _filterStatus = status;
-    notifyListeners();
-  }
-
-  void _setLoading(bool val) {
-    _isLoading = val;
-    notifyListeners();
-  }
-
-  void _seedMockData() {
-    final now = DateTime.now();
-
-    _allTeknisi = const [
-      UserModel(
-        id: 'user-t1',
-        nomorInduk: 'T-045',
-        name: 'Budi Santoso',
-        passwordHash: '',
-        email: 'budi@polban.ac.id',
-        role: 'teknisi',
-        isActive: true,
-      ),
-      UserModel(
-        id: 'user-t2',
-        nomorInduk: 'T-067',
-        name: 'Dedi Hermawan',
-        passwordHash: '',
-        email: 'dedi@polban.ac.id',
-        role: 'teknisi',
-        isActive: true,
-      ),
-      UserModel(
-        id: 'user-t3',
-        nomorInduk: 'T-089',
-        name: 'Siti Rahayu',
-        passwordHash: '',
-        email: 'siti@polban.ac.id',
-        role: 'teknisi',
-        isActive: true,
-      ),
-    ];
-
-    if (_allLaporan.isEmpty) {
-      _allLaporan = [
-        LaporanFasilitas(
-          id: 'lap-001',
-          judul: 'Projector Bracket Failure',
-          deskripsi:
-              'Braket proyektor di Auditorium Utama terlepas dari plafon dan membahayakan keselamatan.',
-          kategoriId: 'kat-5',
-          namaKategori: 'Proyektor',
-          lokasiLabKelas: 'Auditorium Utama, Gd. A',
-          fotoUrls: [],
-          status: 'pending',
-          prioritas: 'high',
-          pelaporId: 'mhs-001',
-          pelaporName: 'Kim y.teu',
-          createdAt: now.subtract(const Duration(hours: 2)),
-          updatedAt: now.subtract(const Duration(hours: 2)),
-        ),
-        LaporanFasilitas(
-          id: 'lap-002',
-          judul: 'AC Bocor di Ruang Dosen',
-          deskripsi: 'AC menetes air cukup deras, sudah terjadi 3 hari.',
-          kategoriId: 'kat-3',
-          namaKategori: 'AC & Pendingin',
-          lokasiLabKelas: 'Ruang Dosen 402, Gd. B',
-          fotoUrls: [],
-          status: 'assigned',
-          prioritas: 'medium',
-          pelaporId: 'mhs-002',
-          pelaporName: 'Rina Sari',
-          handlerId: 'user-t1',
-          handlerName: 'Budi Santoso',
-          createdAt: now.subtract(const Duration(days: 3)),
-          updatedAt: now.subtract(const Duration(days: 2)),
-        ),
-        LaporanFasilitas(
-          id: 'lap-003',
-          judul: 'Pintu Lab Komputer Rusak',
-          deskripsi: 'Engsel pintu patah, pintu tidak bisa ditutup rapat.',
-          kategoriId: 'kat-4',
-          namaKategori: 'Mebel',
-          lokasiLabKelas: 'Lab Komputer C, Gd. C',
-          fotoUrls: [],
-          status: 'pending',
-          prioritas: 'low',
-          pelaporId: 'mhs-003',
-          pelaporName: 'Ahmad',
-          createdAt: now.subtract(const Duration(days: 3)),
-          updatedAt: now.subtract(const Duration(days: 3)),
-        ),
-        LaporanFasilitas(
-          id: 'lap-004',
-          judul: 'AC Ruang Kelas 10A Rusak',
-          deskripsi:
-              'Pendingin ruangan tidak berfungsi sejak pagi hari, air menetes dari unit indoor.',
-          kategoriId: 'kat-3',
-          namaKategori: 'AC & Pendingin',
-          lokasiLabKelas: 'Gedung B, Lt.2',
-          fotoUrls: [],
-          status: 'pending',
-          prioritas: 'high',
-          pelaporId: 'mhs-004',
-          pelaporName: 'Dewi',
-          createdAt: now.subtract(const Duration(hours: 4)),
-          updatedAt: now.subtract(const Duration(hours: 4)),
-        ),
-      ];
-    }
-  }
+  // Komentar: Fungsi lama yang menggunakan 'lokasiLabKelas' atau 'fotoUrls'
+  // sudah digantikan oleh getter di model agar tetap aman.
 }

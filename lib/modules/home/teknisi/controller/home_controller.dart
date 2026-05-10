@@ -93,7 +93,7 @@ class HomeTeknisiController extends GetxController {
     // TODO: navigasi ke halaman lain
     switch (index) {
       case 1:
-        Get.to(() => const DaftarTugasView());
+        // Get.to(() => const DaftarTugasView());
         break;
       case 2:
         Get.to(() => const RiwayatTugasView());
@@ -108,14 +108,14 @@ class HomeTeknisiController extends GetxController {
 
   /// Tap pada kartu tugas mendesak → buka detail laporan
   /// Sesuai UC-07: Teknisi memperbarui status & tambah estimasi
-  void onTugasTapped(TugasTeknisiModel tugas) {
-    Get.to(
-      () => DetailLaporanFasilitasView(
-        laporanId: tugas.id,
-        role: RoleUser.staff, // Petugas teknisi
-      ),
-    );
-  }
+  // void onTugasTapped(TugasTeknisiModel tugas) {
+  //   Get.to(
+  //     () => DetailLaporanFasilitasView(
+  //       laporanId: tugas.id,
+  //       role: Role.teknisi, // Petugas teknisi
+  //     ),
+  //   );
+  // }
 
   /// Mulai kerjakan tugas — ubah status ke in_progress (UC-07)
   Future<void> onMulaiKerjakan(TugasTeknisiModel tugas) async {

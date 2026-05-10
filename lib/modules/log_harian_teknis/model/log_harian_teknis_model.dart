@@ -18,8 +18,6 @@ class LogHarianTeknisModel {
   final String id;
   final String teknisiId;
   final DateTime tanggal;
-  final String kegiatan;
-  final String lokasi;
   final String keterangan;
   final LogHarianSyncStatus syncStatus;
   final DateTime createdAt;
@@ -28,8 +26,6 @@ class LogHarianTeknisModel {
     required this.id,
     required this.teknisiId,
     required this.tanggal,
-    required this.kegiatan,
-    required this.lokasi,
     required this.keterangan,
     this.syncStatus = LogHarianSyncStatus.synced,
     required this.createdAt,
@@ -41,8 +37,6 @@ class LogHarianTeknisModel {
       teknisiId: (json['teknisi_id'] ?? json['teknisiId'] ?? '').toString(),
       tanggal: DateTime.tryParse((json['tanggal'] ?? '').toString()) ??
           DateTime.fromMillisecondsSinceEpoch(0),
-      kegiatan: (json['kegiatan'] ?? '').toString(),
-      lokasi: (json['lokasi'] ?? '').toString(),
       keterangan: (json['keterangan'] ?? '').toString(),
       syncStatus: LogHarianSyncStatus.fromValue(
         json['syncStatus'] ?? json['sync_status'],
@@ -59,8 +53,6 @@ class LogHarianTeknisModel {
       'teknisi_id': teknisiId,
       'teknisiId': teknisiId,
       'tanggal': tanggal.toIso8601String(),
-      'kegiatan': kegiatan,
-      'lokasi': lokasi,
       'keterangan': keterangan,
       'syncStatus': syncStatus.value,
       'createdAt': createdAt.toIso8601String(),
