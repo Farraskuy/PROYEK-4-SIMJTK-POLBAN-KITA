@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import '../model/usulan_pemeliharaan_model.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart'; // ⚠️ Import Service
 
 class UsulanPemeliharaanController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -12,17 +12,13 @@ class UsulanPemeliharaanController extends GetxController {
   final tahunAnggaranCtrl = TextEditingController();
   final pengelolaCtrl = TextEditingController();
 
-  // Setiap row = 1 item usulan
-  final RxList<Map<String, TextEditingController>> rows =
-      <Map<String, TextEditingController>>[].obs;
-
-  final RxList<UsulanPemeliharaanModel> dataList =
-      <UsulanPemeliharaanModel>[].obs;
+  final RxList<Map<String, TextEditingController>> rows = <Map<String, TextEditingController>>[].obs;
+  final RxList<UsulanPemeliharaanModel> dataList = <UsulanPemeliharaanModel>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    addRow(); // mulai dengan 1 baris kosong
+    addRow(); 
   }
 
   void addRow() {
@@ -45,41 +41,49 @@ class UsulanPemeliharaanController extends GetxController {
   Future<void> submit() async {
     if (!formKey.currentState!.validate()) return;
     isSubmitting.value = true;
-    await Future.delayed(const Duration(milliseconds: 400));
 
-    dataList.add(
-      UsulanPemeliharaanModel(
+    try {
+      String cleanTahunUsulan = tahunUsulanCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+      String cleanTahunAnggaran = tahunAnggaranCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+      final newUsulan = UsulanPemeliharaanModel(
         id: const Uuid().v4(),
-        teknisiId: 'TKS001', // TODO: ambil dari session
-        tahunUsulan: tahunUsulanCtrl.text,
-        tahunAnggaran: tahunAnggaranCtrl.text,
-        pengelolaData: pengelolaCtrl.text,
-        items: rows
-            .map(
-              (r) => UsulanPemeliharaanItem(
-                namaBarangAlat: r['nama']!.text,
-                spesifikasi: r['spesifikasi']!.text,
-                spesifikasiTeknis: r['kegiatan']!.text,
-                tingkatKerusakan: r['tingkat']!.text,
-                volume: r['vol']!.text,
-                satuan: r['sat']!.text,
-                hargaSatuan: r['harga']!.text,
-                jumlah: r['jumlah']!.text,
-              ),
-            )
-            .toList(),
-        createdAt: DateTime.now(),
-      ),
-    );
+        teknisiId: 'TKS001', 
+        tahunUsulan: int.tryParse(cleanTahunUsulan),
+        tahunAnggaran: int.tryParse(cleanTahunAnggaran),
+        pengelolaData: pengelolaCtrl.text.trim(),
+        items: rows.map((r) {
+          // Sanitasi yang memungkinkan titik/koma desimal untuk volume, tapi hanya angka untuk harga
+          String cleanVol = r['vol']!.text.replaceAll(RegExp(r'[^0-9\.]'), ''); 
+          String cleanHarga = r['harga']!.text.replaceAll(RegExp(r'[^0-9]'), '');
+          String cleanJumlah = r['jumlah']!.text.replaceAll(RegExp(r'[^0-9]'), '');
 
-    isSubmitting.value = false;
-    AppNavigator.pop();
-    Get.snackbar(
-      'Berhasil',
-      'Usulan pemeliharaan disimpan',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green.shade100,
-    );
+          return UsulanPemeliharaanItem(
+            namaBarangAlat: r['nama']!.text.trim(),
+            spesifikasi: r['spesifikasi']!.text.trim(),
+            spesifikasiTeknis: r['kegiatan']!.text.trim(),
+            tingkatKerusakan: r['tingkat']!.text.trim(),
+            volume: double.tryParse(cleanVol),
+            satuan: r['sat']!.text.trim(),
+            hargaSatuan: double.tryParse(cleanHarga),
+            jumlah: double.tryParse(cleanJumlah),
+          );
+        }).toList(),
+        createdAt: DateTime.now(),
+      );
+
+      final dbService = MonggoDBServices();
+      await dbService.ensureConnected();
+      await dbService.insertData('usulan_pemeliharaan', newUsulan.toJson());
+
+      dataList.add(newUsulan);
+      Get.back();
+      Get.snackbar('Berhasil', 'Usulan pemeliharaan disimpan ke Database', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green.shade100);
+    } catch (e) {
+      Get.snackbar('Gagal', 'Error: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red.shade100);
+    } finally {
+      isSubmitting.value = false;
+    }
   }
 
   @override

@@ -92,7 +92,7 @@ class HomeView extends StatelessWidget {
         );
       }),
 
-      bottomNavigationBar: _buildBottomNavBar(controller),
+      bottomNavigationBar: _buildBottomNavBar(controller, context),
     );
   }
 
@@ -108,7 +108,7 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavBar(HomeController controller) {
+  Widget _buildBottomNavBar(HomeController controller, BuildContext context) {
     const items = [
       AppNavItem(label: 'Home', icon: Icons.home_rounded),
       AppNavItem(label: 'Layanan', icon: Icons.grid_view_rounded),

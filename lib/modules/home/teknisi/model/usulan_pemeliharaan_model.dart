@@ -5,10 +5,10 @@ class UsulanPemeliharaanItem {
   final String spesifikasi;
   final String spesifikasiTeknis;
   final String tingkatKerusakan;
-  final String volume;
+  final double? volume;       // ⚠️ Typed as Double for fractions
   final String satuan;
-  final String hargaSatuan;
-  final String jumlah;
+  final double? hargaSatuan;  // ⚠️ Typed as Double for money
+  final double? jumlah;
 
   UsulanPemeliharaanItem({
     required this.namaBarangAlat,
@@ -36,11 +36,11 @@ class UsulanPemeliharaanItem {
 class UsulanPemeliharaanModel {
   final String id;
   final String teknisiId;
-  final String tahunUsulan;
-  final String tahunAnggaran;
+  final int? tahunUsulan;    // ⚠️ Typed as Integer
+  final int? tahunAnggaran;  // ⚠️ Typed as Integer
   final String pengelolaData;
   final List<UsulanPemeliharaanItem> items;
-  final String syncStatus; // 'local' | 'synced'
+  final String syncStatus;
   final DateTime createdAt;
 
   UsulanPemeliharaanModel({
@@ -50,7 +50,7 @@ class UsulanPemeliharaanModel {
     required this.tahunAnggaran,
     required this.pengelolaData,
     required this.items,
-    this.syncStatus = 'local',
+    this.syncStatus = 'synced',
     required this.createdAt,
   });
 
@@ -61,7 +61,7 @@ class UsulanPemeliharaanModel {
     'tahun_anggaran': tahunAnggaran,
     'pengelola_data': pengelolaData,
     'items': items.map((e) => e.toJson()).toList(),
-    'syncStatus': syncStatus,
-    'createdAt': createdAt.toIso8601String(),
+    'sync_Status': syncStatus,
+    'created_At': createdAt.toIso8601String(),
   };
 }

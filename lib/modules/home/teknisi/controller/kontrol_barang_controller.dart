@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/kontrol_barang_model.dart';
 import 'package:uuid/uuid.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
 
 class DataKontrolBarangController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -122,7 +121,7 @@ class DataKontrolBarangController extends GetxController {
 
     dataList.add(data);
     isSubmitting.value = false;
-    AppNavigator.pop();
+    Get.back();
     Get.snackbar(
       'Berhasil',
       'Data kontrol barang disimpan',

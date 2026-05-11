@@ -50,7 +50,7 @@ class AspirasiView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _C.surface,
-      appBar: _buildAppBar(ctrl),
+      appBar: _buildAppBar(ctrl, context),
       body: Obx(
         () => ctrl.showForm.value
             ? _AspirasiFormPage(ctrl: ctrl)
@@ -72,12 +72,12 @@ class AspirasiView extends StatelessWidget {
                 ),
               ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(ctrl),
+      bottomNavigationBar: _buildBottomNavBar(context, ctrl),
     );
   }
 
   // ---- APP BAR ----
-  PreferredSizeWidget _buildAppBar(AspirasiController ctrl) {
+  PreferredSizeWidget _buildAppBar(AspirasiController ctrl, BuildContext context) {
     return AppBar(
       backgroundColor: _C.white,
       elevation: 0,
@@ -147,7 +147,7 @@ class AspirasiView extends StatelessWidget {
   }
 
   // ---- BOTTOM NAV ----
-  Widget _buildBottomNavBar(AspirasiController ctrl) {
+  Widget _buildBottomNavBar(BuildContext context, AspirasiController ctrl) {
     const items = [
       {'label': 'Home', 'icon': Icons.home_rounded},
       {'label': 'Layanan', 'icon': Icons.grid_view_rounded},

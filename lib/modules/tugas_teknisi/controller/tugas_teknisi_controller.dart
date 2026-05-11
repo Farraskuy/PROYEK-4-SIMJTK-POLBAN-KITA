@@ -6,7 +6,6 @@ import '../model/tugas_teknisi_model.dart';
 import '../../laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import '../../laporan_fasilitas/view/selesaikan_tugas_view.dart';
 import '../../laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
 
 class DaftarTugasController extends GetxController {
   // --------------------------------------------------------
@@ -73,7 +72,7 @@ class DaftarTugasController extends GetxController {
 
   void onItemTapped(ItemTugasModel tugas) {
     // FIXED: Menggunakan role 'teknisi' agar sesuai dengan logika View
-    AppNavigator.push(
+    Get.to(
       DetailLaporanFasilitasView(laporanId: tugas.id, role: 'teknisi'),
     );
   }
@@ -81,7 +80,7 @@ class DaftarTugasController extends GetxController {
   void onSelesaikan(ItemTugasModel tugas) {
     // Konversi ItemTugas ke LaporanFasilitasModel untuk form penyelesaian
     final laporan = _convertToLaporanFasilitas(tugas);
-    AppNavigator.push(SelesaikanTugasView(laporan: laporan));
+    Get.to(SelesaikanTugasView(laporan: laporan));
   }
 
   /// Konversi ItemTugasModel ke LaporanFasilitasModel

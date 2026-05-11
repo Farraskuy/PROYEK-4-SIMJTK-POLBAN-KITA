@@ -105,7 +105,7 @@ class LaporFasilitasView extends StatelessWidget {
                 const SizedBox(height: 32),
 
                 // TOMBOL KIRIM
-                _buildSubmitButton(controller),
+                _buildSubmitButton(context, controller),
               ],
             ),
           ),
@@ -177,7 +177,7 @@ class LaporFasilitasView extends StatelessWidget {
     );
   }
 
-  Widget _buildSubmitButton(LaporFasilitasController controller) {
+  Widget _buildSubmitButton(BuildContext context, LaporFasilitasController controller) {
     return Obx(
       () => SizedBox(
         width: double.infinity,

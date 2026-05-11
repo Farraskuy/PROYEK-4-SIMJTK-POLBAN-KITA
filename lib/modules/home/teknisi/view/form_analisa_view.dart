@@ -18,7 +18,7 @@ class FormAnalisaView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _bg,
-      appBar: _buildAppBar(ctrl),
+      appBar: _buildAppBar(context, ctrl),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         child: Column(
@@ -91,11 +91,11 @@ class FormAnalisaView extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: _buildBottomBar(ctrl),
+      bottomNavigationBar: _buildBottomBar(context, ctrl),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(AnalisaKerusakanController ctrl) {
+  PreferredSizeWidget _buildAppBar(BuildContext context, AnalisaKerusakanController ctrl) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -338,7 +338,7 @@ class FormAnalisaView extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomBar(AnalisaKerusakanController ctrl) {
+  Widget _buildBottomBar(BuildContext context, AnalisaKerusakanController ctrl) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       decoration: BoxDecoration(
@@ -379,7 +379,7 @@ class FormAnalisaView extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: ctrl.isSubmitting.value
                     ? null
-                    : () => ctrl.submitAnalisa(context),
+                    : () => ctrl.submitAnalisa(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _primary,
                   foregroundColor: Colors.white,

@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import '../controller/analisa_kerusakan_controller.dart';
 import '../model/analisa_kerusakan_model.dart';
 import 'form_analisa_view.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
 
 class AnalisaKerusakanView extends StatelessWidget {
   const AnalisaKerusakanView({super.key});
@@ -100,7 +99,7 @@ class AnalisaKerusakanView extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           ctrl.resetForm();
-          AppNavigator.push(const FormAnalisaView());
+          Get.to(const FormAnalisaView());
         },
         backgroundColor: _primary,
         icon: const Icon(Icons.add, color: Colors.white),
@@ -118,7 +117,7 @@ class AnalisaKerusakanView extends StatelessWidget {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: _primary),
-        onPressed: () => AppNavigator.pop(),
+        onPressed: () => Get.back(),
       ),
       titleSpacing: 0,
       title: Row(
@@ -234,7 +233,7 @@ class AnalisaKerusakanView extends StatelessWidget {
       () => GestureDetector(
         onTap: () {
           ctrl.resetForm();
-          AppNavigator.push(const FormAnalisaView());
+          Get.to(const FormAnalisaView());
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

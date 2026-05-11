@@ -24,11 +24,11 @@ class PenghapusanItem {
 class PenghapusanModel {
   final String id;
   final String teknisiId;
-  final String tahunUsulanPenghapusan;
-  final String tahunAnggaran;
+  final int? tahunUsulanPenghapusan; // ⚠️ Typed as Integer
+  final int? tahunAnggaran;          // ⚠️ Typed as Integer
   final String pengelolaData;
   final List<PenghapusanItem> items;
-  final String syncStatus; // 'local' | 'synced'
+  final String syncStatus;
   final DateTime createdAt;
 
   PenghapusanModel({
@@ -38,7 +38,7 @@ class PenghapusanModel {
     required this.tahunAnggaran,
     required this.pengelolaData,
     required this.items,
-    this.syncStatus = 'local',
+    this.syncStatus = 'synced',
     required this.createdAt,
   });
 
@@ -49,7 +49,7 @@ class PenghapusanModel {
     'tahun_anggaran': tahunAnggaran,
     'pengelola_data': pengelolaData,
     'items': items.map((e) => e.toJson()).toList(),
-    'syncStatus': syncStatus,
-    'createdAt': createdAt.toIso8601String(),
+    'sync_Status': syncStatus,
+    'created_At': createdAt.toIso8601String(),
   };
 }

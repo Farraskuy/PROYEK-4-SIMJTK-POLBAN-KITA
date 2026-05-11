@@ -281,7 +281,7 @@ class HomeTeknisiView extends StatelessWidget {
                       const SizedBox(height: 28),
 
                       // ---- TUGAS MENDESAK ----
-                      _buildTugasMendesakHeader(),
+                      _buildTugasMendesakHeader(context),
                       const SizedBox(height: 12),
                       _buildTugasMendesakList(ctrl),
                       const SizedBox(height: 28),
@@ -293,7 +293,7 @@ class HomeTeknisiView extends StatelessWidget {
           ),
         );
       }),
-      bottomNavigationBar: _buildBottomNavBar(ctrl),
+      bottomNavigationBar: _buildBottomNavBar(ctrl, context),
     );
   }
 
@@ -540,7 +540,7 @@ class HomeTeknisiView extends StatelessWidget {
   // ============================================================
   // TUGAS MENDESAK HEADER
   // ============================================================
-  Widget _buildTugasMendesakHeader() {
+  Widget _buildTugasMendesakHeader(BuildContext context) {
     return Row(
       children: [
         const Text(
@@ -622,7 +622,7 @@ class HomeTeknisiView extends StatelessWidget {
   // ============================================================
   // BOTTOM NAV BAR
   // ============================================================
-  Widget _buildBottomNavBar(HomeTeknisiController ctrl) {
+  Widget _buildBottomNavBar(HomeTeknisiController ctrl, BuildContext context) {
     const items = [
       AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
       AppNavItem(label: 'Tugas', icon: Icons.assignment_rounded),

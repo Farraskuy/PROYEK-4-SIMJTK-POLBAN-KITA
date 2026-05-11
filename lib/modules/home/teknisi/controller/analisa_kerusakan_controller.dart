@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/analisa_kerusakan_model.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
 
 class AnalisaKerusakanController extends GetxController {
   // â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -227,7 +226,7 @@ class AnalisaKerusakanController extends GetxController {
       // TODO: simpan ke MongoDB via service
       analisaList.insert(0, newAnalisa);
 
-      AppNavigator.pop();
+      Get.back();
       Get.snackbar(
         'Berhasil',
         'Formulir analisa kerusakan berhasil disimpan',
