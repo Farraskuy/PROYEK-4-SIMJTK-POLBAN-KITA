@@ -24,11 +24,11 @@ class FormAnalisaView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Kop Formulir ────────────────────────────────────────────────
+            // â”€â”€ Kop Formulir â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             _buildFormHeader(),
             const SizedBox(height: 16),
 
-            // ── Pilih Laporan ────────────────────────────────────────────────
+            // â”€â”€ Pilih Laporan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             _buildSectionCard(
               title: 'Pilih Laporan',
               icon: Icons.assignment_outlined,
@@ -36,7 +36,7 @@ class FormAnalisaView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ── Identitas Alat ───────────────────────────────────────────────
+            // â”€â”€ Identitas Alat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             _buildSectionCard(
               title: 'Identitas Alat',
               icon: Icons.inventory_2_outlined,
@@ -44,19 +44,20 @@ class FormAnalisaView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ── Analisa Masalah ──────────────────────────────────────────────
+            // â”€â”€ Analisa Masalah â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             _buildSectionCard(
               title: 'Analisa Masalah',
               icon: Icons.search_outlined,
               child: _TextAreaField(
                 controller: ctrl.analisaMasalahCtrl,
-                hint: 'Tuliskan hasil diagnosa dan temuan teknis secara lengkap...',
+                hint:
+                    'Tuliskan hasil diagnosa dan temuan teknis secara lengkap...',
                 minLines: 5,
               ),
             ),
             const SizedBox(height: 12),
 
-            // ── Rekomendasi Perbaikan ────────────────────────────────────────
+            // â”€â”€ Rekomendasi Perbaikan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             _buildSectionCard(
               title: 'Rekomendasi Perbaikan',
               icon: Icons.build_outlined,
@@ -68,7 +69,7 @@ class FormAnalisaView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ── Rekomendasi Tempat Perbaikan ────────────────────────────────
+            // â”€â”€ Rekomendasi Tempat Perbaikan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             _buildSectionCard(
               title: 'Rekomendasi Tempat Perbaikan',
               icon: Icons.location_on_outlined,
@@ -80,7 +81,7 @@ class FormAnalisaView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ── Info Tambahan (opsional) ────────────────────────────────────
+            // â”€â”€ Info Tambahan (opsional) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             _buildSectionCard(
               title: 'Informasi Tambahan',
               icon: Icons.info_outline,
@@ -100,19 +101,24 @@ class FormAnalisaView extends StatelessWidget {
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: _primary),
-        onPressed: () => Get.back(),
+        onPressed: () => Navigator.pop(context),
       ),
       titleSpacing: 0,
       title: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Formulir Analisa',
-              style: TextStyle(
-                  color: _primary,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold)),
-          Text('Analisa Masalah Kerusakan',
-              style: TextStyle(color: Colors.grey, fontSize: 11)),
+          Text(
+            'Formulir Analisa',
+            style: TextStyle(
+              color: _primary,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            'Analisa Masalah Kerusakan',
+            style: TextStyle(color: Colors.grey, fontSize: 11),
+          ),
         ],
       ),
     );
@@ -127,9 +133,10 @@ class FormAnalisaView extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade300),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2)),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
@@ -145,7 +152,8 @@ class FormAnalisaView extends StatelessWidget {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     border: Border(
-                        right: BorderSide(color: Colors.grey.shade300)),
+                      right: BorderSide(color: Colors.grey.shade300),
+                    ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -157,15 +165,21 @@ class FormAnalisaView extends StatelessWidget {
                           color: _primary,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Icon(Icons.school,
-                            color: Colors.white, size: 28),
+                        child: const Icon(
+                          Icons.school,
+                          color: Colors.white,
+                          size: 28,
+                        ),
                       ),
                       const SizedBox(height: 4),
-                      const Text('POLBAN',
-                          style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              color: _primary)),
+                      const Text(
+                        'POLBAN',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: _primary,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -176,19 +190,25 @@ class FormAnalisaView extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text('JURUSAN TEKNIK KOMPUTER',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                color: _primary),
-                            textAlign: TextAlign.center),
+                        const Text(
+                          'JURUSAN TEKNIK KOMPUTER',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: _primary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                         const SizedBox(height: 2),
-                        const Text('POLITEKNIK NEGERI BANDUNG',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 11,
-                                color: _primary),
-                            textAlign: TextAlign.center),
+                        const Text(
+                          'POLITEKNIK NEGERI BANDUNG',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            color: _primary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ],
                     ),
                   ),
@@ -209,26 +229,33 @@ class FormAnalisaView extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     border: Border(
-                        right: BorderSide(color: Colors.grey.shade300)),
+                      right: BorderSide(color: Colors.grey.shade300),
+                    ),
                   ),
                   child: const Center(
-                    child: Text('FORMULIR',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 10,
-                            color: _primary)),
+                    child: Text(
+                      'FORMULIR',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                        color: _primary,
+                      ),
+                    ),
                   ),
                 ),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: const Center(
-                      child: Text('ANALISA MASALAH KERUSAKAN',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12,
-                              color: _primary),
-                          textAlign: TextAlign.center),
+                      child: Text(
+                        'ANALISA MASALAH KERUSAKAN',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                          color: _primary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
                 ),
@@ -253,24 +280,24 @@ class FormAnalisaView extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade200),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2)),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section header — mirip label tabel di surat
+          // Section header â€” mirip label tabel di surat
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
               color: _primary.withOpacity(0.05),
-              border: Border(
-                  bottom: BorderSide(color: Colors.grey.shade200)),
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
               borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(12)),
+                top: Radius.circular(12),
+              ),
             ),
             child: Row(
               children: [
@@ -279,32 +306,33 @@ class FormAnalisaView extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                      color: _primary,
-                      decoration: TextDecoration.underline),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: _primary,
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
                 if (isOptional) ...[
                   const SizedBox(width: 6),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 7, vertical: 2),
+                      horizontal: 7,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text('Opsional',
-                        style: TextStyle(
-                            fontSize: 9, color: Colors.grey)),
+                    child: const Text(
+                      'Opsional',
+                      style: TextStyle(fontSize: 9, color: Colors.grey),
+                    ),
                   ),
                 ],
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: child,
-          ),
+          Padding(padding: const EdgeInsets.all(14), child: child),
         ],
       ),
     );
@@ -317,71 +345,80 @@ class FormAnalisaView extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10,
-              offset: const Offset(0, -3)),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          ),
         ],
       ),
-      child: Obx(() => Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: ctrl.isSubmitting.value
-                      ? null
-                      : () {
-                          ctrl.resetForm();
-                          Get.back();
-                        },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: _primary,
-                    side: const BorderSide(color: _primary),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+      child: Obx(
+        () => Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: ctrl.isSubmitting.value
+                    ? null
+                    : () {
+                        ctrl.resetForm();
+                        Navigator.pop(context);
+                      },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: _primary,
+                  side: const BorderSide(color: _primary),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Text('Batal'),
                 ),
+                child: const Text('Batal'),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton(
-                  onPressed: ctrl.isSubmitting.value
-                      ? null
-                      : ctrl.submitAnalisa,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    elevation: 0,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: ElevatedButton(
+                onPressed: ctrl.isSubmitting.value
+                    ? null
+                    : () => ctrl.submitAnalisa(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: ctrl.isSubmitting.value
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2))
-                      : const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.save_outlined, size: 18),
-                            SizedBox(width: 8),
-                            Text('Simpan Formulir',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                          ],
+                  elevation: 0,
+                ),
+                child: ctrl.isSubmitting.value
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
                         ),
-                ),
+                      )
+                    : const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.save_outlined, size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            'Simpan Formulir',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
               ),
-            ],
-          )),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-// ── Laporan Picker ────────────────────────────────────────────────────────────
+// â”€â”€ Laporan Picker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _LaporanPicker extends StatelessWidget {
   final AnalisaKerusakanController ctrl;
@@ -402,8 +439,11 @@ class _LaporanPicker extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(Icons.check_circle_outline,
-                  color: Colors.green.shade600, size: 18),
+              Icon(
+                Icons.check_circle_outline,
+                color: Colors.green.shade600,
+                size: 18,
+              ),
               const SizedBox(width: 8),
               const Expanded(
                 child: Text(
@@ -431,21 +471,31 @@ class _LaporanPicker extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.assignment_turned_in_outlined,
-                      color: _primary, size: 16),
+                  const Icon(
+                    Icons.assignment_turned_in_outlined,
+                    color: _primary,
+                    size: 16,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(ctrl.selectedLaporan.value!.judul,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                                color: _primary)),
-                        Text(ctrl.selectedLaporan.value!.lokasi,
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 11)),
+                        Text(
+                          ctrl.selectedLaporan.value!.judul,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: _primary,
+                          ),
+                        ),
+                        Text(
+                          ctrl.selectedLaporan.value!.lokasi,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 11,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -454,12 +504,13 @@ class _LaporanPicker extends StatelessWidget {
             ),
 
           // Daftar laporan
-          ...belum.map((lap) => _LaporanTile(
-                laporan: lap,
-                isSelected:
-                    ctrl.selectedLaporan.value?.id == lap.id,
-                onTap: () => ctrl.setLaporan(lap),
-              )),
+          ...belum.map(
+            (lap) => _LaporanTile(
+              laporan: lap,
+              isSelected: ctrl.selectedLaporan.value?.id == lap.id,
+              onTap: () => ctrl.setLaporan(lap),
+            ),
+          ),
         ],
       );
     });
@@ -491,8 +542,9 @@ class _LaporanTile extends StatelessWidget {
           color: isSelected ? _primary.withOpacity(0.08) : Colors.grey.shade50,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-              color: isSelected ? _primary : Colors.grey.shade200,
-              width: isSelected ? 1.5 : 1),
+            color: isSelected ? _primary : Colors.grey.shade200,
+            width: isSelected ? 1.5 : 1,
+          ),
         ),
         child: Row(
           children: [
@@ -509,23 +561,32 @@ class _LaporanTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(laporan.judul,
-                      style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                          color: isSelected ? _primary : Colors.black87)),
+                  Text(
+                    laporan.judul,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      color: isSelected ? _primary : Colors.black87,
+                    ),
+                  ),
                   const SizedBox(height: 2),
                   Row(
                     children: [
-                      Icon(Icons.location_on_outlined,
-                          size: 11, color: Colors.grey.shade500),
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 11,
+                        color: Colors.grey.shade500,
+                      ),
                       const SizedBox(width: 2),
                       Expanded(
-                        child: Text(laporan.lokasi,
-                            style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.grey.shade500),
-                            overflow: TextOverflow.ellipsis),
+                        child: Text(
+                          laporan.lokasi,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey.shade500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),
@@ -539,7 +600,7 @@ class _LaporanTile extends StatelessWidget {
   }
 }
 
-// ── Identitas Alat Section ────────────────────────────────────────────────────
+// â”€â”€ Identitas Alat Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _IdentitasAlatSection extends StatelessWidget {
   final AnalisaKerusakanController ctrl;
@@ -552,105 +613,114 @@ class _IdentitasAlatSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Dasar Pemeriksaan ──────────────────────────────────────────────
+        // â”€â”€ Dasar Pemeriksaan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         _FormRow(
           label: 'Dasar Pemeriksaan',
-          child: Obx(() => Wrap(
-                spacing: 12,
-                children: DasarPemeriksaan.values.map((d) {
-                  final sel = ctrl.dasarPemeriksaan.value == d;
-                  return GestureDetector(
-                    onTap: () => ctrl.setDasarPemeriksaan(d),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Radio<DasarPemeriksaan>(
-                          value: d,
-                          groupValue: ctrl.dasarPemeriksaan.value,
-                          onChanged: (_) => ctrl.setDasarPemeriksaan(d),
-                          activeColor: _primary,
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          visualDensity: VisualDensity.compact,
+          child: Obx(
+            () => Wrap(
+              spacing: 12,
+              children: DasarPemeriksaan.values.map((d) {
+                final sel = ctrl.dasarPemeriksaan.value == d;
+                return GestureDetector(
+                  onTap: () => ctrl.setDasarPemeriksaan(d),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Radio<DasarPemeriksaan>(
+                        value: d,
+                        groupValue: ctrl.dasarPemeriksaan.value,
+                        onChanged: (_) => ctrl.setDasarPemeriksaan(d),
+                        activeColor: _primary,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      Text(
+                        d.label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: sel ? FontWeight.bold : FontWeight.normal,
+                          color: sel ? _primary : Colors.grey.shade700,
                         ),
-                        Text(d.label,
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: sel
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                color:
-                                    sel ? _primary : Colors.grey.shade700)),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              )),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
         ),
 
         const _FormDivider(),
 
-        // ── Nama Alat ──────────────────────────────────────────────────────
+        // â”€â”€ Nama Alat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         _FormRow(
           label: 'Nama Alat',
           child: _InlineTextField(
-              controller: ctrl.namaAlatCtrl,
-              hint: 'Contoh: Proyektor Epson EB-X41'),
+            controller: ctrl.namaAlatCtrl,
+            hint: 'Contoh: Proyektor Epson EB-X41',
+          ),
         ),
 
         const _FormDivider(),
 
-        // ── Kode Alat ──────────────────────────────────────────────────────
+        // â”€â”€ Kode Alat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         _FormRow(
           label: 'Kode Alat',
           child: _InlineTextField(
-              controller: ctrl.kodeAlatCtrl,
-              hint: 'Contoh: PRY-LAB-C-001'),
+            controller: ctrl.kodeAlatCtrl,
+            hint: 'Contoh: PRY-LAB-C-001',
+          ),
         ),
 
         const _FormDivider(),
 
-        // ── No. Inventaris ─────────────────────────────────────────────────
+        // â”€â”€ No. Inventaris â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         _FormRow(
           label: 'No. Inventaris',
           child: _InlineTextField(
-              controller: ctrl.noInventarisCtrl,
-              hint: 'Contoh: INV/2021/PRY/003'),
+            controller: ctrl.noInventarisCtrl,
+            hint: 'Contoh: INV/2021/PRY/003',
+          ),
         ),
 
         const _FormDivider(),
 
-        // ── Lokasi (otomatis dari laporan) ─────────────────────────────────
-        Obx(() => _FormRow(
-              label: 'Lokasi',
-              child: ctrl.selectedLaporan.value != null
-                  ? Text(
-                      ctrl.selectedLaporan.value!.lokasi,
-                      style: const TextStyle(
-                          fontSize: 13,
-                          color: _primary,
-                          fontWeight: FontWeight.w500),
-                    )
-                  : Text('— (pilih laporan terlebih dahulu)',
-                      style: TextStyle(
-                          fontSize: 12, color: Colors.grey.shade400)),
-            )),
+        // â”€â”€ Lokasi (otomatis dari laporan) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        Obx(
+          () => _FormRow(
+            label: 'Lokasi',
+            child: ctrl.selectedLaporan.value != null
+                ? Text(
+                    ctrl.selectedLaporan.value!.lokasi,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: _primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  )
+                : Text(
+                    'â€” (pilih laporan terlebih dahulu)',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade400),
+                  ),
+          ),
+        ),
 
         const _FormDivider(),
 
-        // ── No. Kerusakan ──────────────────────────────────────────────────
+        // â”€â”€ No. Kerusakan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         _FormRow(
           label: 'No. Kerusakan',
           child: _InlineTextField(
-              controller: ctrl.noKerusakanCtrl,
-              hint: 'Contoh: KRS-2024-0042'),
+            controller: ctrl.noKerusakanCtrl,
+            hint: 'Contoh: KRS-2024-0042',
+          ),
         ),
       ],
     );
   }
 }
 
-// ── Informasi Tambahan (opsional) ─────────────────────────────────────────────
+// â”€â”€ Informasi Tambahan (opsional) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _InfoTambahanSection extends StatelessWidget {
   final AnalisaKerusakanController ctrl;
@@ -664,89 +734,104 @@ class _InfoTambahanSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Kategori Kerusakan
-        const Text('Kategori Kerusakan',
-            style: TextStyle(fontSize: 12, color: Colors.grey)),
+        const Text(
+          'Kategori Kerusakan',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
         const SizedBox(height: 6),
-        Obx(() => Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: KategoriKerusakan.values.map((k) {
-                final sel = ctrl.kategoriKerusakan.value == k;
-                return GestureDetector(
-                  onTap: () => ctrl.setKategoriKerusakan(k),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: sel ? _primary : Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                          color: sel ? _primary : Colors.grey.shade200),
-                    ),
-                    child: Text(k.label,
-                        style: TextStyle(
-                            fontSize: 12,
-                            color:
-                                sel ? Colors.white : Colors.grey.shade600,
-                            fontWeight: sel
-                                ? FontWeight.bold
-                                : FontWeight.normal)),
+        Obx(
+          () => Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: KategoriKerusakan.values.map((k) {
+              final sel = ctrl.kategoriKerusakan.value == k;
+              return GestureDetector(
+                onTap: () => ctrl.setKategoriKerusakan(k),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 7,
                   ),
-                );
-              }).toList(),
-            )),
+                  decoration: BoxDecoration(
+                    color: sel ? _primary : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: sel ? _primary : Colors.grey.shade200,
+                    ),
+                  ),
+                  child: Text(
+                    k.label,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: sel ? Colors.white : Colors.grey.shade600,
+                      fontWeight: sel ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
 
         const SizedBox(height: 14),
 
         // Tingkat Kerusakan
-        const Text('Tingkat Kerusakan',
-            style: TextStyle(fontSize: 12, color: Colors.grey)),
+        const Text(
+          'Tingkat Kerusakan',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
         const SizedBox(height: 6),
-        Obx(() => Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: TingkatKerusakan.values.map((t) {
-                final sel = ctrl.tingkatKerusakan.value == t;
-                final color = _tingkatColor(t);
-                return GestureDetector(
-                  onTap: () => ctrl.setTingkatKerusakan(t),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 7),
-                    decoration: BoxDecoration(
-                      color:
-                          sel ? color.withOpacity(0.12) : Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                          color:
-                              sel ? color : Colors.grey.shade200,
-                          width: sel ? 1.5 : 1),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(t.label,
-                            style: TextStyle(
-                                fontSize: 12,
-                                color:
-                                    sel ? color : Colors.grey.shade600,
-                                fontWeight: sel
-                                    ? FontWeight.bold
-                                    : FontWeight.normal)),
-                        Text(t.deskripsi,
-                            style: TextStyle(
-                                fontSize: 9,
-                                color: sel
-                                    ? color.withOpacity(0.8)
-                                    : Colors.grey.shade400)),
-                      ],
+        Obx(
+          () => Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: TingkatKerusakan.values.map((t) {
+              final sel = ctrl.tingkatKerusakan.value == t;
+              final color = _tingkatColor(t);
+              return GestureDetector(
+                onTap: () => ctrl.setTingkatKerusakan(t),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 150),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 7,
+                  ),
+                  decoration: BoxDecoration(
+                    color: sel ? color.withOpacity(0.12) : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: sel ? color : Colors.grey.shade200,
+                      width: sel ? 1.5 : 1,
                     ),
                   ),
-                );
-              }).toList(),
-            )),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        t.label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: sel ? color : Colors.grey.shade600,
+                          fontWeight: sel ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      Text(
+                        t.deskripsi,
+                        style: TextStyle(
+                          fontSize: 9,
+                          color: sel
+                              ? color.withOpacity(0.8)
+                              : Colors.grey.shade400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
 
         const SizedBox(height: 14),
 
@@ -757,9 +842,10 @@ class _InfoTambahanSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Estimasi Hari',
-                      style:
-                          TextStyle(fontSize: 12, color: Colors.grey)),
+                  const Text(
+                    'Estimasi Hari',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                   const SizedBox(height: 6),
                   _InlineTextField(
                     controller: ctrl.estimasiHariCtrl,
@@ -775,9 +861,10 @@ class _InfoTambahanSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Estimasi Biaya',
-                      style:
-                          TextStyle(fontSize: 12, color: Colors.grey)),
+                  const Text(
+                    'Estimasi Biaya',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                   const SizedBox(height: 6),
                   _InlineTextField(
                     controller: ctrl.estimasiBiayaCtrl,
@@ -796,15 +883,19 @@ class _InfoTambahanSection extends StatelessWidget {
 
   Color _tingkatColor(TingkatKerusakan t) {
     switch (t) {
-      case TingkatKerusakan.ringan: return Colors.green;
-      case TingkatKerusakan.sedang: return Colors.orange;
-      case TingkatKerusakan.berat: return Colors.red;
-      case TingkatKerusakan.total: return Colors.red.shade900;
+      case TingkatKerusakan.ringan:
+        return Colors.green;
+      case TingkatKerusakan.sedang:
+        return Colors.orange;
+      case TingkatKerusakan.berat:
+        return Colors.red;
+      case TingkatKerusakan.total:
+        return Colors.red.shade900;
     }
   }
 }
 
-// ── Helper Widgets ────────────────────────────────────────────────────────────
+// â”€â”€ Helper Widgets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 /// Row dengan label kiri (seperti tabel surat) + konten kanan
 class _FormRow extends StatelessWidget {
@@ -825,13 +916,16 @@ class _FormRow extends StatelessWidget {
             child: Text(
               label,
               style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w500),
+                fontSize: 12,
+                color: Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
-          const Text(': ',
-              style: TextStyle(fontSize: 12, color: Colors.black54)),
+          const Text(
+            ': ',
+            style: TextStyle(fontSize: 12, color: Colors.black54),
+          ),
           Expanded(child: child),
         ],
       ),
@@ -872,24 +966,19 @@ class _InlineTextField extends StatelessWidget {
       style: const TextStyle(fontSize: 13),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle:
-            TextStyle(fontSize: 12, color: Colors.grey.shade400),
+        hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade400),
         prefixText: prefix != null ? '$prefix ' : null,
         prefixStyle: const TextStyle(fontSize: 13, color: Colors.black54),
         suffixText: suffix,
-        suffixStyle:
-            const TextStyle(fontSize: 12, color: Colors.grey),
+        suffixStyle: const TextStyle(fontSize: 12, color: Colors.grey),
         isDense: true,
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
+        contentPadding: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
         border: InputBorder.none,
         enabledBorder: UnderlineInputBorder(
-          borderSide:
-              BorderSide(color: Colors.grey.shade300, width: 1),
+          borderSide: BorderSide(color: Colors.grey.shade300, width: 1),
         ),
         focusedBorder: const UnderlineInputBorder(
-          borderSide:
-              BorderSide(color: Color(0xFF1E3A5F), width: 1.5),
+          borderSide: BorderSide(color: Color(0xFF1E3A5F), width: 1.5),
         ),
       ),
     );
@@ -918,8 +1007,7 @@ class _TextAreaField extends StatelessWidget {
       style: const TextStyle(fontSize: 13, height: 1.6),
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle:
-            TextStyle(fontSize: 12, color: Colors.grey.shade400),
+        hintStyle: TextStyle(fontSize: 12, color: Colors.grey.shade400),
         isDense: true,
         contentPadding: EdgeInsets.zero,
         border: InputBorder.none,

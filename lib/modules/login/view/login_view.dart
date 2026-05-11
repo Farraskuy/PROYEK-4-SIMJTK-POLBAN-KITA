@@ -134,7 +134,6 @@ class _LoginViewState extends State<LoginView> {
                           prefixIcon: Icons.person_outline,
                           hintText: 'Masukkan nomor identitas',
                           enabled: !_isLoading,
-                          keyboardType: TextInputType.number,
                         ),
                         const SizedBox(height: 24),
                         AppTextField(

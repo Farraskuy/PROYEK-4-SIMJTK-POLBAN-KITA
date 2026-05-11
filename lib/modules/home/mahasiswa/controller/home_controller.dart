@@ -1,5 +1,6 @@
 // lib/modules/home/controller/home_controller.dart
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import '../model/home_model.dart';
@@ -62,7 +63,7 @@ class HomeController extends GetxController {
   // --------------------------------------------------------
 
   /// Navigasi dari Bottom Navigation Bar[cite: 6]
-  void onNavItemTapped(int index) {
+  void onNavItemTapped(BuildContext context, int index) {
     selectedNavIndex.value = index;
     switch (index) {
       case 0:
@@ -70,11 +71,19 @@ class HomeController extends GetxController {
         break;
       case 1:
         // Layanan - Redirect ke Laporan Fasilitas[cite: 6]
-        Get.to(() => LaporanFasilitasMahasiswaView());
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LaporanFasilitasMahasiswaView(),
+          ),
+        );
         break;
       case 2:
         // Aspirasi
-        Get.to(() => const AspirasiView());
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AspirasiView()),
+        );
         break;
       case 3:
         // Profil
@@ -138,16 +147,24 @@ class HomeController extends GetxController {
 
   void onLihatSemuaKalender() {}
   void onLihatSemuaAksesCepat() {}
-  void onLihatSemuaAspirasi() {
-    Get.to(() => const AspirasiView());
+  void onLihatSemuaAspirasi(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AspirasiView()),
+    );
   }
 
   /// Navigasi dari Grid Akses Cepat di Dashboard[cite: 6]
-  void onAksesCepatTapped(AksesCepatRoute route) {
+  void onAksesCepatTapped(BuildContext context, AksesCepatRoute route) {
     switch (route) {
       case AksesCepatRoute.laporFasilitas:
         // Menuju Halaman Laporan Fasilitas[cite: 6]
-        Get.to(() => const LaporanFasilitasMahasiswaView());
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LaporanFasilitasMahasiswaView(),
+          ),
+        );
         break;
       case AksesCepatRoute.lostFound:
         Get.snackbar(

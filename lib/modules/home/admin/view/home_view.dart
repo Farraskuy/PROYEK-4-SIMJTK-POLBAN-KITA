@@ -1,12 +1,16 @@
 // ============================================================
 // FILE: modules/admin/dashboard/view/admin_dashboard_view.dart
-// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
+// Kelompok A7 â€“ SIMJTK (Sistem Informasi Mahasiswa JTK)
 // ============================================================
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/home_controller.dart';
 import '../model/home_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_dashboard_components.dart';
 
 // ============================================================
 // DESIGN TOKENS
@@ -108,66 +112,14 @@ class AdminDashboardView extends StatelessWidget {
   // ============================================================
   // SLIVER APP BAR
   // ============================================================
-  SliverAppBar _buildSliverAppBar(AdminDashboardController ctrl) {
-    return SliverAppBar(
-      backgroundColor: _C.white,
-      elevation: 0,
-      floating: true,
-      pinned: false,
-      titleSpacing: 0,
-      title: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            // Avatar admin
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: _C.primary,
-              child: const Icon(Icons.admin_panel_settings_rounded,
-                  color: Colors.white, size: 20),
-            ),
-            const SizedBox(width: 10),
-            const Expanded(
-              child: Text(
-                'Institution Admin',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: _C.textPrimary,
-                ),
-              ),
-            ),
-            // Notifikasi
-            Obx(() => Stack(
-                  children: [
-                    IconButton(
-                      onPressed: ctrl.onNotifikasiTapped,
-                      icon: const Icon(Icons.notifications_outlined,
-                          color: _C.textPrimary, size: 26),
-                    ),
-                    if (ctrl.unreadNotif.value > 0)
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          width: 16,
-                          height: 16,
-                          decoration: const BoxDecoration(
-                              color: Colors.red, shape: BoxShape.circle),
-                          alignment: Alignment.center,
-                          child: Text(
-                            '${ctrl.unreadNotif.value}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                  ],
-                )),
-          ],
-        ),
+  Widget _buildSliverAppBar(AdminDashboardController ctrl) {
+    return Obx(
+      () => AppHomeAppBar(
+        title: 'Institution Admin',
+        subtitle: ctrl.currentAdmin.value.name,
+        avatarIcon: Icons.admin_panel_settings_rounded,
+        unreadCount: ctrl.unreadNotif.value,
+        onNotificationTap: ctrl.onNotifikasiTapped,
       ),
     );
   }
@@ -190,15 +142,17 @@ class AdminDashboardView extends StatelessWidget {
         ),
         const SizedBox(height: 4),
 
-        Obx(() => Text(
-              ctrl.currentAdmin.value.name,
-              style: const TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w800,
-                color: _C.textPrimary,
-                height: 1.1,
-              ),
-            )),
+        Obx(
+          () => Text(
+            ctrl.currentAdmin.value.name,
+            style: const TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: _C.textPrimary,
+              height: 1.1,
+            ),
+          ),
+        ),
         const SizedBox(height: 4),
         const Text(
           'Ringkasan aktivitas institusi hari ini.',
@@ -302,8 +256,11 @@ class AdminDashboardView extends StatelessWidget {
                 color: Colors.white.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.description_outlined,
-                  color: Colors.white, size: 24),
+              child: const Icon(
+                Icons.description_outlined,
+                color: Colors.white,
+                size: 24,
+              ),
             ),
           ],
         ),
@@ -326,8 +283,8 @@ class AdminDashboardView extends StatelessWidget {
               icon: Icons.engineering_rounded,
               label: 'Teknisi Aktif',
               value: '${r.teknisiAktif}',
-              iconColor: _C.primaryLight,
-              iconBg: _C.tindakanBg,
+              color: AppColors.primaryLight,
+              backgroundColor: AppColors.blueSoft,
             ),
           ),
           const SizedBox(width: 12),
@@ -336,8 +293,8 @@ class AdminDashboardView extends StatelessWidget {
               icon: Icons.pending_actions_rounded,
               label: 'Aspirasi Tertunda',
               value: '${r.aspirasiTertunda}',
-              iconColor: const Color(0xFFE65100),
-              iconBg: const Color(0xFFFFF3E0),
+              color: AppColors.warning,
+              backgroundColor: AppColors.orangeSoft,
             ),
           ),
         ],
@@ -368,22 +325,24 @@ class AdminDashboardView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Obx(() => Row(
-              children: ctrl.tindakanCepatList.map((item) {
-                return Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      right: ctrl.tindakanCepatList.last == item ? 0 : 10,
-                    ),
-                    child: _TindakanCepatButton(
-                      label: item.label,
-                      icon: iconMap[item.type] ?? Icons.flash_on_rounded,
-                      onTap: () => ctrl.onTindakanCepatTapped(item.type),
-                    ),
+        Obx(
+          () => Row(
+            children: ctrl.tindakanCepatList.map((item) {
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: ctrl.tindakanCepatList.last == item ? 0 : 10,
                   ),
-                );
-              }).toList(),
-            )),
+                  child: _TindakanCepatButton(
+                    label: item.label,
+                    icon: iconMap[item.type] ?? Icons.flash_on_rounded,
+                    onTap: () => ctrl.onTindakanCepatTapped(item.type),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
       ],
     );
   }
@@ -422,76 +381,38 @@ class AdminDashboardView extends StatelessWidget {
   // AKTIVITAS LIST
   // ============================================================
   Widget _buildAktivitasList(AdminDashboardController ctrl) {
-    return Obx(() => ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: ctrl.aktivitasList.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
-          itemBuilder: (context, index) {
-            final item = ctrl.aktivitasList[index];
-            return _AktivitasCard(
-              aktivitas: item,
-              onTap: () => ctrl.onAktivitasTapped(item),
-            );
-          },
-        ));
+    return Obx(
+      () => ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: ctrl.aktivitasList.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 10),
+        itemBuilder: (context, index) {
+          final item = ctrl.aktivitasList[index];
+          return _AktivitasCard(
+            aktivitas: item,
+            onTap: () => ctrl.onAktivitasTapped(item),
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildBottomNavBar(AdminDashboardController ctrl) {
-    final items = AdminNavItemModel.items();
-    final icons = [
-      Icons.dashboard_rounded,
-      Icons.apartment_rounded,
-      Icons.campaign_rounded,
-      Icons.group_rounded,
+    const items = [
+      AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
+      AppNavItem(label: 'Layanan', icon: Icons.apartment_rounded),
+      AppNavItem(label: 'Aspirasi', icon: Icons.campaign_rounded),
+      AppNavItem(label: 'User', icon: Icons.group_rounded),
     ];
 
-    return Obx(() => Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-          ),
-          child: SafeArea(
-            child: SizedBox(
-              height: 60,
-              child: Row(
-                children: List.generate(items.length, (i) {
-                  final active = ctrl.selectedNavIndex.value == i;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => ctrl.onNavTapped(i),
-                      behavior: HitTestBehavior.opaque,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            icons[i],
-                            size: 24,
-                            color: active
-                                ? _C.navActive
-                                : _C.navInactive,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            items[i].label,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: active
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: active
-                                  ? _C.navActive
-                                  : _C.navInactive,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ),
-        ));
+    return Obx(
+      () => AppBottomNavBar(
+        items: items,
+        selectedIndex: ctrl.selectedNavIndex.value,
+        onTap: ctrl.onNavTapped,
+      ),
+    );
   }
 
   // ---- HELPER ----
@@ -540,11 +461,20 @@ class _LaporanProgressBar extends StatelessWidget {
         const SizedBox(height: 6),
         Row(
           children: [
-            _LegendDot(color: Colors.greenAccent, label: 'Selesai ${stat.laporanResolved}'),
+            _LegendDot(
+              color: Colors.greenAccent,
+              label: 'Selesai ${stat.laporanResolved}',
+            ),
             const SizedBox(width: 10),
-            _LegendDot(color: Colors.amberAccent, label: 'Proses ${stat.laporanInProgress}'),
+            _LegendDot(
+              color: Colors.amberAccent,
+              label: 'Proses ${stat.laporanInProgress}',
+            ),
             const SizedBox(width: 10),
-            _LegendDot(color: Colors.orangeAccent, label: 'Pending ${stat.laporanPending}'),
+            _LegendDot(
+              color: Colors.orangeAccent,
+              label: 'Pending ${stat.laporanPending}',
+            ),
           ],
         ),
       ],
@@ -556,8 +486,11 @@ class _BarItem extends StatelessWidget {
   final String label;
   final double value;
   final Color color;
-  const _BarItem(
-      {required this.label, required this.value, required this.color});
+  const _BarItem({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -587,13 +520,13 @@ class _LegendDot extends StatelessWidget {
         Container(
           width: 7,
           height: 7,
-          decoration:
-              BoxDecoration(color: color, shape: BoxShape.circle),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
-        Text(label,
-            style: const TextStyle(
-                color: Colors.white60, fontSize: 10)),
+        Text(
+          label,
+          style: const TextStyle(color: Colors.white60, fontSize: 10),
+        ),
       ],
     );
   }
@@ -602,72 +535,14 @@ class _LegendDot extends StatelessWidget {
 // ============================================================
 // WIDGET: Kartu Ringkasan Kecil
 // ============================================================
-class _RingkasanCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color iconColor;
-  final Color iconBg;
-
+class _RingkasanCard extends AppStatCard {
   const _RingkasanCard({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.iconColor,
-    required this.iconBg,
+    required super.icon,
+    required super.label,
+    required super.value,
+    required super.color,
+    required super.backgroundColor,
   });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: _C.cardBg,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _C.divider, width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 20, color: iconColor),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: _C.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              color: _C.textPrimary,
-              height: 1.1,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ============================================================
@@ -699,7 +574,7 @@ class _TindakanCepatButton extends StatelessWidget {
               color: Colors.black.withOpacity(0.04),
               blurRadius: 6,
               offset: const Offset(0, 2),
-            )
+            ),
           ],
         ),
         child: Column(
@@ -802,7 +677,7 @@ class _AktivitasCard extends StatelessWidget {
               color: Colors.black.withOpacity(0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
-            )
+            ),
           ],
         ),
         child: Row(

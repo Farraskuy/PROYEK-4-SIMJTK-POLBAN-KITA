@@ -1,6 +1,6 @@
 // ============================================================
 // FILE: modules/aspirasi/view/aspirasi_view.dart
-// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
+// Kelompok A7 â€“ SIMJTK (Sistem Informasi Mahasiswa JTK)
 // ============================================================
 
 import 'package:flutter/material.dart';
@@ -39,7 +39,7 @@ class _C {
 }
 
 // ============================================================
-// ASPIRASI VIEW — Entry Point
+// ASPIRASI VIEW â€” Entry Point
 // ============================================================
 class AspirasiView extends StatelessWidget {
   const AspirasiView({super.key});
@@ -51,19 +51,27 @@ class AspirasiView extends StatelessWidget {
     return Scaffold(
       backgroundColor: _C.surface,
       appBar: _buildAppBar(ctrl),
-      body: Obx(() => ctrl.showForm.value
-          ? _AspirasiFormPage(ctrl: ctrl)
-          : _AspirasiListPage(ctrl: ctrl)),
-      floatingActionButton: Obx(() => ctrl.showForm.value
-          ? const SizedBox.shrink()
-          : FloatingActionButton.extended(
-              onPressed: ctrl.onTambahAspirasi,
-              backgroundColor: _C.primary,
-              icon: const Icon(Icons.edit_rounded, color: Colors.white),
-              label: const Text('Tulis Aspirasi',
+      body: Obx(
+        () => ctrl.showForm.value
+            ? _AspirasiFormPage(ctrl: ctrl)
+            : _AspirasiListPage(ctrl: ctrl),
+      ),
+      floatingActionButton: Obx(
+        () => ctrl.showForm.value
+            ? const SizedBox.shrink()
+            : FloatingActionButton.extended(
+                onPressed: ctrl.onTambahAspirasi,
+                backgroundColor: _C.primary,
+                icon: const Icon(Icons.edit_rounded, color: Colors.white),
+                label: const Text(
+                  'Tulis Aspirasi',
                   style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w600)),
-            )),
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+      ),
       bottomNavigationBar: _buildBottomNavBar(ctrl),
     );
   }
@@ -74,54 +82,64 @@ class AspirasiView extends StatelessWidget {
       backgroundColor: _C.white,
       elevation: 0,
       automaticallyImplyLeading: false,
-      title: Obx(() => ctrl.showForm.value
-          ? Row(
-              children: [
-                GestureDetector(
-                  onTap: ctrl.onTutupForm,
-                  child: const Icon(Icons.arrow_back_rounded,
-                      color: _C.textPrimary, size: 22),
-                ),
-                const SizedBox(width: 12),
-                const Text(
-                  'Tambah/Edit Aspirasi Mahasiswa',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: _C.textPrimary,
+      title: Obx(
+        () => ctrl.showForm.value
+            ? Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => ctrl.onTutupForm(context),
+                    child: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: _C.textPrimary,
+                      size: 22,
+                    ),
                   ),
-                ),
-              ],
-            )
-          : Row(
-              children: [
-                const CircleAvatar(
-                  radius: 18,
-                  backgroundColor: _C.primary,
-                  child: Icon(Icons.person, color: Colors.white, size: 18),
-                ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Halo, ${ctrl.currentUserName}',
-                      style: const TextStyle(
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Tambah/Edit Aspirasi Mahasiswa',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: _C.textPrimary,
+                    ),
+                  ),
+                ],
+              )
+            : Row(
+                children: [
+                  const CircleAvatar(
+                    radius: 18,
+                    backgroundColor: _C.primary,
+                    child: Icon(Icons.person, color: Colors.white, size: 18),
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Halo, ${ctrl.currentUserName}',
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: _C.textPrimary),
-                    ),
-                    const Text('Mahasiswa JTK',
-                        style:
-                            TextStyle(fontSize: 11, color: _C.textSecondary)),
-                  ],
-                ),
-              ],
-            )),
+                          color: _C.textPrimary,
+                        ),
+                      ),
+                      const Text(
+                        'Mahasiswa JTK',
+                        style: TextStyle(fontSize: 11, color: _C.textSecondary),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+      ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_outlined,
-              color: _C.textPrimary, size: 24),
+          icon: const Icon(
+            Icons.notifications_outlined,
+            color: _C.textPrimary,
+            size: 24,
+          ),
           onPressed: () {},
         ),
       ],
@@ -143,9 +161,10 @@ class AspirasiView extends StatelessWidget {
         color: _C.white,
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, -2))
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, -2),
+          ),
         ],
       ),
       child: SafeArea(
@@ -157,23 +176,28 @@ class AspirasiView extends StatelessWidget {
               return Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    if (!active) Get.back();
+                    if (!active) Navigator.pop(context);
                   },
                   behavior: HitTestBehavior.opaque,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(items[i]['icon'] as IconData,
-                          size: 24,
-                          color: active ? _C.navActive : _C.navInactive),
+                      Icon(
+                        items[i]['icon'] as IconData,
+                        size: 24,
+                        color: active ? _C.navActive : _C.navInactive,
+                      ),
                       const SizedBox(height: 2),
-                      Text(items[i]['label'] as String,
-                          style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: active
-                                  ? FontWeight.w700
-                                  : FontWeight.w400,
-                              color: active ? _C.navActive : _C.navInactive)),
+                      Text(
+                        items[i]['label'] as String,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: active
+                              ? FontWeight.w700
+                              : FontWeight.w400,
+                          color: active ? _C.navActive : _C.navInactive,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -204,7 +228,10 @@ class _AspirasiListPage extends StatelessWidget {
           child: Text(
             'Suara Mahasiswa',
             style: TextStyle(
-                fontSize: 24, fontWeight: FontWeight.w800, color: _C.textPrimary),
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
+              color: _C.textPrimary,
+            ),
           ),
         ),
         const Padding(
@@ -212,7 +239,10 @@ class _AspirasiListPage extends StatelessWidget {
           child: Text(
             'Sampaikan aspirasi, saran, dan masukan untuk kemajuan JTK.',
             style: TextStyle(
-                fontSize: 13, color: _C.textSecondary, height: 1.5),
+              fontSize: 13,
+              color: _C.textSecondary,
+              height: 1.5,
+            ),
           ),
         ),
 
@@ -224,14 +254,16 @@ class _AspirasiListPage extends StatelessWidget {
             labelColor: _C.primary,
             unselectedLabelColor: _C.textSecondary,
             labelStyle: const TextStyle(
-                fontSize: 14, fontWeight: FontWeight.w700),
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
             unselectedLabelStyle: const TextStyle(
-                fontSize: 14, fontWeight: FontWeight.w400),
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+            ),
             indicatorColor: _C.primary,
             indicatorWeight: 2.5,
-            tabs: TabAspirasi.values
-                .map((t) => Tab(text: t.label))
-                .toList(),
+            tabs: TabAspirasi.values.map((t) => Tab(text: t.label)).toList(),
           ),
         ),
 
@@ -240,7 +272,8 @@ class _AspirasiListPage extends StatelessWidget {
           child: Obx(() {
             if (ctrl.isLoading.value) {
               return const Center(
-                  child: CircularProgressIndicator(color: _C.primary));
+                child: CircularProgressIndicator(color: _C.primary),
+              );
             }
 
             if (ctrl.displayedAspirasi.isEmpty) {
@@ -248,11 +281,16 @@ class _AspirasiListPage extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.campaign_outlined,
-                        size: 56, color: _C.textLight),
+                    Icon(
+                      Icons.campaign_outlined,
+                      size: 56,
+                      color: _C.textLight,
+                    ),
                     const SizedBox(height: 12),
-                    const Text('Belum ada aspirasi di sini',
-                        style: TextStyle(color: _C.textSecondary)),
+                    const Text(
+                      'Belum ada aspirasi di sini',
+                      style: TextStyle(color: _C.textSecondary),
+                    ),
                   ],
                 ),
               );
@@ -262,8 +300,10 @@ class _AspirasiListPage extends StatelessWidget {
               color: _C.primary,
               onRefresh: ctrl.onRefresh,
               child: ListView.separated(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 itemCount: ctrl.displayedAspirasi.length,
                 separatorBuilder: (_, __) =>
                     const Divider(height: 1, color: _C.divider),
@@ -307,15 +347,19 @@ class _AspirasiFormPage extends StatelessWidget {
             const Text(
               'Suara Mahasiswa',
               style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: _C.textPrimary),
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: _C.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             const Text(
               'Tulis dan sampaikan aspirasi, kritik, atau saran Anda untuk perbaikan lingkungan akademik. Suara Anda adalah fondasi perubahan.',
               style: TextStyle(
-                  fontSize: 13, color: _C.textSecondary, height: 1.5),
+                fontSize: 13,
+                color: _C.textSecondary,
+                height: 1.5,
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -330,7 +374,7 @@ class _AspirasiFormPage extends StatelessWidget {
                     color: Colors.black.withOpacity(0.04),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
-                  )
+                  ),
                 ],
               ),
               child: Column(
@@ -342,41 +386,53 @@ class _AspirasiFormPage extends StatelessWidget {
                     child: Text(
                       'DETAIL ASPIRASI',
                       style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: _C.textLight,
-                          letterSpacing: 1.2),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textLight,
+                        letterSpacing: 1.2,
+                      ),
                     ),
                   ),
 
                   // ---- TEXT AREA ----
-                  Obx(() => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: TextField(
-                          controller: ctrl.isiSaranController,
-                          maxLines: 8,
-                          maxLength: AspirasiController.maxIsiSaranLength,
-                          style: const TextStyle(
-                              fontSize: 14, color: _C.textPrimary, height: 1.5),
-                          decoration: InputDecoration(
-                            hintText:
-                                'Jelaskan aspirasi Anda secara detail dan konstruktif...',
-                            hintStyle: const TextStyle(
-                                color: _C.textLight, fontSize: 14),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            counterText: ctrl.isiSaranCounter,
-                            counterStyle: const TextStyle(
-                                fontSize: 11, color: _C.textLight),
-                            errorText: ctrl.errorIsiSaran.value.isEmpty
-                                ? null
-                                : ctrl.errorIsiSaran.value,
-                            errorStyle: const TextStyle(
-                                fontSize: 11, color: _C.errorColor),
+                  Obx(
+                    () => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: TextField(
+                        controller: ctrl.isiSaranController,
+                        maxLines: 8,
+                        maxLength: AspirasiController.maxIsiSaranLength,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: _C.textPrimary,
+                          height: 1.5,
+                        ),
+                        decoration: InputDecoration(
+                          hintText:
+                              'Jelaskan aspirasi Anda secara detail dan konstruktif...',
+                          hintStyle: const TextStyle(
+                            color: _C.textLight,
+                            fontSize: 14,
+                          ),
+                          border: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          counterText: ctrl.isiSaranCounter,
+                          counterStyle: const TextStyle(
+                            fontSize: 11,
+                            color: _C.textLight,
+                          ),
+                          errorText: ctrl.errorIsiSaran.value.isEmpty
+                              ? null
+                              : ctrl.errorIsiSaran.value,
+                          errorStyle: const TextStyle(
+                            fontSize: 11,
+                            color: _C.errorColor,
                           ),
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
 
                   const Divider(height: 1, color: _C.divider),
 
@@ -385,13 +441,15 @@ class _AspirasiFormPage extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     child: Row(
                       children: [
-                        Obx(() => Switch(
-                              value: ctrl.isAnonymous.value,
-                              onChanged: ctrl.onToggleAnonymous,
-                              activeColor: _C.primary,
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                            )),
+                        Obx(
+                          () => Switch(
+                            value: ctrl.isAnonymous.value,
+                            onChanged: ctrl.onToggleAnonymous,
+                            activeColor: _C.primary,
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                          ),
+                        ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: Column(
@@ -400,15 +458,18 @@ class _AspirasiFormPage extends StatelessWidget {
                               Text(
                                 'Post as Anonymous',
                                 style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: _C.textPrimary),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: _C.textPrimary,
+                                ),
                               ),
                               SizedBox(height: 2),
                               Text(
                                 'Identitas Anda akan disembunyikan.',
                                 style: TextStyle(
-                                    fontSize: 12, color: _C.textSecondary),
+                                  fontSize: 12,
+                                  color: _C.textSecondary,
+                                ),
                               ),
                             ],
                           ),
@@ -430,17 +491,23 @@ class _AspirasiFormPage extends StatelessWidget {
                   child: SizedBox(
                     height: 50,
                     child: OutlinedButton(
-                      onPressed: ctrl.onHapusForm,
+                      onPressed: () => ctrl.onHapusForm(context),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: _C.errorColor,
-                        side: const BorderSide(color: _C.errorColor, width: 1.5),
+                        side: const BorderSide(
+                          color: _C.errorColor,
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: const Text(
                         'Hapus',
                         style: TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -450,36 +517,41 @@ class _AspirasiFormPage extends StatelessWidget {
                 // Post Aspirasi
                 Expanded(
                   flex: 2,
-                  child: Obx(() => SizedBox(
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: ctrl.isSubmitting.value
-                              ? null
-                              : ctrl.onPostAspirasi,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: _C.primary,
-                            disabledBackgroundColor:
-                                _C.primary.withOpacity(0.6),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                            elevation: 1,
+                  child: Obx(
+                    () => SizedBox(
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: ctrl.isSubmitting.value
+                            ? null
+                            : ctrl.onPostAspirasi,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: _C.primary,
+                          disabledBackgroundColor: _C.primary.withOpacity(0.6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: ctrl.isSubmitting.value
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                      color: Colors.white, strokeWidth: 2),
-                                )
-                              : const Text(
-                                  'Post Aspirasi',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
-                                ),
+                          elevation: 1,
                         ),
-                      )),
+                        child: ctrl.isSubmitting.value
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Post Aspirasi',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -525,8 +597,11 @@ class _AspirasiCard extends StatelessWidget {
                     ? _C.anonymousBg
                     : _C.avatarBg,
                 child: aspirasi.isAnonymous
-                    ? const Icon(Icons.person_outline_rounded,
-                        color: _C.textSecondary, size: 20)
+                    ? const Icon(
+                        Icons.person_outline_rounded,
+                        color: _C.textSecondary,
+                        size: 20,
+                      )
                     : Text(
                         aspirasi.initials,
                         style: const TextStyle(
@@ -548,14 +623,17 @@ class _AspirasiCard extends StatelessWidget {
                           ? 'Anonim'
                           : (aspirasi.pelaporName ?? 'Mahasiswa JTK'),
                       style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: _C.textPrimary),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: _C.textPrimary,
+                      ),
                     ),
                     Text(
-                      '${aspirasi.isAnonymous ? '' : '${aspirasi.pelaporProdi ?? ''} · '}${aspirasi.waktuRelatif}',
+                      '${aspirasi.isAnonymous ? '' : '${aspirasi.pelaporProdi ?? ''} Â· '}${aspirasi.waktuRelatif}',
                       style: const TextStyle(
-                          fontSize: 11, color: _C.textSecondary),
+                        fontSize: 11,
+                        color: _C.textSecondary,
+                      ),
                     ),
                   ],
                 ),
@@ -571,10 +649,11 @@ class _AspirasiCard extends StatelessWidget {
           Text(
             aspirasi.topik,
             style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: _C.textPrimary,
-                height: 1.3),
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: _C.textPrimary,
+              height: 1.3,
+            ),
           ),
           const SizedBox(height: 6),
 
@@ -582,7 +661,10 @@ class _AspirasiCard extends StatelessWidget {
           Text(
             aspirasi.isiSaran,
             style: const TextStyle(
-                fontSize: 13, color: _C.textSecondary, height: 1.55),
+              fontSize: 13,
+              color: _C.textSecondary,
+              height: 1.55,
+            ),
             maxLines: 4,
             overflow: TextOverflow.ellipsis,
           ),
@@ -665,7 +747,10 @@ class _StatusBadge extends StatelessWidget {
           Text(
             status.label,
             style: TextStyle(
-                fontSize: 11, fontWeight: FontWeight.w700, color: textColor),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: textColor,
+            ),
           ),
         ],
       ),
@@ -700,10 +785,11 @@ class _TanggapanAdmin extends StatelessWidget {
               Text(
                 'TANGGAPAN ADMIN JTK',
                 style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: _C.primaryLight,
-                    letterSpacing: 0.8),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                  color: _C.primaryLight,
+                  letterSpacing: 0.8,
+                ),
               ),
             ],
           ),
@@ -711,10 +797,11 @@ class _TanggapanAdmin extends StatelessWidget {
           Text(
             '"$tanggapan"',
             style: const TextStyle(
-                fontSize: 12,
-                color: _C.textSecondary,
-                height: 1.55,
-                fontStyle: FontStyle.italic),
+              fontSize: 12,
+              color: _C.textSecondary,
+              height: 1.55,
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ],
       ),
@@ -754,8 +841,7 @@ class _VoteButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isActive ? color.withOpacity(0.08) : _C.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-              color: isActive ? color : _C.divider, width: 1.3),
+          border: Border.all(color: isActive ? color : _C.divider, width: 1.3),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -765,10 +851,10 @@ class _VoteButton extends StatelessWidget {
             Text(
               count > 0 ? '$label  $count' : label,
               style: TextStyle(
-                  fontSize: 13,
-                  fontWeight:
-                      isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: color),
+                fontSize: 13,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: color,
+              ),
             ),
           ],
         ),

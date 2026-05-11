@@ -2,13 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/laporan_fasilitas_model.dart';
 import '../service/laporan_fasilitas_service.dart';
 
 class LaporFasilitasController extends GetxController {
   final formKey = GlobalKey<FormState>();
 
-  // Controller untuk input text
   final judulController = TextEditingController();
   final lokasiController = TextEditingController();
   final deskripsiController = TextEditingController();
@@ -16,90 +16,87 @@ class LaporFasilitasController extends GetxController {
   final RxList<String> selectedFotoPaths = <String>[].obs;
   final RxBool isSubmitting = false.obs;
 
-  // Variabel untuk menangani Mode Edit
   final RxBool isEditMode = false.obs;
   String? _idLaporanLama;
+  LaporanFasilitasModel? _laporanLama;
 
   final LaporanFasilitasService _service = LaporanFasilitasService();
 
-  // Getter dinamis untuk UI View
   String get pageTitle =>
-      isEditMode.value ? "Edit Laporan" : "Lapor Kerusakan Fasilitas";
+      isEditMode.value ? 'Edit Laporan' : 'Lapor Kerusakan Fasilitas';
   String get submitButtonLabel =>
-      isEditMode.value ? "Simpan Perubahan" : "Kirim Laporan";
+      isEditMode.value ? 'Simpan Perubahan' : 'Kirim Laporan';
 
-  // --- LOGIKA EDIT (FIX ERROR) ---
-
-  /// Fungsi ini dipanggil dari View untuk mengisi form dengan data lama
   void setupEditPage(LaporanFasilitasModel laporan) {
     isEditMode.value = true;
     _idLaporanLama = laporan.id;
+    _laporanLama = laporan;
 
-    // Isi field dengan data yang sudah ada di database[cite: 7]
     judulController.text = laporan.judul;
     lokasiController.text = laporan.lokasi;
     deskripsiController.text = laporan.deskripsi;
     selectedFotoPaths.assignAll(laporan.foto_urls);
   }
 
-  // --- LOGIKA SUBMIT (CREATE & UPDATE) ---[cite: 7]
-
-  Future<void> onSubmitLaporan() async {
-    // Validasi input[cite: 7]
-    if (lokasiController.text.isEmpty || deskripsiController.text.isEmpty) {
-      Get.snackbar("Error", "Field Lokasi dan Deskripsi wajib diisi");
+  Future<void> onSubmitLaporan(BuildContext context) async {
+    if (lokasiController.text.trim().isEmpty ||
+        deskripsiController.text.trim().isEmpty) {
+      Get.snackbar('Error', 'Field Lokasi dan Deskripsi wajib diisi');
       return;
     }
 
     isSubmitting.value = true;
     try {
       final now = DateTime.now();
+      final currentUser = await AuthService().loadSavedSession();
+      final pelaporId =
+          currentUser?.id ?? currentUser?.nomorInduk ?? 'anonymous';
+      final old = _laporanLama;
 
-      // Susun data model sesuai skema MongoDB[cite: 7]
       final laporanData = LaporanFasilitasModel(
-        // Jika edit pakai ID lama, jika baru buat ID baru[cite: 7]
         id: isEditMode.value
             ? _idLaporanLama!
             : 'LAP-${now.millisecondsSinceEpoch}',
-        judul: judulController.text.isEmpty
-            ? "Laporan Fasilitas"
-            : judulController.text,
-        deskripsi: deskripsiController.text,
-        lokasi: lokasiController.text,
+        judul: judulController.text.trim().isEmpty
+            ? 'Laporan Fasilitas'
+            : judulController.text.trim(),
+        deskripsi: deskripsiController.text.trim(),
+        lokasi: lokasiController.text.trim(),
         foto_urls: List.from(selectedFotoPaths),
-        pelapor_id: 'user_dummy_123', // ID User dummy
-        status: StatusLaporan.pending,
-        vote_score: 0,
-        createdAt: now,
+        pelapor_id: old?.pelapor_id ?? pelaporId,
+        teknisi_id: old?.teknisi_id,
+        status: old?.status ?? StatusLaporan.pending,
+        vote_score: old?.vote_score ?? 0,
+        upvoter_ids: old?.upvoter_ids ?? const [],
+        downvoter_ids: old?.downvoter_ids ?? const [],
+        createdAt: old?.createdAt ?? now,
         updatedAt: now,
+        catatanPetugas: old?.catatanPetugas,
+        kebutuhanTu: old?.kebutuhanTu,
+        printedAt: old?.printedAt,
+        printedBy: old?.printedBy,
       );
 
       if (isEditMode.value) {
-        // Panggil service update untuk MongoDB[cite: 7]
         await _service.update(laporanData);
-        Get.snackbar("Sukses", "Laporan berhasil diperbarui");
+        Get.snackbar('Sukses', 'Laporan berhasil diperbarui');
       } else {
-        // Panggil service create untuk data baru[cite: 7]
         await _service.create(laporanData);
-        Get.snackbar("Sukses", "Laporan berhasil terkirim");
+        Get.snackbar('Sukses', 'Laporan berhasil terkirim');
       }
 
-      // Kembali ke halaman sebelumnya dan kirim sinyal refresh[cite: 7]
-      Get.back(result: true);
+      Navigator.pop(context, true);
     } catch (e) {
-      Get.snackbar("Gagal", "Terjadi kesalahan: ${e.toString()}");
+      Get.snackbar('Gagal', 'Terjadi kesalahan: $e');
     } finally {
       isSubmitting.value = false;
     }
   }
 
-  // --- HELPER METHODS ---[cite: 7]
-
-  void onBatalKembali() => Get.back();
+  void onBatalKembali(BuildContext context) => Navigator.pop(context);
 
   @override
   void onClose() {
-    // Bersihkan memori controller saat tidak dipakai[cite: 7]
     judulController.dispose();
     lokasiController.dispose();
     deskripsiController.dispose();

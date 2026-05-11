@@ -3,9 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/analisa_kerusakan_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
 
 class AnalisaKerusakanController extends GetxController {
-  // ── State ──────────────────────────────────────────────────────────────────
+  // â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   final RxList<AnalisaKerusakanModel> analisaList =
       <AnalisaKerusakanModel>[].obs;
   final RxList<LaporanSingkat> laporanAktif = <LaporanSingkat>[].obs;
@@ -13,7 +14,7 @@ class AnalisaKerusakanController extends GetxController {
   final RxString errorMessage = ''.obs;
   final RxString filterKategori = 'semua'.obs;
 
-  // ── Form state (sesuai Formulir POLBAN) ───────────────────────────────────
+  // â”€â”€ Form state (sesuai Formulir POLBAN) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   final Rx<LaporanSingkat?> selectedLaporan = Rx<LaporanSingkat?>(null);
 
   // Identitas alat
@@ -33,14 +34,13 @@ class AnalisaKerusakanController extends GetxController {
   // Metadata tambahan
   final Rx<KategoriKerusakan> kategoriKerusakan =
       KategoriKerusakan.hardware.obs;
-  final Rx<TingkatKerusakan> tingkatKerusakan =
-      TingkatKerusakan.sedang.obs;
+  final Rx<TingkatKerusakan> tingkatKerusakan = TingkatKerusakan.sedang.obs;
   final RxInt estimasiHari = 0.obs;
   final RxDouble estimasiBiaya = 0.0.obs;
 
   final RxBool isSubmitting = false.obs;
 
-  // ── TextEditingControllers ────────────────────────────────────────────────
+  // â”€â”€ TextEditingControllers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   late final TextEditingController namaAlatCtrl;
   late final TextEditingController kodeAlatCtrl;
   late final TextEditingController noInventarisCtrl;
@@ -84,7 +84,7 @@ class AnalisaKerusakanController extends GetxController {
     super.onClose();
   }
 
-  // ── Load ───────────────────────────────────────────────────────────────────
+  // â”€â”€ Load â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<void> loadData() async {
     isLoading.value = true;
@@ -101,7 +101,7 @@ class AnalisaKerusakanController extends GetxController {
     }
   }
 
-  // ── Getters / Filter ───────────────────────────────────────────────────────
+  // â”€â”€ Getters / Filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   List<AnalisaKerusakanModel> get filteredAnalisa {
     if (filterKategori.value == 'semua') return analisaList;
@@ -112,19 +112,16 @@ class AnalisaKerusakanController extends GetxController {
 
   List<LaporanSingkat> get laporanBelumDianalisa {
     final sudahDianalisa = analisaList.map((a) => a.laporanId).toSet();
-    return laporanAktif
-        .where((l) => !sudahDianalisa.contains(l.id))
-        .toList();
+    return laporanAktif.where((l) => !sudahDianalisa.contains(l.id)).toList();
   }
 
   bool laporanSudahDianalisa(String laporanId) =>
       analisaList.any((a) => a.laporanId == laporanId);
 
   // Lokasi diambil langsung dari laporan yang dipilih
-  String get lokasiDariLaporan =>
-      selectedLaporan.value?.lokasi ?? '';
+  String get lokasiDariLaporan => selectedLaporan.value?.lokasi ?? '';
 
-  // ── Form ───────────────────────────────────────────────────────────────────
+  // â”€â”€ Form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   void resetForm() {
     selectedLaporan.value = null;
@@ -159,7 +156,7 @@ class AnalisaKerusakanController extends GetxController {
     tingkatKerusakan.value = t;
   }
 
-  // ── Submit ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   Future<void> submitAnalisa() async {
     if (selectedLaporan.value == null) {
@@ -218,12 +215,10 @@ class AnalisaKerusakanController extends GetxController {
         rekomendasiTempatPerbaikan: rekomendasiTempatCtrl.text.trim(),
         kategoriKerusakan: kategoriKerusakan.value,
         tingkatKerusakan: tingkatKerusakan.value,
-        estimasiWaktuPerbaikanHari:
-            int.tryParse(estimasiHariCtrl.text),
+        estimasiWaktuPerbaikanHari: int.tryParse(estimasiHariCtrl.text),
         estimasiBiaya: double.tryParse(
-            estimasiBiayaCtrl.text
-                .replaceAll('.', '')
-                .replaceAll(',', '.')),
+          estimasiBiayaCtrl.text.replaceAll('.', '').replaceAll(',', '.'),
+        ),
         syncStatus: 'local',
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -232,7 +227,7 @@ class AnalisaKerusakanController extends GetxController {
       // TODO: simpan ke MongoDB via service
       analisaList.insert(0, newAnalisa);
 
-      Get.back();
+      AppNavigator.pop();
       Get.snackbar(
         'Berhasil',
         'Formulir analisa kerusakan berhasil disimpan',
@@ -261,7 +256,7 @@ class AnalisaKerusakanController extends GetxController {
     );
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
+  // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   String formatRupiah(double? val) {
     if (val == null) return '-';

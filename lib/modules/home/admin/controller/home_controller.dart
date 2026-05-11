@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/home_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
 // // Import file view/screen admin yang sudah ada
 // import '../../../laporan_fasilitas/view/admin_laporan_fasilitas_screen.dart';
 // import '../../../laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
@@ -70,13 +71,13 @@ class AdminDashboardController extends GetxController {
     selectedNavIndex.value = index;
     if (index == 1) {
       // Navigasi ke admin fasilitas tanpa Provider agar tidak error[cite: 11]
-      // Get.to(() => const AdminLaporanFasilitasScreen());
+      // AppNavigator.push(const AdminLaporanFasilitasScreen());
     }
   }
 
   void onTugaskan() {
     // Navigasi cepat ke panel admin fasilitas[cite: 20]
-    // Get.to(() => const AdminLaporanFasilitasScreen());
+    // AppNavigator.push(const AdminLaporanFasilitasScreen());
   }
 
   void onAktivitasTapped(AktivitasTerbaruModel aktivitas) {
@@ -85,7 +86,7 @@ class AdminDashboardController extends GetxController {
       case TipeAktivitas.laporanBaru:
       case TipeAktivitas.delegasi:
         // Navigasi ke detail laporan menggunakan targetId (UUIDv4)
-        // Get.to(() => DetailLaporanFasilitasView(
+        // AppNavigator.push(DetailLaporanFasilitasView(
         //       laporanId: aktivitas.targetId,
         //       role: 'admin',
         //     ));

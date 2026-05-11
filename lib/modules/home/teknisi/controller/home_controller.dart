@@ -1,6 +1,6 @@
 // ============================================================
 // FILE: modules/home/teknisi/controller/home_teknisi_controller.dart
-// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
+// Kelompok A7 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ SIMJTK (Sistem Informasi Mahasiswa JTK)
 // Sesuai UC-07: Mengelola Tindakan Teknisi
 // ============================================================
 //
@@ -10,10 +10,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/home_model.dart';
-import '../../../tugas_teknisi/view/tugas_teknisi_view.dart';
-import '../../../laporan_fasilitas/model/laporan_fasilitas_model.dart';
-import '../../../laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
 import '../../../riwayat_tugas/view/riwayat_tugas_view.dart';
+import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 
 class HomeTeknisiController extends GetxController {
   // --------------------------------------------------------
@@ -71,7 +69,7 @@ class HomeTeknisiController extends GetxController {
     semuaTugas.assignAll(allTugas);
 
     // Filter tugas mendesak: high priority & belum selesai
-    // Sesuai hak akses Teknisi — menerima delegasi dari Admin (UC-06)
+    // Sesuai hak akses Teknisi ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â menerima delegasi dari Admin (UC-06)
     tugasMendesak.assignAll(
       allTugas.where((t) => t.isMendesak).toList()
         ..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
@@ -88,15 +86,24 @@ class HomeTeknisiController extends GetxController {
   Future<void> onRefresh() async => await _loadData();
 
   /// Bottom nav tap
-  void onNavTapped(int index) {
+  void onNavTapped(BuildContext context, int index) {
     selectedNavIndex.value = index;
     // TODO: navigasi ke halaman lain
     switch (index) {
       case 1:
-        // Get.to(() => const DaftarTugasView());
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                const LaporanFasilitasMahasiswaView(role: 'teknisi'),
+          ),
+        );
         break;
       case 2:
-        Get.to(() => const RiwayatTugasView());
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const RiwayatTugasView()),
+        );
         break;
     }
   }
@@ -106,23 +113,22 @@ class HomeTeknisiController extends GetxController {
     unreadNotif.value = 0;
   }
 
-  /// Tap pada kartu tugas mendesak → buka detail laporan
-  /// Sesuai UC-07: Teknisi memperbarui status & tambah estimasi
-  // void onTugasTapped(TugasTeknisiModel tugas) {
-  //   Get.to(
-  //     () => DetailLaporanFasilitasView(
-  //       laporanId: tugas.id,
-  //       role: Role.teknisi, // Petugas teknisi
-  //     ),
-  //   );
-  // }
+  /// Tap pada kartu tugas mendesak.
+  void onTugasTapped(TugasTeknisiModel tugas) {
+    Get.snackbar(
+      tugas.judul,
+      '${tugas.lokasi} - ${tugas.prioritas.label}',
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(16),
+    );
+  }
 
-  /// Mulai kerjakan tugas — ubah status ke in_progress (UC-07)
+  /// Mulai kerjakan tugas ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ubah status ke in_progress (UC-07)
   Future<void> onMulaiKerjakan(TugasTeknisiModel tugas) async {
     final idx = semuaTugas.indexWhere((t) => t.id == tugas.id);
     if (idx == -1) return;
 
-    // Simulasi update — di implementasi nyata panggil service
+    // Simulasi update ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â di implementasi nyata panggil service
     await Future.delayed(const Duration(milliseconds: 300));
 
     // Update di list mendesak
@@ -152,10 +158,10 @@ class HomeTeknisiController extends GetxController {
     );
   }
 
-  /// Selesaikan tugas — ubah status ke resolved + wajib foto bukti (UC-07)
+  /// Selesaikan tugas ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ubah status ke resolved + wajib foto bukti (UC-07)
   void onSelesaikanTugas(TugasTeknisiModel tugas) {
     // TODO: navigasi ke form selesaikan tugas dengan upload foto bukti
-    // Get.to(() => SelesaikanTugasView(tugas: tugas))
+    // AppNavigator.push(SelesaikanTugasView(tugas: tugas))
     Get.snackbar(
       'Selesaikan Tugas',
       'Upload foto bukti untuk menyelesaikan "${tugas.judul}"',

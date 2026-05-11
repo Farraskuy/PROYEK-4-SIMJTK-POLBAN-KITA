@@ -1,70 +1,75 @@
 // lib/modules/laporan_fasilitas/controller/interaksi_laporan_controller.dart
 
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/laporan_fasilitas_model.dart';
 import '../service/laporan_fasilitas_service.dart';
 
 class InteraksiLaporanController extends GetxController {
+  InteraksiLaporanController({this.role = 'mahasiswa'});
+
+  final String role;
   final LaporanFasilitasService _service = LaporanFasilitasService();
 
-  var listLaporan = <LaporanFasilitasModel>[].obs;
-  var isLoading = false.obs;
+  final listLaporan = <LaporanFasilitasModel>[].obs;
+  final isLoading = false.obs;
+  final currentUserId = 'anonymous'.obs;
+
+  bool get isMahasiswa => role == 'mahasiswa';
+  bool get isPetugas => role == 'teknisi' || role == 'petugas';
+  bool get isTu => role == 'tu';
 
   @override
   void onInit() {
     super.onInit();
+    _loadCurrentUser();
     fetchLaporan();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    final user = await AuthService().loadSavedSession();
+    currentUserId.value = user?.id ?? user?.nomorInduk ?? 'anonymous';
   }
 
   Future<void> fetchLaporan() async {
     isLoading.value = true;
     try {
-      var data = await _service.getAll();
-      // Sorting default berdasarkan vote terbanyak (keresahan mahasiswa)[cite: 3, 11]
-      data.sort((a, b) => b.vote_score.compareTo(a.vote_score));
+      final data = await _service.getForRole(role);
       listLaporan.assignAll(data);
     } catch (e) {
-      Get.snackbar("Error", "Gagal memuat data: $e");
+      Get.snackbar('Error', 'Gagal memuat data: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Logika Upvote[cite: 3, 11]
   void upvoteLaporan(String userId, int index) async {
-    var laporan = listLaporan[index];
+    final laporan = listLaporan[index];
 
     if (laporan.upvoter_ids.contains(userId)) {
       laporan.upvoter_ids.remove(userId);
     } else {
       laporan.upvoter_ids.add(userId);
-      laporan.downvoter_ids.remove(
-        userId,
-      ); // Pastikan tidak ada di list downvote
+      laporan.downvoter_ids.remove(userId);
     }
 
     _updateVoteAndSync(laporan, index);
   }
 
-  /// Logika Downvote (Baru)[cite: 3, 11]
   void downvoteLaporan(String userId, int index) async {
-    var laporan = listLaporan[index];
+    final laporan = listLaporan[index];
 
     if (laporan.downvoter_ids.contains(userId)) {
       laporan.downvoter_ids.remove(userId);
     } else {
       laporan.downvoter_ids.add(userId);
-      laporan.upvoter_ids.remove(
-        userId,
-      ); // Pastikan tidak ada di list upvote[cite: 11]
+      laporan.upvoter_ids.remove(userId);
     }
 
     _updateVoteAndSync(laporan, index);
   }
 
-  /// Helper untuk hitung skor dan simpan ke MongoDB
   void _updateVoteAndSync(LaporanFasilitasModel laporan, int index) async {
-    // Vote score = Total Upvote - Total Downvote[cite: 11]
     laporan.vote_score =
         laporan.upvoter_ids.length - laporan.downvoter_ids.length;
     laporan.updatedAt = DateTime.now();
@@ -72,23 +77,20 @@ class InteraksiLaporanController extends GetxController {
     listLaporan[index] = laporan;
     listLaporan.refresh();
 
-    await _service.update(laporan); // Simpan ke database
+    await _service.update(laporan);
   }
 
-  /// Logika Delete Laporan[cite: 3, 7]
   Future<void> deleteLaporan(String laporanId) async {
     try {
       await _service.delete(laporanId);
       listLaporan.removeWhere((l) => l.id == laporanId);
-      Get.snackbar(
-        "Sukses",
-        "Laporan berhasil dihapus",
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Sukses', 'Laporan berhasil dihapus');
     } catch (e) {
-      Get.snackbar("Gagal", "Gagal menghapus laporan: $e");
+      Get.snackbar('Gagal', 'Gagal menghapus laporan: $e');
     }
   }
+
+  Future<void> refreshAfterAction() async => fetchLaporan();
 
   void sortLaporan(String criteria) {
     if (criteria == 'terbaru') {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/kontrol_barang_model.dart';
 import 'package:uuid/uuid.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
 
 class DataKontrolBarangController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -18,18 +19,34 @@ class DataKontrolBarangController extends GetxController {
   final prakiraanHargaCtrl = TextEditingController();
 
   // Tabel B
-  final List<String> hardwareLabels = ['Mainboard', 'Prosesor', 'Harddisk', 'RAM', 'VGA', 'LAN', 'Sound', 'CDROOM', 'Diskdrive', 'Keyboard', 'Mouse', 'Monitor'];
+  final List<String> hardwareLabels = [
+    'Mainboard',
+    'Prosesor',
+    'Harddisk',
+    'RAM',
+    'VGA',
+    'LAN',
+    'Sound',
+    'CDROOM',
+    'Diskdrive',
+    'Keyboard',
+    'Mouse',
+    'Monitor',
+  ];
   late final List<TextEditingController> hardwareCtrls;
 
   // Tabel C
   final osCtrl = TextEditingController();
   // Refactored to a reactive dynamic list for scalability
-  final RxList<TextEditingController> aplikasiCtrls = <TextEditingController>[].obs;
+  final RxList<TextEditingController> aplikasiCtrls =
+      <TextEditingController>[].obs;
 
   // Tabel F
-  final RxList<Map<String, TextEditingController>> biayaRows = <Map<String, TextEditingController>>[].obs;
+  final RxList<Map<String, TextEditingController>> biayaRows =
+      <Map<String, TextEditingController>>[].obs;
 
-  final RxList<DataKontrolBarangModel> dataList = <DataKontrolBarangModel>[].obs;
+  final RxList<DataKontrolBarangModel> dataList =
+      <DataKontrolBarangModel>[].obs;
 
   @override
   void onInit() {
@@ -76,31 +93,55 @@ class DataKontrolBarangController extends GetxController {
       asalBarang: asalBarangCtrl.text,
       tahunPerolehan: tahunPerolehanCtrl.text,
       prakiraanHarga: prakiraanHargaCtrl.text,
-      spesifikasiHardware: List.generate(12, (i) => SpesifikasiHardware(komponen: hardwareLabels[i], nilai: hardwareCtrls[i].text)),
+      spesifikasiHardware: List.generate(
+        12,
+        (i) => SpesifikasiHardware(
+          komponen: hardwareLabels[i],
+          nilai: hardwareCtrls[i].text,
+        ),
+      ),
       operatingSystem: osCtrl.text,
-      aplikasi: aplikasiCtrls.map((c) => c.text).where((t) => t.trim().isNotEmpty).toList(),
+      aplikasi: aplikasiCtrls
+          .map((c) => c.text)
+          .where((t) => t.trim().isNotEmpty)
+          .toList(),
       pemeriksaanBerkala: [],
-      biayaPerbaikan: biayaRows.map((r) => BiayaPerbaikanItem(
-        komponenRusak: r['komponen_rusak']!.text,
-        komponenPengganti: r['komponen_pengganti']!.text,
-        biayaPerbaikan: r['biaya']!.text,
-        sumberDana: r['sumber_dana']!.text,
-        ditanganiOleh: r['ditangani']!.text,
-      )).toList(),
+      biayaPerbaikan: biayaRows
+          .map(
+            (r) => BiayaPerbaikanItem(
+              komponenRusak: r['komponen_rusak']!.text,
+              komponenPengganti: r['komponen_pengganti']!.text,
+              biayaPerbaikan: r['biaya']!.text,
+              sumberDana: r['sumber_dana']!.text,
+              ditanganiOleh: r['ditangani']!.text,
+            ),
+          )
+          .toList(),
       createdAt: DateTime.now(),
     );
 
     dataList.add(data);
     isSubmitting.value = false;
-    Get.back();
-    Get.snackbar('Berhasil', 'Data kontrol barang disimpan', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green.shade100);
+    AppNavigator.pop();
+    Get.snackbar(
+      'Berhasil',
+      'Data kontrol barang disimpan',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.green.shade100,
+    );
   }
 
   @override
   void onClose() {
-    namaRuangCtrl.dispose(); namaBarangCtrl.dispose(); noInventarisCtrl.dispose();
-    idKomputerCtrl.dispose(); statusBarangCtrl.dispose(); asalBarangCtrl.dispose();
-    tahunPerolehanCtrl.dispose(); prakiraanHargaCtrl.dispose(); osCtrl.dispose();
+    namaRuangCtrl.dispose();
+    namaBarangCtrl.dispose();
+    noInventarisCtrl.dispose();
+    idKomputerCtrl.dispose();
+    statusBarangCtrl.dispose();
+    asalBarangCtrl.dispose();
+    tahunPerolehanCtrl.dispose();
+    prakiraanHargaCtrl.dispose();
+    osCtrl.dispose();
     for (final c in hardwareCtrls) c.dispose();
     for (final c in aplikasiCtrls) c.dispose();
     super.onClose();

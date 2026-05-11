@@ -1,6 +1,6 @@
 // // ============================================================
 // // FILE: modules/home/teknisi/tugas/view/daftar_tugas_view.dart
-// // Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
+// // Kelompok A7 â€“ SIMJTK (Sistem Informasi Mahasiswa JTK)
 // // ============================================================
 
 // import 'package:flutter/material.dart';
@@ -127,7 +127,7 @@
 //               Row(
 //                 children: [
 //                   IconButton(
-//                     onPressed: () => Get.back(),
+//                     onPressed: () => AppNavigator.pop(),
 //                     icon: const Icon(Icons.menu_rounded, color: _C.textPrimary, size: 24),
 //                     padding: EdgeInsets.zero,
 //                     constraints: const BoxConstraints(),
@@ -305,7 +305,7 @@
 //                       Text(item.judul, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
 //                       const SizedBox(height: 6),
 //                       Text(item.lokasi, style: const TextStyle(fontSize: 12, color: _C.textSecondary)),
-                      
+
 //                       // Tombol Aksi sesuai Status[cite: 22]
 //                       if (item.status == StatusLaporanTeknisi.assigned) ...[
 //                         const SizedBox(height: 12),
@@ -366,7 +366,7 @@
 //     Color bg = _C.menungguBg, fg = _C.menungguFg;
 //     if (status == StatusLaporanTeknisi.inProgress) { bg = _C.diprosesBg; fg = _C.diprosesFg; }
 //     else if (status == StatusLaporanTeknisi.resolved) { bg = _C.selesaiBg; fg = _C.selesaiFg; }
-    
+
 //     return Container(
 //       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
 //       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(6)),

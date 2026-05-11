@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/log_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
@@ -72,7 +71,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    return MaterialApp(
       title: 'SIMJTK - Integrated Portal',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

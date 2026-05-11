@@ -1,6 +1,6 @@
 // ============================================================
 // FILE: modules/aspirasi/controller/aspirasi_controller.dart
-// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
+// Kelompok A7 â€“ SIMJTK (Sistem Informasi Mahasiswa JTK)
 // ============================================================
 //
 // Dependency: get: ^4.6.6
@@ -18,7 +18,7 @@ class AspirasiController extends GetxController
   late TabController tabController;
 
   // --------------------------------------------------------
-  // STATE OBSERVABLES — LIST
+  // STATE OBSERVABLES â€” LIST
   // --------------------------------------------------------
 
   /// Semua aspirasi (raw dari server/cache)
@@ -39,7 +39,7 @@ class AspirasiController extends GetxController
   final String currentUserProdi = 'D3 Teknik Informatika';
 
   // --------------------------------------------------------
-  // STATE OBSERVABLES — FORM
+  // STATE OBSERVABLES â€” FORM
   // --------------------------------------------------------
 
   /// Controller teks area aspirasi
@@ -54,7 +54,7 @@ class AspirasiController extends GetxController
   /// Error teks deskripsi
   final RxString errorIsiSaran = ''.obs;
 
-  /// Mode — true: tampilkan form, false: tampilkan list
+  /// Mode â€” true: tampilkan form, false: tampilkan list
   final RxBool showForm = false.obs;
 
   // --------------------------------------------------------
@@ -130,12 +130,15 @@ class AspirasiController extends GetxController
         break;
 
       case TabAspirasi.diproses:
-        final filtered = _allAspirasi
-            .where((a) =>
-                a.status == StatusAspirasi.inReview ||
-                a.status == StatusAspirasi.responded)
-            .toList()
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        final filtered =
+            _allAspirasi
+                .where(
+                  (a) =>
+                      a.status == StatusAspirasi.inReview ||
+                      a.status == StatusAspirasi.responded,
+                )
+                .toList()
+              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
         displayedAspirasi.assignAll(filtered);
         break;
     }
@@ -158,11 +161,10 @@ class AspirasiController extends GetxController
     errorIsiSaran.value = '';
   }
 
-  String _generateId() =>
-      'asp-${DateTime.now().millisecondsSinceEpoch}';
+  String _generateId() => 'asp-${DateTime.now().millisecondsSinceEpoch}';
 
   // --------------------------------------------------------
-  // PUBLIC METHODS — NAVIGASI FORM/LIST
+  // PUBLIC METHODS â€” NAVIGASI FORM/LIST
   // --------------------------------------------------------
 
   /// Buka form tambah aspirasi
@@ -171,26 +173,29 @@ class AspirasiController extends GetxController
   }
 
   /// Tutup form dan kembali ke list
-  void onTutupForm() {
+  void onTutupForm(BuildContext context) {
     if (isiSaranController.text.isNotEmpty) {
       Get.dialog(
         AlertDialog(
           title: const Text('Batalkan Aspirasi?'),
           content: const Text(
-              'Teks yang sudah Anda tulis akan hilang. Yakin ingin kembali?'),
+            'Teks yang sudah Anda tulis akan hilang. Yakin ingin kembali?',
+          ),
           actions: [
             TextButton(
-              onPressed: () => Get.back(),
+              onPressed: () => Navigator.pop(context),
               child: const Text('Tidak'),
             ),
             TextButton(
               onPressed: () {
-                Get.back();
+                Navigator.pop(context);
                 _resetForm();
                 showForm.value = false;
               },
-              child: const Text('Ya, Hapus',
-                  style: TextStyle(color: Colors.red)),
+              child: const Text(
+                'Ya, Hapus',
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
         ),
@@ -202,7 +207,7 @@ class AspirasiController extends GetxController
   }
 
   // --------------------------------------------------------
-  // PUBLIC METHODS — FORM
+  // PUBLIC METHODS â€” FORM
   // --------------------------------------------------------
 
   /// Toggle anonymous mode
@@ -211,7 +216,7 @@ class AspirasiController extends GetxController
   }
 
   /// Hapus isi form
-  void onHapusForm() {
+  void onHapusForm(BuildContext context) {
     if (isiSaranController.text.isEmpty) return;
     Get.dialog(
       AlertDialog(
@@ -219,12 +224,12 @@ class AspirasiController extends GetxController
         content: const Text('Teks yang sudah ditulis akan dihapus.'),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
+            onPressed: () => Navigator.pop(context),
             child: const Text('Batal'),
           ),
           TextButton(
             onPressed: () {
-              Get.back();
+              Navigator.pop(context);
               _resetForm();
             },
             child: const Text('Hapus', style: TextStyle(color: Colors.red)),
@@ -283,10 +288,10 @@ class AspirasiController extends GetxController
   }
 
   // --------------------------------------------------------
-  // PUBLIC METHODS — VOTING
+  // PUBLIC METHODS â€” VOTING
   // --------------------------------------------------------
 
-  /// Upvote aspirasi — toggle jika sudah upvote
+  /// Upvote aspirasi â€” toggle jika sudah upvote
   void onUpvote(String aspirasiId) {
     final idx = _allAspirasi.indexWhere((a) => a.id == aspirasiId);
     if (idx == -1) return;
@@ -324,7 +329,7 @@ class AspirasiController extends GetxController
     _applyFilter();
   }
 
-  /// Downvote aspirasi — toggle jika sudah downvote
+  /// Downvote aspirasi â€” toggle jika sudah downvote
   void onDownvote(String aspirasiId) {
     final idx = _allAspirasi.indexWhere((a) => a.id == aspirasiId);
     if (idx == -1) return;

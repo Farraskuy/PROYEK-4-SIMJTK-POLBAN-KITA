@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import '../model/penghapusan_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
 
 class PenghapusanController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -40,25 +41,29 @@ class PenghapusanController extends GetxController {
     isSubmitting.value = true;
     await Future.delayed(const Duration(milliseconds: 400));
 
-    dataList.add(PenghapusanModel(
-      id: const Uuid().v4(),
-      teknisiId: 'TKS001', // TODO: ambil dari session
-      tahunUsulanPenghapusan: tahunUsulanCtrl.text,
-      tahunAnggaran: tahunAnggaranCtrl.text,
-      pengelolaData: pengelolaCtrl.text,
-      items: rows
-          .map((r) => PenghapusanItem(
+    dataList.add(
+      PenghapusanModel(
+        id: const Uuid().v4(),
+        teknisiId: 'TKS001', // TODO: ambil dari session
+        tahunUsulanPenghapusan: tahunUsulanCtrl.text,
+        tahunAnggaran: tahunAnggaranCtrl.text,
+        pengelolaData: pengelolaCtrl.text,
+        items: rows
+            .map(
+              (r) => PenghapusanItem(
                 namaBarang: r['nama']!.text,
                 kondisiBarang: r['kondisi']!.text,
                 noInventaris: r['no_inv']!.text,
                 keterangan: r['ket']!.text,
-              ))
-          .toList(),
-      createdAt: DateTime.now(),
-    ));
+              ),
+            )
+            .toList(),
+        createdAt: DateTime.now(),
+      ),
+    );
 
     isSubmitting.value = false;
-    Get.back();
+    AppNavigator.pop();
     Get.snackbar(
       'Berhasil',
       'Usulan penghapusan disimpan',

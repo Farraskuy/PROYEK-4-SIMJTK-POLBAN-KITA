@@ -1,6 +1,6 @@
 // ============================================================
 // FILE: modules/home/teknisi/view/home_teknisi_view.dart
-// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
+// Kelompok A7 Ã¢â‚¬â€œ SIMJTK (Sistem Informasi Mahasiswa JTK)
 // ============================================================
 
 import 'package:flutter/material.dart';
@@ -12,6 +12,9 @@ import '../view/kontrol_barang_view.dart';
 import '../view/usulan_pemeliharaan_view.dart';
 import '../view/penghapusan_view.dart';
 import '../../../log_harian_teknis/view/log_harian_teknis_view.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
+
 // ============================================================
 // DESIGN TOKENS
 // ============================================================
@@ -99,35 +102,80 @@ Color _kategoriIconBg(String kategori) {
   }
 }
 
-
 // Widget section Modul Maintenance
 class ModulMaintenanceSection extends StatelessWidget {
   const ModulMaintenanceSection({super.key});
 
   static const _menus = [
-    {'label': 'Analisa\nKerusakan',   'icon': Icons.analytics_rounded,        'color': Color(0xFFE53935), 'route': 'analisa'},
-    {'label': 'Kontrol\nBarang/Alat', 'icon': Icons.inventory_2_outlined,      'color': Color(0xFF1565C0), 'route': 'kontrol'},
-    {'label': 'Usulan\nPemeliharaan', 'icon': Icons.build_circle_outlined,     'color': Color(0xFF2E7D32), 'route': 'pemeliharaan'},
-    {'label': 'Usulan\nPenghapusan',  'icon': Icons.delete_outline_rounded,    'color': Color(0xFFF57C00), 'route': 'penghapusan'},
-    {'label': 'Log\nHarian',          'icon': Icons.note_alt_outlined,         'color': Color(0xFF6A1B9A), 'route': 'log'},
+    {
+      'label': 'Analisa\nKerusakan',
+      'icon': Icons.analytics_rounded,
+      'color': Color(0xFFE53935),
+      'route': 'analisa',
+    },
+    {
+      'label': 'Kontrol\nBarang/Alat',
+      'icon': Icons.inventory_2_outlined,
+      'color': Color(0xFF1565C0),
+      'route': 'kontrol',
+    },
+    {
+      'label': 'Usulan\nPemeliharaan',
+      'icon': Icons.build_circle_outlined,
+      'color': Color(0xFF2E7D32),
+      'route': 'pemeliharaan',
+    },
+    {
+      'label': 'Usulan\nPenghapusan',
+      'icon': Icons.delete_outline_rounded,
+      'color': Color(0xFFF57C00),
+      'route': 'penghapusan',
+    },
+    {
+      'label': 'Log\nHarian',
+      'icon': Icons.note_alt_outlined,
+      'color': Color(0xFF6A1B9A),
+      'route': 'log',
+    },
   ];
 
-  void _navigate(String route) {
+  void _navigate(BuildContext context, String route) {
     switch (route) {
       case 'analisa':
-        Get.to(() => const AnalisaKerusakanView());
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AnalisaKerusakanView()),
+        );
         break;
       case 'kontrol':
-        Get.to(() => const DataKontrolBarangView());
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const DataKontrolBarangView(),
+          ),
+        );
         break;
       case 'pemeliharaan':
-        Get.to(() => const UsulanPemeliharaanView());
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const UsulanPemeliharaanView(),
+          ),
+        );
         break;
       case 'penghapusan':
-        Get.to(() => const UsulanPenghapusanView());
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const UsulanPenghapusanView(),
+          ),
+        );
         break;
       case 'log':
-        Get.to(() => LogHarianTeknisView ());
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LogHarianTeknisView()),
+        );
         break;
     }
   }
@@ -138,8 +186,12 @@ class ModulMaintenanceSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Modul Maintenance', 
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Color(0xFF1A1A2E))
+          'Modul Maintenance',
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF1A1A2E),
+          ),
         ),
         const SizedBox(height: 12),
         GridView.count(
@@ -151,7 +203,7 @@ class ModulMaintenanceSection extends StatelessWidget {
           children: _menus.map((m) {
             final color = m['color'] as Color;
             return GestureDetector(
-              onTap: () => _navigate(m['route'] as String),
+              onTap: () => _navigate(context, m['route'] as String),
               child: Container(
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.08),
@@ -167,11 +219,12 @@ class ModulMaintenanceSection extends StatelessWidget {
                       m['label'] as String,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 8.5, // Sedikit diperkecil agar pas di grid 5 kolom
-                        color: color, 
-                        fontWeight: FontWeight.w700, 
-                        height: 1.1
-                      )
+                        fontSize:
+                            8.5, // Sedikit diperkecil agar pas di grid 5 kolom
+                        color: color,
+                        fontWeight: FontWeight.w700,
+                        height: 1.1,
+                      ),
                     ),
                   ],
                 ),
@@ -183,7 +236,6 @@ class ModulMaintenanceSection extends StatelessWidget {
     );
   }
 }
-
 
 // ============================================================
 // HOME TEKNISI VIEW
@@ -225,7 +277,7 @@ class HomeTeknisiView extends StatelessWidget {
                       _buildStatistik(ctrl),
                       const SizedBox(height: 28),
 
-                      const ModulMaintenanceSection(), 
+                      const ModulMaintenanceSection(),
                       const SizedBox(height: 28),
 
                       // ---- TUGAS MENDESAK ----
@@ -248,50 +300,18 @@ class HomeTeknisiView extends StatelessWidget {
   // ============================================================
   // APP BAR
   // ============================================================
-  SliverAppBar _buildAppBar(HomeTeknisiController ctrl, BuildContext context) {
-    return SliverAppBar(
-      backgroundColor: _C.white,
-      elevation: 0,
-      floating: true,
-      pinned: false,
-      titleSpacing: 0,
-      leading: IconButton(
-        // ← replace the menu icon
-        icon: const Icon(
-          Icons.arrow_back_ios_new_rounded,
-          color: _C.textPrimary,
-          size: 22,
-        ),
-        onPressed: () => Navigator.pop(context), // ← pops back to LoginView
+  Widget _buildAppBar(HomeTeknisiController ctrl, BuildContext context) {
+    return Obx(
+      () => AppHomeAppBar(
+        title: 'Technician Portal',
+        subtitle: ctrl.currentTeknisi.value.name,
+        avatarIcon: Icons.engineering_rounded,
+        avatarText: ctrl.currentTeknisi.value.name.isEmpty
+            ? null
+            : ctrl.currentTeknisi.value.name[0].toUpperCase(),
+        unreadCount: ctrl.unreadNotif.value,
+        onNotificationTap: ctrl.onNotifikasiTapped,
       ),
-      title: const Text(
-        'Technician Portal',
-        style: TextStyle(
-          fontSize: 17,
-          fontWeight: FontWeight.w700,
-          color: _C.primary,
-        ),
-      ),
-      actions: [
-        // Avatar teknisi
-        Padding(
-          padding: const EdgeInsets.only(right: 14),
-          child: Obx(
-            () => CircleAvatar(
-              radius: 19,
-              backgroundColor: _C.primary,
-              child: Text(
-                ctrl.currentTeknisi.value.name[0].toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -323,7 +343,7 @@ class HomeTeknisiView extends StatelessWidget {
   }
 
   // ============================================================
-  // STATISTIK TUGAS — kartu gabungan sesuai Figma
+  // STATISTIK TUGAS Ã¢â‚¬â€ kartu gabungan sesuai Figma
   // ============================================================
   Widget _buildStatistik(HomeTeknisiController ctrl) {
     return Obx(() {
@@ -345,7 +365,7 @@ class HomeTeknisiView extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Kolom kiri — total tugas
+            // Kolom kiri Ã¢â‚¬â€ total tugas
             Expanded(
               flex: 4,
               child: Padding(
@@ -387,7 +407,7 @@ class HomeTeknisiView extends StatelessWidget {
               ),
             ),
 
-            // Kolom kanan — SELESAI & PENDING
+            // Kolom kanan Ã¢â‚¬â€ SELESAI & PENDING
             Expanded(
               flex: 5,
               child: Column(
@@ -534,7 +554,12 @@ class HomeTeknisiView extends StatelessWidget {
         const Spacer(),
         // MENGGANTI ICON STATIS MENJADI TOMBOL ANALISA
         GestureDetector(
-          onTap: () => Get.to(() => const AnalisaKerusakanView()),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AnalisaKerusakanView(),
+            ),
+          ),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
@@ -544,7 +569,8 @@ class HomeTeknisiView extends StatelessWidget {
             child: Row(
               children: const [
                 Icon(
-                  Icons.analytics_rounded, // Icon yang lebih relevan untuk analisa
+                  Icons
+                      .analytics_rounded, // Icon yang lebih relevan untuk analisa
                   color: Color(0xFFD32F2F),
                   size: 16,
                 ),
@@ -582,13 +608,12 @@ class HomeTeknisiView extends StatelessWidget {
         itemCount: list.length,
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
-          // return _TugasCard(
-          //   tugas: list[index],
-          //   onTap: () => ctrl.onTugasTapped(list[index]),
-          //   onMulai: () => ctrl.onMulaiKerjakan(list[index]),
-          //   onSelesai: () => ctrl.onSelesaikanTugas(list[index]),
-          // );
-          return const SizedBox.shrink();
+          return _TugasCard(
+            tugas: list[index],
+            onTap: () => ctrl.onTugasTapped(list[index]),
+            onMulai: () => ctrl.onMulaiKerjakan(list[index]),
+            onSelesai: () => ctrl.onSelesaikanTugas(list[index]),
+          );
         },
       );
     });
@@ -598,78 +623,18 @@ class HomeTeknisiView extends StatelessWidget {
   // BOTTOM NAV BAR
   // ============================================================
   Widget _buildBottomNavBar(HomeTeknisiController ctrl) {
-    final items = TeknisiNavItemModel.items();
-    final icons = [
-      Icons.dashboard_rounded,
-      Icons.assignment_rounded,
-      Icons.history_rounded,
-      Icons.person_rounded,
+    const items = [
+      AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
+      AppNavItem(label: 'Tugas', icon: Icons.assignment_rounded),
+      AppNavItem(label: 'Riwayat', icon: Icons.history_rounded),
+      AppNavItem(label: 'Profil', icon: Icons.person_rounded),
     ];
 
     return Obx(
-      () => Container(
-        decoration: BoxDecoration(
-          color: _C.navBg,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: SizedBox(
-            height: 62,
-            child: Row(
-              children: List.generate(items.length, (i) {
-                final active = ctrl.selectedNavIndex.value == i;
-                return Expanded(
-                  child: GestureDetector(
-                    onTap: () => ctrl.onNavTapped(i),
-                    behavior: HitTestBehavior.opaque,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Active: icon dalam rounded container biru
-                        if (active)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _C.primary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Icon(
-                              icons[i],
-                              size: 20,
-                              color: _C.navActive,
-                            ),
-                          )
-                        else
-                          Icon(icons[i], size: 22, color: _C.navInactive),
-                        const SizedBox(height: 3),
-                        Text(
-                          items[i].label,
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: active
-                                ? FontWeight.w700
-                                : FontWeight.w400,
-                            color: active ? _C.navActive : _C.navInactive,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ),
+      () => AppBottomNavBar(
+        items: items,
+        selectedIndex: ctrl.selectedNavIndex.value,
+          onTap: (index) => ctrl.onNavTapped(context, index),
       ),
     );
   }

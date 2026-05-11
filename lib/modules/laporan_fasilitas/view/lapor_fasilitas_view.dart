@@ -43,7 +43,7 @@ class LaporFasilitasView extends StatelessWidget {
             Icons.arrow_back_rounded,
             color: _AppColors.textPrimary,
           ),
-          onPressed: () => Get.back(),
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Lapor Kerusakan',
@@ -185,7 +185,7 @@ class LaporFasilitasView extends StatelessWidget {
         child: ElevatedButton(
           onPressed: controller.isSubmitting.value
               ? null
-              : controller.onSubmitLaporan,
+              : () => controller.onSubmitLaporan(context),
           style: ElevatedButton.styleFrom(
             backgroundColor: _AppColors.primary,
             shape: RoundedRectangleBorder(

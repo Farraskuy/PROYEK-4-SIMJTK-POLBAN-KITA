@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/home_controller.dart';
 import '../model/home_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 
 class _AppColors {
   static const primary = Color(0xFF1A3A6B);
@@ -77,7 +79,7 @@ class HomeView extends StatelessWidget {
                     _SectionHeader(
                       title: 'Aspirasi Trending',
                       showFlame: true,
-                      onLihatSemua: controller.onLihatSemuaAspirasi,
+                      onLihatSemua: () => controller.onLihatSemuaAspirasi(context),
                     ),
                     const SizedBox(height: 12),
                     _AspirasiList(controller: controller),
@@ -94,143 +96,33 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  SliverAppBar _buildAppBar(HomeController controller) {
-    return SliverAppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      floating: true,
-      pinned: false,
-      titleSpacing: 0,
-      title: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            // Avatar
-            CircleAvatar(
-              radius: 22,
-              backgroundColor: _AppColors.primary,
-              child: const Icon(Icons.person, color: Colors.white, size: 22),
-            ),
-            const SizedBox(width: 12),
-
-            // Nama & Role
-            Expanded(
-              child: Obx(() => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Halo, ${controller.currentUser.value.name}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: _AppColors.textPrimary,
-                        ),
-                      ),
-                      Text(
-                        'Mahasiswa JTK',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: _AppColors.textSecondary,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                    ],
-                  )),
-            ),
-
-            // Notifikasi Bell
-            Obx(() => Stack(
-                  children: [
-                    IconButton(
-                      onPressed: controller.onNotificationTapped,
-                      icon: const Icon(Icons.notifications_outlined,
-                          color: _AppColors.textPrimary, size: 26),
-                    ),
-                    if (controller.unreadNotifCount.value > 0)
-                      Positioned(
-                        right: 8,
-                        top: 8,
-                        child: Container(
-                          width: 16,
-                          height: 16,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            '${controller.unreadNotifCount.value}',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                )),
-          ],
-        ),
+  Widget _buildAppBar(HomeController controller) {
+    return Obx(
+      () => AppHomeAppBar(
+        title: 'Halo, ${controller.currentUser.value.name}',
+        subtitle: 'Mahasiswa JTK',
+        avatarIcon: Icons.person_rounded,
+        unreadCount: controller.unreadNotifCount.value,
+        onNotificationTap: controller.onNotificationTapped,
       ),
     );
   }
 
   Widget _buildBottomNavBar(HomeController controller) {
-    final items = BottomNavItemModel.items();
-    final icons = [
-      Icons.home_rounded,
-      Icons.grid_view_rounded,
-      Icons.campaign_rounded,
-      Icons.person_rounded,
+    const items = [
+      AppNavItem(label: 'Home', icon: Icons.home_rounded),
+      AppNavItem(label: 'Layanan', icon: Icons.grid_view_rounded),
+      AppNavItem(label: 'Aspirasi', icon: Icons.campaign_rounded),
+      AppNavItem(label: 'Profil', icon: Icons.person_rounded),
     ];
 
-    return Obx(() => Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-          ),
-          child: SafeArea(
-            child: SizedBox(
-              height: 60,
-              child: Row(
-                children: List.generate(items.length, (i) {
-                  final active = controller.selectedNavIndex.value == i;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => controller.onNavItemTapped(i),
-                      behavior: HitTestBehavior.opaque,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            icons[i],
-                            size: 24,
-                            color: active
-                                ? _AppColors.navActive
-                                : _AppColors.navInactive,
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            items[i].label,
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: active
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              color: active
-                                  ? _AppColors.navActive
-                                  : _AppColors.navInactive,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ),
-        ));
+    return Obx(
+      () => AppBottomNavBar(
+        items: items,
+        selectedIndex: controller.selectedNavIndex.value,
+        onTap: (index) => controller.onNavItemTapped(context, index),
+      ),
+    );
   }
 }
 
@@ -261,7 +153,7 @@ class _SectionHeader extends StatelessWidget {
           ),
           if (showFlame) ...[
             const SizedBox(width: 4),
-            const Text('🔥', style: TextStyle(fontSize: 16)),
+            const Text('ðŸ”¥', style: TextStyle(fontSize: 16)),
           ],
           const Spacer(),
           GestureDetector(
@@ -310,24 +202,24 @@ class _KalenderCarousel extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           // Page indicator dots
-          Obx(() => Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(list.length, (i) {
-                  final active = controller.activeKalenderIndex.value == i;
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: active ? 20 : 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: active
-                          ? _AppColors.primary
-                          : _AppColors.divider,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  );
-                }),
-              )),
+          Obx(
+            () => Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(list.length, (i) {
+                final active = controller.activeKalenderIndex.value == i;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: active ? 20 : 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: active ? _AppColors.primary : _AppColors.divider,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                );
+              }),
+            ),
+          ),
         ],
       );
     });
@@ -353,7 +245,7 @@ class _KalenderCard extends StatelessWidget {
             color: Colors.black.withValues(alpha: 20),
             blurRadius: 8,
             offset: const Offset(0, 2),
-          )
+          ),
         ],
       ),
       padding: const EdgeInsets.all(16),
@@ -365,8 +257,10 @@ class _KalenderCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: isDark
                       ? Colors.white.withValues(alpha: 38)
@@ -457,7 +351,7 @@ class _AksesCepatGrid extends StatelessWidget {
             return _AksesCepatItem(
               item: item,
               icon: _iconMap[item.iconAsset] ?? Icons.circle_outlined,
-              onTap: () => controller.onAksesCepatTapped(item.route),
+              onTap: () => controller.onAksesCepatTapped(context, item.route),
             );
           },
         ),
@@ -524,8 +418,10 @@ class _AspirasiList extends StatelessWidget {
         return const Padding(
           padding: EdgeInsets.all(32),
           child: Center(
-            child: Text('Belum ada aspirasi',
-                style: TextStyle(color: _AppColors.textSecondary)),
+            child: Text(
+              'Belum ada aspirasi',
+              style: TextStyle(color: _AppColors.textSecondary),
+            ),
           ),
         );
       }
@@ -535,10 +431,8 @@ class _AspirasiList extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: list.length,
-        separatorBuilder: (_, _) => const Divider(
-          height: 1,
-          color: _AppColors.divider,
-        ),
+        separatorBuilder: (_, _) =>
+            const Divider(height: 1, color: _AppColors.divider),
         itemBuilder: (context, index) {
           return _AspirasiCard(
             aspirasi: list[index],
@@ -632,7 +526,9 @@ class _AspirasiCard extends StatelessWidget {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 3),
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: _tagBgColor,
                         borderRadius: BorderRadius.circular(4),
