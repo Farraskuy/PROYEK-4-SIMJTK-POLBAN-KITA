@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import '../model/penghapusan_model.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
+ 
 
 class PenghapusanController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -36,8 +36,8 @@ class PenghapusanController extends GetxController {
     if (rows.length > 1) rows.removeAt(index);
   }
 
-  Future<void> submit() async {
-    if (!formKey.currentState!.validate()) return;
+  Future<bool> submit() async {
+    if (!formKey.currentState!.validate()) return false;
     isSubmitting.value = true;
     await Future.delayed(const Duration(milliseconds: 400));
 
@@ -63,13 +63,13 @@ class PenghapusanController extends GetxController {
     );
 
     isSubmitting.value = false;
-    AppNavigator.pop();
     Get.snackbar(
       'Berhasil',
       'Usulan penghapusan disimpan',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green.shade100,
     );
+    return true;
   }
 
   @override

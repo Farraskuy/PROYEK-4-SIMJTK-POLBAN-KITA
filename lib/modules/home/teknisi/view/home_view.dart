@@ -12,6 +12,8 @@ import '../view/kontrol_barang_view.dart';
 import '../view/usulan_pemeliharaan_view.dart';
 import '../view/penghapusan_view.dart';
 import '../../../log_harian_teknis/view/log_harian_teknis_view.dart';
+import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
+import '../../../riwayat_tugas/view/riwayat_tugas_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 
@@ -281,7 +283,7 @@ class HomeTeknisiView extends StatelessWidget {
                       const SizedBox(height: 28),
 
                       // ---- TUGAS MENDESAK ----
-                      _buildTugasMendesakHeader(),
+                      _buildTugasMendesakHeader(context),
                       const SizedBox(height: 12),
                       _buildTugasMendesakList(ctrl),
                       const SizedBox(height: 28),
@@ -293,7 +295,7 @@ class HomeTeknisiView extends StatelessWidget {
           ),
         );
       }),
-      bottomNavigationBar: _buildBottomNavBar(ctrl),
+      bottomNavigationBar: _buildBottomNavBar(context, ctrl),
     );
   }
 
@@ -540,7 +542,7 @@ class HomeTeknisiView extends StatelessWidget {
   // ============================================================
   // TUGAS MENDESAK HEADER
   // ============================================================
-  Widget _buildTugasMendesakHeader() {
+  Widget _buildTugasMendesakHeader(BuildContext context) {
     return Row(
       children: [
         const Text(
@@ -622,7 +624,27 @@ class HomeTeknisiView extends StatelessWidget {
   // ============================================================
   // BOTTOM NAV BAR
   // ============================================================
-  Widget _buildBottomNavBar(HomeTeknisiController ctrl) {
+  void _navigateBottomBar(BuildContext context, HomeTeknisiNavTarget? target) {
+    if (target == null) return;
+    if (target == HomeTeknisiNavTarget.tugas) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              const LaporanFasilitasMahasiswaView(role: 'teknisi'),
+        ),
+      );
+      return;
+    }
+    if (target == HomeTeknisiNavTarget.riwayat) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const RiwayatTugasView()),
+      );
+    }
+  }
+
+  Widget _buildBottomNavBar(BuildContext context, HomeTeknisiController ctrl) {
     const items = [
       AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
       AppNavItem(label: 'Tugas', icon: Icons.assignment_rounded),
@@ -634,7 +656,7 @@ class HomeTeknisiView extends StatelessWidget {
       () => AppBottomNavBar(
         items: items,
         selectedIndex: ctrl.selectedNavIndex.value,
-          onTap: (index) => ctrl.onNavTapped(context, index),
+        onTap: (index) => _navigateBottomBar(context, ctrl.onNavTapped(index)),
       ),
     );
   }

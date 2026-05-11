@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/home_controller.dart';
 import '../model/home_model.dart';
+import '../../../aspirasi/view/aspirasi_view.dart';
+import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 
@@ -79,7 +81,10 @@ class HomeView extends StatelessWidget {
                     _SectionHeader(
                       title: 'Aspirasi Trending',
                       showFlame: true,
-                      onLihatSemua: () => controller.onLihatSemuaAspirasi(context),
+                      onLihatSemua: () => _navigateMahasiswa(
+                        context,
+                        controller.onLihatSemuaAspirasi(),
+                      ),
                     ),
                     const SizedBox(height: 12),
                     _AspirasiList(controller: controller),
@@ -92,7 +97,7 @@ class HomeView extends StatelessWidget {
         );
       }),
 
-      bottomNavigationBar: _buildBottomNavBar(controller),
+      bottomNavigationBar: _buildBottomNavBar(context, controller),
     );
   }
 
@@ -108,7 +113,7 @@ class HomeView extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavBar(HomeController controller) {
+  Widget _buildBottomNavBar(BuildContext context, HomeController controller) {
     const items = [
       AppNavItem(label: 'Home', icon: Icons.home_rounded),
       AppNavItem(label: 'Layanan', icon: Icons.grid_view_rounded),
@@ -120,7 +125,8 @@ class HomeView extends StatelessWidget {
       () => AppBottomNavBar(
         items: items,
         selectedIndex: controller.selectedNavIndex.value,
-        onTap: (index) => controller.onNavItemTapped(context, index),
+        onTap: (index) =>
+            _navigateMahasiswa(context, controller.onNavItemTapped(index)),
       ),
     );
   }
@@ -351,12 +357,32 @@ class _AksesCepatGrid extends StatelessWidget {
             return _AksesCepatItem(
               item: item,
               icon: _iconMap[item.iconAsset] ?? Icons.circle_outlined,
-              onTap: () => controller.onAksesCepatTapped(context, item.route),
+              onTap: () => _navigateMahasiswa(
+                context,
+                controller.onAksesCepatTapped(item.route),
+              ),
             );
           },
         ),
       );
     });
+  }
+}
+
+void _navigateMahasiswa(BuildContext context, MahasiswaNavTarget? target) {
+  if (target == null) return;
+  if (target == MahasiswaNavTarget.laporanFasilitas) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LaporanFasilitasMahasiswaView()),
+    );
+    return;
+  }
+  if (target == MahasiswaNavTarget.aspirasi) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AspirasiView()),
+    );
   }
 }
 

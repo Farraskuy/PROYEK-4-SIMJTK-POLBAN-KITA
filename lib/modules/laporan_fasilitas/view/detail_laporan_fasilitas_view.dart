@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/detail_laporan_fasilitas_controller.dart';
 import '../model/laporan_fasilitas_model.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
+ 
 
 class DetailLaporanFasilitasView extends StatefulWidget {
   final String laporanId;

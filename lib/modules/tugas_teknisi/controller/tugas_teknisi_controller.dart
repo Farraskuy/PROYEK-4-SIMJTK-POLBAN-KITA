@@ -1,12 +1,8 @@
 // lib/modules/home/teknisi/tugas/controller/daftar_tugas_controller.dart
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/tugas_teknisi_model.dart';
 import '../../laporan_fasilitas/model/laporan_fasilitas_model.dart';
-import '../../laporan_fasilitas/view/selesaikan_tugas_view.dart';
-import '../../laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
 
 class DaftarTugasController extends GetxController {
   // --------------------------------------------------------
@@ -71,18 +67,10 @@ class DaftarTugasController extends GetxController {
     _applyFilter();
   }
 
-  void onItemTapped(ItemTugasModel tugas) {
-    // FIXED: Menggunakan role 'teknisi' agar sesuai dengan logika View
-    AppNavigator.push(
-      DetailLaporanFasilitasView(laporanId: tugas.id, role: 'teknisi'),
-    );
-  }
+  String onItemTapped(ItemTugasModel tugas) => tugas.id;
 
-  void onSelesaikan(ItemTugasModel tugas) {
-    // Konversi ItemTugas ke LaporanFasilitasModel untuk form penyelesaian
-    final laporan = _convertToLaporanFasilitas(tugas);
-    AppNavigator.push(SelesaikanTugasView(laporan: laporan));
-  }
+  LaporanFasilitasModel onSelesaikan(ItemTugasModel tugas) =>
+      _convertToLaporanFasilitas(tugas);
 
   /// Konversi ItemTugasModel ke LaporanFasilitasModel
   /// Sesuai dengan skema database Farras (_id, foto_urls, teknisi_id)

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/kontrol_barang_model.dart';
 import 'package:uuid/uuid.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
+ 
 
 class DataKontrolBarangController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -77,8 +77,8 @@ class DataKontrolBarangController extends GetxController {
     aplikasiCtrls.removeAt(index);
   }
 
-  Future<void> submit() async {
-    if (!formKey.currentState!.validate()) return;
+  Future<bool> submit() async {
+    if (!formKey.currentState!.validate()) return false;
     isSubmitting.value = true;
     await Future.delayed(const Duration(milliseconds: 500));
 
@@ -122,13 +122,13 @@ class DataKontrolBarangController extends GetxController {
 
     dataList.add(data);
     isSubmitting.value = false;
-    AppNavigator.pop();
     Get.snackbar(
       'Berhasil',
       'Data kontrol barang disimpan',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green.shade100,
     );
+    return true;
   }
 
   @override

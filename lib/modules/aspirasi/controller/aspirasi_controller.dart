@@ -10,7 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/aspirasi_model.dart';
 
-class AspirasiController extends GetxController
+class AspirasiController  
+    extends GetxController
     with GetSingleTickerProviderStateMixin {
   // --------------------------------------------------------
   // TAB CONTROLLER
@@ -172,38 +173,12 @@ class AspirasiController extends GetxController
     showForm.value = true;
   }
 
+  bool get hasDraft => isiSaranController.text.isNotEmpty;
+
   /// Tutup form dan kembali ke list
-  void onTutupForm(BuildContext context) {
-    if (isiSaranController.text.isNotEmpty) {
-      Get.dialog(
-        AlertDialog(
-          title: const Text('Batalkan Aspirasi?'),
-          content: const Text(
-            'Teks yang sudah Anda tulis akan hilang. Yakin ingin kembali?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Tidak'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _resetForm();
-                showForm.value = false;
-              },
-              child: const Text(
-                'Ya, Hapus',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      _resetForm();
-      showForm.value = false;
-    }
+  void onTutupFormConfirmed() {
+    _resetForm();
+    showForm.value = false;
   }
 
   // --------------------------------------------------------
@@ -216,27 +191,10 @@ class AspirasiController extends GetxController
   }
 
   /// Hapus isi form
-  void onHapusForm(BuildContext context) {
-    if (isiSaranController.text.isEmpty) return;
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Hapus Tulisan?'),
-        content: const Text('Teks yang sudah ditulis akan dihapus.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _resetForm();
-            },
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+  bool canHapusForm() => isiSaranController.text.isNotEmpty;
+
+  void onHapusFormConfirmed() {
+    _resetForm();
   }
 
   /// Submit aspirasi baru

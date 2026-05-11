@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import '../model/home_model.dart';
+
+enum HomeTuNavTarget { laporanFasilitas }
 
 class HomeTuController extends GetxController {
   final Rx<TuHomeModel> state = TuHomeModel.placeholder().obs;
@@ -18,32 +18,22 @@ class HomeTuController extends GetxController {
 
   void onNotificationTapped() => unreadNotif.value = 0;
 
-  void onNavTapped(BuildContext context, int index) {
+  HomeTuNavTarget? onNavTapped(int index) {
     selectedNavIndex.value = index;
     if (index == 1 || index == 2) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const LaporanFasilitasMahasiswaView(role: 'tu'),
-        ),
-      );
-      return;
+      return HomeTuNavTarget.laporanFasilitas;
     }
     if (index != 0) {
       Get.snackbar('Navigasi TU', 'Menu ini sedang disiapkan.');
     }
+    return null;
   }
 
-  void onQuickAction(BuildContext context, String label) {
+  HomeTuNavTarget? onQuickAction(String label) {
     if (label == 'Surat Keterangan' || label == 'Arsip Layanan') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const LaporanFasilitasMahasiswaView(role: 'tu'),
-        ),
-      );
-      return;
+      return HomeTuNavTarget.laporanFasilitas;
     }
     Get.snackbar('Akses Cepat', 'Menu $label sedang disiapkan.');
+    return null;
   }
 }

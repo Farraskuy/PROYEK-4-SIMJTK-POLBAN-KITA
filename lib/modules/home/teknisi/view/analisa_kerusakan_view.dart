@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import '../controller/analisa_kerusakan_controller.dart';
 import '../model/analisa_kerusakan_model.dart';
 import 'form_analisa_view.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
+ 
 
 class AnalisaKerusakanView extends StatelessWidget {
   const AnalisaKerusakanView({super.key});
@@ -18,7 +18,7 @@ class AnalisaKerusakanView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
-      appBar: _buildAppBar(ctrl),
+      appBar: _buildAppBar(ctrl, context),
       body: Obx(() {
         if (ctrl.isLoading.value) {
           return const Center(
@@ -30,7 +30,7 @@ class AnalisaKerusakanView extends StatelessWidget {
           onRefresh: ctrl.loadData,
           child: CustomScrollView(
             slivers: [
-              // â”€â”€ Header stats â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+              //  Header stats 
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
@@ -56,7 +56,7 @@ class AnalisaKerusakanView extends StatelessWidget {
 
                       // Banner laporan belum dianalisa
                       if (ctrl.laporanBelumDianalisa.isNotEmpty)
-                        _buildPendingBanner(ctrl),
+                        _buildPendingBanner(context, ctrl),
                       const SizedBox(height: 8),
 
                       // Filter chips
@@ -76,7 +76,7 @@ class AnalisaKerusakanView extends StatelessWidget {
                 ),
               ),
 
-              // â”€â”€ List analisa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+              //  List analisa 
               Obx(
                 () => ctrl.filteredAnalisa.isEmpty
                     ? SliverFillRemaining(child: _buildEmpty())
@@ -100,7 +100,10 @@ class AnalisaKerusakanView extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           ctrl.resetForm();
-          AppNavigator.push(const FormAnalisaView());
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FormAnalisaView()),
+          );
         },
         backgroundColor: _primary,
         icon: const Icon(Icons.add, color: Colors.white),
@@ -112,13 +115,16 @@ class AnalisaKerusakanView extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(AnalisaKerusakanController ctrl) {
+  PreferredSizeWidget _buildAppBar(
+    AnalisaKerusakanController ctrl,
+    BuildContext context,
+  ) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: _primary),
-        onPressed: () => AppNavigator.pop(),
+        onPressed: () => Navigator.pop(context),
       ),
       titleSpacing: 0,
       title: Row(
@@ -229,12 +235,18 @@ class AnalisaKerusakanView extends StatelessWidget {
     });
   }
 
-  Widget _buildPendingBanner(AnalisaKerusakanController ctrl) {
+  Widget _buildPendingBanner(
+    BuildContext context,
+    AnalisaKerusakanController ctrl,
+  ) {
     return Obx(
       () => GestureDetector(
         onTap: () {
           ctrl.resetForm();
-          AppNavigator.push(const FormAnalisaView());
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const FormAnalisaView()),
+          );
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -344,7 +356,7 @@ class AnalisaKerusakanView extends StatelessWidget {
   }
 }
 
-// â”€â”€ Stat Chip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//  Stat Chip 
 
 class _StatChip extends StatelessWidget {
   final String label;
@@ -406,7 +418,7 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-// â”€â”€ Analisa Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//  Analisa Card 
 
 class _AnalisaCard extends StatelessWidget {
   final AnalisaKerusakanModel analisa;
@@ -444,7 +456,7 @@ class _AnalisaCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // â”€â”€ Top: kategori + tingkat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Top: kategori + tingkat 
             Row(
               children: [
                 Container(
@@ -520,7 +532,7 @@ class _AnalisaCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // â”€â”€ No. Kerusakan + Nama Alat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  No. Kerusakan + Nama Alat 
             Row(
               children: [
                 Text(
@@ -576,7 +588,7 @@ class _AnalisaCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // â”€â”€ Analisa Masalah (ringkasan) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Analisa Masalah (ringkasan) 
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(10),
@@ -613,7 +625,7 @@ class _AnalisaCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // â”€â”€ Rekomendasi Perbaikan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Rekomendasi Perbaikan 
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(10),
@@ -660,7 +672,7 @@ class _AnalisaCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // â”€â”€ Rekomendasi Tempat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Rekomendasi Tempat 
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -682,7 +694,7 @@ class _AnalisaCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // â”€â”€ Meta info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Meta info 
             Wrap(
               spacing: 12,
               runSpacing: 4,
@@ -702,7 +714,7 @@ class _AnalisaCard extends StatelessWidget {
             ),
             const SizedBox(height: 10),
 
-            // â”€â”€ Footer: sync + tanggal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Footer: sync + tanggal 
             Row(
               children: [
                 _SyncBadge(status: analisa.syncStatus),

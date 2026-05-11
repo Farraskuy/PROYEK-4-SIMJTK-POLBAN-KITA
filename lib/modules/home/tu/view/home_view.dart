@@ -4,6 +4,7 @@ import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_dashboard_components.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
+import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import '../controller/home_controller.dart';
 
 class HomeTuView extends StatelessWidget {
@@ -73,37 +74,25 @@ class HomeTuView extends StatelessWidget {
                           label: 'Surat Keterangan',
                           icon: Icons.description_rounded,
                           color: AppColors.primary,
-                          onTap: () => controller.onQuickAction(
-                            context,
-                            'Surat Keterangan',
-                          ),
+                          onTap: () => _navigate(context, controller.onQuickAction('Surat Keterangan')),
                         ),
                         AppQuickAction(
                           label: 'Kalender Akademik',
                           icon: Icons.event_note_rounded,
                           color: AppColors.success,
-                          onTap: () => controller.onQuickAction(
-                            context,
-                            'Kalender Akademik',
-                          ),
+                          onTap: () => _navigate(context, controller.onQuickAction('Kalender Akademik')),
                         ),
                         AppQuickAction(
                           label: 'Data Mahasiswa',
                           icon: Icons.groups_rounded,
                           color: AppColors.warning,
-                          onTap: () => controller.onQuickAction(
-                            context,
-                            'Data Mahasiswa',
-                          ),
+                          onTap: () => _navigate(context, controller.onQuickAction('Data Mahasiswa')),
                         ),
                         AppQuickAction(
                           label: 'Arsip Layanan',
                           icon: Icons.inventory_2_rounded,
                           color: AppColors.purple,
-                          onTap: () => controller.onQuickAction(
-                            context,
-                            'Arsip Layanan',
-                          ),
+                          onTap: () => _navigate(context, controller.onQuickAction('Arsip Layanan')),
                         ),
                       ],
                     ),
@@ -130,10 +119,22 @@ class HomeTuView extends StatelessWidget {
             AppNavItem(label: 'Profil', icon: Icons.person_rounded),
           ],
           selectedIndex: controller.selectedNavIndex.value,
-          onTap: (index) => controller.onNavTapped(context, index),
+          onTap: (index) => _navigate(context, controller.onNavTapped(index)),
         ),
       ),
     );
+  }
+
+  void _navigate(BuildContext context, HomeTuNavTarget? target) {
+    if (target == null) return;
+    if (target == HomeTuNavTarget.laporanFasilitas) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LaporanFasilitasMahasiswaView(role: 'tu'),
+        ),
+      );
+    }
   }
 }
 

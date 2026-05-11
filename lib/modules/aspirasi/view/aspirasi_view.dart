@@ -50,7 +50,7 @@ class AspirasiView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _C.surface,
-      appBar: _buildAppBar(ctrl),
+      appBar: _buildAppBar(context, ctrl),
       body: Obx(
         () => ctrl.showForm.value
             ? _AspirasiFormPage(ctrl: ctrl)
@@ -72,12 +72,15 @@ class AspirasiView extends StatelessWidget {
                 ),
               ),
       ),
-      bottomNavigationBar: _buildBottomNavBar(ctrl),
+      bottomNavigationBar: _buildBottomNavBar(context, ctrl),
     );
   }
 
   // ---- APP BAR ----
-  PreferredSizeWidget _buildAppBar(AspirasiController ctrl) {
+  PreferredSizeWidget _buildAppBar(
+    BuildContext context,
+    AspirasiController ctrl,
+  ) {
     return AppBar(
       backgroundColor: _C.white,
       elevation: 0,
@@ -87,7 +90,7 @@ class AspirasiView extends StatelessWidget {
             ? Row(
                 children: [
                   GestureDetector(
-                    onTap: () => ctrl.onTutupForm(context),
+                    onTap: () => _handleTutupForm(context, ctrl),
                     child: const Icon(
                       Icons.arrow_back_rounded,
                       color: _C.textPrimary,
@@ -147,7 +150,7 @@ class AspirasiView extends StatelessWidget {
   }
 
   // ---- BOTTOM NAV ----
-  Widget _buildBottomNavBar(AspirasiController ctrl) {
+  Widget _buildBottomNavBar(BuildContext context, AspirasiController ctrl) {
     const items = [
       {'label': 'Home', 'icon': Icons.home_rounded},
       {'label': 'Layanan', 'icon': Icons.grid_view_rounded},
@@ -491,7 +494,7 @@ class _AspirasiFormPage extends StatelessWidget {
                   child: SizedBox(
                     height: 50,
                     child: OutlinedButton(
-                      onPressed: () => ctrl.onHapusForm(context),
+                      onPressed: () => _handleHapusForm(context, ctrl),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: _C.errorColor,
                         side: const BorderSide(
@@ -860,5 +863,66 @@ class _VoteButton extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Future<void> _handleTutupForm(
+  BuildContext context,
+  AspirasiController controller,
+) async {
+  if (!controller.hasDraft) {
+    controller.onTutupFormConfirmed();
+    return;
+  }
+
+  final shouldDiscard = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Batalkan Aspirasi?'),
+      content: const Text(
+        'Teks yang sudah Anda tulis akan hilang. Yakin ingin kembali?',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Tidak'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Ya, Hapus', style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
+  );
+
+  if (shouldDiscard == true) {
+    controller.onTutupFormConfirmed();
+  }
+}
+
+Future<void> _handleHapusForm(
+  BuildContext context,
+  AspirasiController controller,
+) async {
+  if (!controller.canHapusForm()) return;
+  final shouldDelete = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Hapus Tulisan?'),
+      content: const Text('Teks yang sudah ditulis akan dihapus.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Batal'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+        ),
+      ],
+    ),
+  );
+  if (shouldDelete == true) {
+    controller.onHapusFormConfirmed();
   }
 }

@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/analisa_kerusakan_model.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/app_navigator.dart';
+ 
 
 class AnalisaKerusakanController extends GetxController {
-  // â”€â”€ State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //  State 
   final RxList<AnalisaKerusakanModel> analisaList =
       <AnalisaKerusakanModel>[].obs;
   final RxList<LaporanSingkat> laporanAktif = <LaporanSingkat>[].obs;
@@ -14,7 +14,7 @@ class AnalisaKerusakanController extends GetxController {
   final RxString errorMessage = ''.obs;
   final RxString filterKategori = 'semua'.obs;
 
-  // â”€â”€ Form state (sesuai Formulir POLBAN) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //  Form state (sesuai Formulir POLBAN) 
   final Rx<LaporanSingkat?> selectedLaporan = Rx<LaporanSingkat?>(null);
 
   // Identitas alat
@@ -40,7 +40,7 @@ class AnalisaKerusakanController extends GetxController {
 
   final RxBool isSubmitting = false.obs;
 
-  // â”€â”€ TextEditingControllers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //  TextEditingControllers 
   late final TextEditingController namaAlatCtrl;
   late final TextEditingController kodeAlatCtrl;
   late final TextEditingController noInventarisCtrl;
@@ -84,7 +84,7 @@ class AnalisaKerusakanController extends GetxController {
     super.onClose();
   }
 
-  // â”€â”€ Load â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //  Load 
 
   Future<void> loadData() async {
     isLoading.value = true;
@@ -101,7 +101,7 @@ class AnalisaKerusakanController extends GetxController {
     }
   }
 
-  // â”€â”€ Getters / Filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //  Getters / Filter 
 
   List<AnalisaKerusakanModel> get filteredAnalisa {
     if (filterKategori.value == 'semua') return analisaList;
@@ -121,7 +121,7 @@ class AnalisaKerusakanController extends GetxController {
   // Lokasi diambil langsung dari laporan yang dipilih
   String get lokasiDariLaporan => selectedLaporan.value?.lokasi ?? '';
 
-  // â”€â”€ Form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //  Form 
 
   void resetForm() {
     selectedLaporan.value = null;
@@ -156,40 +156,40 @@ class AnalisaKerusakanController extends GetxController {
     tingkatKerusakan.value = t;
   }
 
-  // â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //  Submit 
 
-  Future<void> submitAnalisa() async {
+  Future<bool> submitAnalisa() async {
     if (selectedLaporan.value == null) {
       _showError('Pilih laporan terlebih dahulu');
-      return;
+      return false;
     }
     if (namaAlatCtrl.text.trim().isEmpty) {
       _showError('Isi nama alat');
-      return;
+      return false;
     }
     if (kodeAlatCtrl.text.trim().isEmpty) {
       _showError('Isi kode alat');
-      return;
+      return false;
     }
     if (noInventarisCtrl.text.trim().isEmpty) {
       _showError('Isi nomor inventaris');
-      return;
+      return false;
     }
     if (noKerusakanCtrl.text.trim().isEmpty) {
       _showError('Isi nomor kerusakan');
-      return;
+      return false;
     }
     if (analisaMasalahCtrl.text.trim().isEmpty) {
       _showError('Isi analisa masalah');
-      return;
+      return false;
     }
     if (rekomendasiPerbaikanCtrl.text.trim().isEmpty) {
       _showError('Isi rekomendasi perbaikan');
-      return;
+      return false;
     }
     if (rekomendasiTempatCtrl.text.trim().isEmpty) {
       _showError('Isi rekomendasi tempat perbaikan');
-      return;
+      return false;
     }
 
     isSubmitting.value = true;
@@ -227,7 +227,6 @@ class AnalisaKerusakanController extends GetxController {
       // TODO: simpan ke MongoDB via service
       analisaList.insert(0, newAnalisa);
 
-      AppNavigator.pop();
       Get.snackbar(
         'Berhasil',
         'Formulir analisa kerusakan berhasil disimpan',
@@ -238,8 +237,10 @@ class AnalisaKerusakanController extends GetxController {
         duration: const Duration(seconds: 3),
       );
       resetForm();
+      return true;
     } catch (e) {
       _showError('Gagal menyimpan: $e');
+      return false;
     } finally {
       isSubmitting.value = false;
     }
@@ -256,7 +257,7 @@ class AnalisaKerusakanController extends GetxController {
     );
   }
 
-  // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  //  Helpers 
 
   String formatRupiah(double? val) {
     if (val == null) return '-';
