@@ -1,13 +1,10 @@
 // lib/modules/home/controller/home_controller.dart
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import '../model/home_model.dart';
 
-// FIX: Import path disesuaikan (naik 2 tingkat folder) agar class dikenali[cite: 3, 6]
-import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
-import '../../../aspirasi/view/aspirasi_view.dart';
+enum MahasiswaNavTarget { laporanFasilitas, aspirasi }
 
 class HomeController extends GetxController {
   // --------------------------------------------------------
@@ -63,28 +60,16 @@ class HomeController extends GetxController {
   // --------------------------------------------------------
 
   /// Navigasi dari Bottom Navigation Bar[cite: 6]
-  void onNavItemTapped(BuildContext context, int index) {
+  MahasiswaNavTarget? onNavItemTapped(int index) {
     selectedNavIndex.value = index;
     switch (index) {
       case 0:
         // Home
-        break;
+        return null;
       case 1:
-        // Layanan - Redirect ke Laporan Fasilitas[cite: 6]
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LaporanFasilitasMahasiswaView(),
-          ),
-        );
-        break;
+        return MahasiswaNavTarget.laporanFasilitas;
       case 2:
-        // Aspirasi
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AspirasiView()),
-        );
-        break;
+        return MahasiswaNavTarget.aspirasi;
       case 3:
         // Profil
         Get.snackbar(
@@ -92,8 +77,9 @@ class HomeController extends GetxController {
           'Menuju Profil...',
           snackPosition: SnackPosition.BOTTOM,
         );
-        break;
+        return null;
     }
+    return null;
   }
 
   void onKalenderPageChanged(int index) {
@@ -147,74 +133,62 @@ class HomeController extends GetxController {
 
   void onLihatSemuaKalender() {}
   void onLihatSemuaAksesCepat() {}
-  void onLihatSemuaAspirasi(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AspirasiView()),
-    );
-  }
+  MahasiswaNavTarget onLihatSemuaAspirasi() => MahasiswaNavTarget.aspirasi;
 
   /// Navigasi dari Grid Akses Cepat di Dashboard[cite: 6]
-  void onAksesCepatTapped(BuildContext context, AksesCepatRoute route) {
+  MahasiswaNavTarget? onAksesCepatTapped(AksesCepatRoute route) {
     switch (route) {
       case AksesCepatRoute.laporFasilitas:
-        // Menuju Halaman Laporan Fasilitas[cite: 6]
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LaporanFasilitasMahasiswaView(),
-          ),
-        );
-        break;
+        return MahasiswaNavTarget.laporanFasilitas;
       case AksesCepatRoute.lostFound:
         Get.snackbar(
           'Akses Cepat',
           'Menuju Lost & Found...',
           snackPosition: SnackPosition.BOTTOM,
         );
-        break;
+        return null;
       case AksesCepatRoute.beasiswa:
         Get.snackbar(
           'Akses Cepat',
           'Menuju Beasiswa...',
           snackPosition: SnackPosition.BOTTOM,
         );
-        break;
+        return null;
       case AksesCepatRoute.suratKeterangan:
         Get.snackbar(
           'Akses Cepat',
           'Menuju Surat Keterangan...',
           snackPosition: SnackPosition.BOTTOM,
         );
-        break;
+        return null;
       case AksesCepatRoute.izinLab:
         Get.snackbar(
           'Akses Cepat',
           'Menuju Izin Lab...',
           snackPosition: SnackPosition.BOTTOM,
         );
-        break;
+        return null;
       case AksesCepatRoute.peminjamanRuang:
         Get.snackbar(
           'Akses Cepat',
           'Menuju Peminjaman Ruang...',
           snackPosition: SnackPosition.BOTTOM,
         );
-        break;
+        return null;
       case AksesCepatRoute.jadwalKuliah:
         Get.snackbar(
           'Akses Cepat',
           'Menuju Jadwal Kuliah...',
           snackPosition: SnackPosition.BOTTOM,
         );
-        break;
+        return null;
       case AksesCepatRoute.infoUkt:
         Get.snackbar(
           'Akses Cepat',
           'Menuju Info UKT...',
           snackPosition: SnackPosition.BOTTOM,
         );
-        break;
+        return null;
     }
   }
 

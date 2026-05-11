@@ -10,8 +10,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/home_model.dart';
-import '../../../riwayat_tugas/view/riwayat_tugas_view.dart';
-import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
+
+enum HomeTeknisiNavTarget { tugas, riwayat }
 
 class HomeTeknisiController extends GetxController {
   // --------------------------------------------------------
@@ -86,25 +86,15 @@ class HomeTeknisiController extends GetxController {
   Future<void> onRefresh() async => await _loadData();
 
   /// Bottom nav tap
-  void onNavTapped(BuildContext context, int index) {
+  HomeTeknisiNavTarget? onNavTapped(int index) {
     selectedNavIndex.value = index;
-    // TODO: navigasi ke halaman lain
     switch (index) {
       case 1:
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                const LaporanFasilitasMahasiswaView(role: 'teknisi'),
-          ),
-        );
-        break;
+        return HomeTeknisiNavTarget.tugas;
       case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const RiwayatTugasView()),
-        );
-        break;
+        return HomeTeknisiNavTarget.riwayat;
+      default:
+        return null;
     }
   }
 

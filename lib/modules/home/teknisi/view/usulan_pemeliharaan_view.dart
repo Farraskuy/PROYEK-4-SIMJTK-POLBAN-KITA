@@ -119,7 +119,14 @@ class UsulanPemeliharaanView extends StatelessWidget {
             
             // ── TOMBOL SUBMIT ──
             Obx(() => ElevatedButton(
-              onPressed: c.isSubmitting.value ? null : c.submit,
+              onPressed: c.isSubmitting.value
+                  ? null
+                  : () async {
+                      final success = await c.submit();
+                      if (success && context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: _primary, 
                 padding: const EdgeInsets.symmetric(vertical: 14), 

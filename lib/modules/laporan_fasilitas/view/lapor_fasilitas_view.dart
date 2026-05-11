@@ -177,15 +177,23 @@ class LaporFasilitasView extends StatelessWidget {
     );
   }
 
-  Widget _buildSubmitButton(BuildContext context, LaporFasilitasController controller) {
+  Widget _buildSubmitButton(
+    BuildContext context,
+    LaporFasilitasController controller,
+  ) {
     return Obx(
       () => SizedBox(
         width: double.infinity,
         height: 52,
-        child: ElevatedButton(
-          onPressed: controller.isSubmitting.value
-              ? null
-              : () => controller.onSubmitLaporan(context),
+          child: ElevatedButton(
+            onPressed: controller.isSubmitting.value
+                ? null
+                : () async {
+                    final success = await controller.onSubmitLaporan();
+                    if (success && context.mounted) {
+                      Navigator.pop(context, true);
+                    }
+                  },
           style: ElevatedButton.styleFrom(
             backgroundColor: _AppColors.primary,
             shape: RoundedRectangleBorder(

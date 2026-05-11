@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import '../model/penghapusan_model.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart'; // ⚠️ Import Service
+import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 
 class PenghapusanController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -34,16 +34,14 @@ class PenghapusanController extends GetxController {
     if (rows.length > 1) rows.removeAt(index);
   }
 
-  Future<void> submit() async {
-    if (!formKey.currentState!.validate()) return;
+  Future<bool> submit() async {
+    if (!formKey.currentState!.validate()) return false;
     isSubmitting.value = true;
 
     try {
-      // 1. Sanitasi input angka
-      String cleanTahunUsulan = tahunUsulanCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
-      String cleanTahunAnggaran = tahunAnggaranCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final cleanTahunUsulan = tahunUsulanCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final cleanTahunAnggaran = tahunAnggaranCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
 
-      // 2. Buat Model
       final newUsulan = PenghapusanModel(
         id: const Uuid().v4(),
         teknisiId: 'TKS001',
@@ -59,17 +57,27 @@ class PenghapusanController extends GetxController {
         createdAt: DateTime.now(),
       );
 
-      // 3. Simpan ke Database
       final dbService = MonggoDBServices();
       await dbService.ensureConnected();
       await dbService.insertData('usulan_penghapusan', newUsulan.toJson());
 
-      // 4. Update UI
       dataList.add(newUsulan);
       Get.back();
-      Get.snackbar('Berhasil', 'Usulan penghapusan disimpan ke Database', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green.shade100);
+      Get.snackbar(
+        'Berhasil',
+        'Usulan penghapusan disimpan ke Database',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.shade100,
+      );
+      return true;
     } catch (e) {
-      Get.snackbar('Gagal', 'Error: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red.shade100);
+      Get.snackbar(
+        'Gagal',
+        'Error: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+      );
+      return false;
     } finally {
       isSubmitting.value = false;
     }

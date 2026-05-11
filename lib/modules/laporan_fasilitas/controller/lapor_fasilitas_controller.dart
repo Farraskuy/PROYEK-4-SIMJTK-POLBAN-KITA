@@ -38,11 +38,11 @@ class LaporFasilitasController extends GetxController {
     selectedFotoPaths.assignAll(laporan.foto_urls);
   }
 
-  Future<void> onSubmitLaporan(BuildContext context) async {
+  Future<bool> onSubmitLaporan() async {
     if (lokasiController.text.trim().isEmpty ||
         deskripsiController.text.trim().isEmpty) {
       Get.snackbar('Error', 'Field Lokasi dan Deskripsi wajib diisi');
-      return;
+      return false;
     }
 
     isSubmitting.value = true;
@@ -85,15 +85,14 @@ class LaporFasilitasController extends GetxController {
         Get.snackbar('Sukses', 'Laporan berhasil terkirim');
       }
 
-      Navigator.pop(context, true);
+      return true;
     } catch (e) {
       Get.snackbar('Gagal', 'Terjadi kesalahan: $e');
+      return false;
     } finally {
       isSubmitting.value = false;
     }
   }
-
-  void onBatalKembali(BuildContext context) => Navigator.pop(context);
 
   @override
   void onClose() {

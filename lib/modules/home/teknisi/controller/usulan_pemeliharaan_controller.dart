@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import '../model/usulan_pemeliharaan_model.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart'; // ⚠️ Import Service
+import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 
 class UsulanPemeliharaanController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -18,7 +18,7 @@ class UsulanPemeliharaanController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    addRow(); 
+    addRow();
   }
 
   void addRow() {
@@ -38,26 +38,24 @@ class UsulanPemeliharaanController extends GetxController {
     if (rows.length > 1) rows.removeAt(index);
   }
 
-  Future<void> submit() async {
-    if (!formKey.currentState!.validate()) return;
+  Future<bool> submit() async {
+    if (!formKey.currentState!.validate()) return false;
     isSubmitting.value = true;
 
     try {
-      String cleanTahunUsulan = tahunUsulanCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
-      String cleanTahunAnggaran = tahunAnggaranCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final cleanTahunUsulan = tahunUsulanCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final cleanTahunAnggaran = tahunAnggaranCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
 
       final newUsulan = UsulanPemeliharaanModel(
         id: const Uuid().v4(),
-        teknisiId: 'TKS001', 
+        teknisiId: 'TKS001',
         tahunUsulan: int.tryParse(cleanTahunUsulan),
         tahunAnggaran: int.tryParse(cleanTahunAnggaran),
         pengelolaData: pengelolaCtrl.text.trim(),
         items: rows.map((r) {
-          // Sanitasi yang memungkinkan titik/koma desimal untuk volume, tapi hanya angka untuk harga
-          String cleanVol = r['vol']!.text.replaceAll(RegExp(r'[^0-9\.]'), ''); 
-          String cleanHarga = r['harga']!.text.replaceAll(RegExp(r'[^0-9]'), '');
-          String cleanJumlah = r['jumlah']!.text.replaceAll(RegExp(r'[^0-9]'), '');
-
+          final cleanVol = r['vol']!.text.replaceAll(RegExp(r'[^0-9\.]'), '');
+          final cleanHarga = r['harga']!.text.replaceAll(RegExp(r'[^0-9]'), '');
+          final cleanJumlah = r['jumlah']!.text.replaceAll(RegExp(r'[^0-9]'), '');
           return UsulanPemeliharaanItem(
             namaBarangAlat: r['nama']!.text.trim(),
             spesifikasi: r['spesifikasi']!.text.trim(),
@@ -78,9 +76,21 @@ class UsulanPemeliharaanController extends GetxController {
 
       dataList.add(newUsulan);
       Get.back();
-      Get.snackbar('Berhasil', 'Usulan pemeliharaan disimpan ke Database', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.green.shade100);
+      Get.snackbar(
+        'Berhasil',
+        'Usulan pemeliharaan disimpan ke Database',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.shade100,
+      );
+      return true;
     } catch (e) {
-      Get.snackbar('Gagal', 'Error: $e', snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red.shade100);
+      Get.snackbar(
+        'Gagal',
+        'Error: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+      );
+      return false;
     } finally {
       isSubmitting.value = false;
     }

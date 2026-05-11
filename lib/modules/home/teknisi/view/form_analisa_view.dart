@@ -18,17 +18,17 @@ class FormAnalisaView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _bg,
-      appBar: _buildAppBar(context, ctrl),
+      appBar: _buildAppBar(ctrl, context),
       body: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // â”€â”€ Kop Formulir â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Kop Formulir 
             _buildFormHeader(),
             const SizedBox(height: 16),
 
-            // â”€â”€ Pilih Laporan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Pilih Laporan 
             _buildSectionCard(
               title: 'Pilih Laporan',
               icon: Icons.assignment_outlined,
@@ -36,7 +36,7 @@ class FormAnalisaView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // â”€â”€ Identitas Alat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Identitas Alat 
             _buildSectionCard(
               title: 'Identitas Alat',
               icon: Icons.inventory_2_outlined,
@@ -44,7 +44,7 @@ class FormAnalisaView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // â”€â”€ Analisa Masalah â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Analisa Masalah 
             _buildSectionCard(
               title: 'Analisa Masalah',
               icon: Icons.search_outlined,
@@ -57,7 +57,7 @@ class FormAnalisaView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // â”€â”€ Rekomendasi Perbaikan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Rekomendasi Perbaikan 
             _buildSectionCard(
               title: 'Rekomendasi Perbaikan',
               icon: Icons.build_outlined,
@@ -69,7 +69,7 @@ class FormAnalisaView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // â”€â”€ Rekomendasi Tempat Perbaikan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Rekomendasi Tempat Perbaikan 
             _buildSectionCard(
               title: 'Rekomendasi Tempat Perbaikan',
               icon: Icons.location_on_outlined,
@@ -81,7 +81,7 @@ class FormAnalisaView extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // â”€â”€ Info Tambahan (opsional) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            //  Info Tambahan (opsional) 
             _buildSectionCard(
               title: 'Informasi Tambahan',
               icon: Icons.info_outline,
@@ -95,7 +95,10 @@ class FormAnalisaView extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, AnalisaKerusakanController ctrl) {
+  PreferredSizeWidget _buildAppBar(
+    AnalisaKerusakanController ctrl,
+    BuildContext context,
+  ) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -338,7 +341,10 @@ class FormAnalisaView extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomBar(BuildContext context, AnalisaKerusakanController ctrl) {
+  Widget _buildBottomBar(
+    BuildContext context,
+    AnalisaKerusakanController ctrl,
+  ) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       decoration: BoxDecoration(
@@ -379,7 +385,12 @@ class FormAnalisaView extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: ctrl.isSubmitting.value
                     ? null
-                    : () => ctrl.submitAnalisa(),
+                    : () async {
+                        final success = await ctrl.submitAnalisa();
+                        if (success && context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _primary,
                   foregroundColor: Colors.white,
@@ -418,7 +429,7 @@ class FormAnalisaView extends StatelessWidget {
   }
 }
 
-// â”€â”€ Laporan Picker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//  Laporan Picker 
 
 class _LaporanPicker extends StatelessWidget {
   final AnalisaKerusakanController ctrl;
@@ -600,7 +611,7 @@ class _LaporanTile extends StatelessWidget {
   }
 }
 
-// â”€â”€ Identitas Alat Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//  Identitas Alat Section 
 
 class _IdentitasAlatSection extends StatelessWidget {
   final AnalisaKerusakanController ctrl;
@@ -613,7 +624,7 @@ class _IdentitasAlatSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // â”€â”€ Dasar Pemeriksaan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        //  Dasar Pemeriksaan 
         _FormRow(
           label: 'Dasar Pemeriksaan',
           child: Obx(
@@ -652,7 +663,7 @@ class _IdentitasAlatSection extends StatelessWidget {
 
         const _FormDivider(),
 
-        // â”€â”€ Nama Alat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        //  Nama Alat 
         _FormRow(
           label: 'Nama Alat',
           child: _InlineTextField(
@@ -663,7 +674,7 @@ class _IdentitasAlatSection extends StatelessWidget {
 
         const _FormDivider(),
 
-        // â”€â”€ Kode Alat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        //  Kode Alat 
         _FormRow(
           label: 'Kode Alat',
           child: _InlineTextField(
@@ -674,7 +685,7 @@ class _IdentitasAlatSection extends StatelessWidget {
 
         const _FormDivider(),
 
-        // â”€â”€ No. Inventaris â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        //  No. Inventaris 
         _FormRow(
           label: 'No. Inventaris',
           child: _InlineTextField(
@@ -685,7 +696,7 @@ class _IdentitasAlatSection extends StatelessWidget {
 
         const _FormDivider(),
 
-        // â”€â”€ Lokasi (otomatis dari laporan) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        //  Lokasi (otomatis dari laporan) 
         Obx(
           () => _FormRow(
             label: 'Lokasi',
@@ -707,7 +718,7 @@ class _IdentitasAlatSection extends StatelessWidget {
 
         const _FormDivider(),
 
-        // â”€â”€ No. Kerusakan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        //  No. Kerusakan 
         _FormRow(
           label: 'No. Kerusakan',
           child: _InlineTextField(
@@ -720,7 +731,7 @@ class _IdentitasAlatSection extends StatelessWidget {
   }
 }
 
-// â”€â”€ Informasi Tambahan (opsional) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//  Informasi Tambahan (opsional) 
 
 class _InfoTambahanSection extends StatelessWidget {
   final AnalisaKerusakanController ctrl;
@@ -895,7 +906,7 @@ class _InfoTambahanSection extends StatelessWidget {
   }
 }
 
-// â”€â”€ Helper Widgets â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+//  Helper Widgets 
 
 /// Row dengan label kiri (seperti tabel surat) + konten kanan
 class _FormRow extends StatelessWidget {

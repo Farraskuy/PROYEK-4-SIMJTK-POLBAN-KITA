@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/detail_laporan_fasilitas_controller.dart';
 import '../model/laporan_fasilitas_model.dart';
+ 
 
 class DetailLaporanFasilitasView extends StatefulWidget {
   final String laporanId;
