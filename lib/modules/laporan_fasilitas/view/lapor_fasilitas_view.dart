@@ -1,9 +1,11 @@
 // lib/modules/laporan_fasilitas/view/lapor_fasilitas_view.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 import '../controller/lapor_fasilitas_controller.dart';
+import '../view/vision_view.dart';
 
 // ============================================================
 // DESIGN TOKENS
@@ -26,17 +28,59 @@ class _AppColors {
 // ============================================================
 // LAPOR FASILITAS VIEW
 // ============================================================
-class LaporFasilitasView extends StatelessWidget {
+class LaporFasilitasView extends StatefulWidget {
   const LaporFasilitasView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Inisialisasi controller[cite: 10, 27]
-    final controller = Get.put(LaporFasilitasController());
+  State<LaporFasilitasView> createState() => _LaporFasilitasViewState();
+}
 
+class _LaporFasilitasViewState extends State<LaporFasilitasView> {
+  // Ambil atau daftarkan instance controller menggunakan GetX lifecycle aman
+  final LaporFasilitasController controller =
+      Get.isRegistered<LaporFasilitasController>()
+      ? Get.find<LaporFasilitasController>()
+      : Get.put(LaporFasilitasController());
+
+  @override
+  void initState() {
+    super.initState();
+    // Jika TIDAK dalam mode edit (artinya membuat laporan baru), reset seluruh inputan form
+    if (!controller.isEditMode.value) {
+      controller.judulController.clear();
+      controller.lokasiController.clear();
+      controller.deskripsiController.clear();
+      controller.selectedFotoPaths.clear();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _AppColors.surface,
-      appBar: const AppDetailAppBar(title: 'Lapor Kerusakan'),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_rounded,
+            color: _AppColors.textPrimary,
+          ),
+          onPressed: () {
+            // Pastikan saat keluar dari form, status edit dikembalikan ke false
+            controller.isEditMode.value = false;
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text(
+          'Lapor Kerusakan',
+          style: TextStyle(
+            color: _AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+      ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(
@@ -83,7 +127,7 @@ class LaporFasilitasView extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // FIELD: UNGGAH FOTO (OPSIONAL)[cite: 5]
+                // FIELD: UNGGAH FOTO
                 _buildUnggahFoto(controller),
                 const SizedBox(height: 32),
 
@@ -125,37 +169,85 @@ class LaporFasilitasView extends StatelessWidget {
   Widget _buildUnggahFoto(LaporFasilitasController controller) {
     return _FormFieldWrapper(
       label: 'Unggah Foto (Opsional)',
-      child: GestureDetector(
-        onTap: () {
-          // Logika ambil foto[cite: 5, 12]
-        },
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          decoration: BoxDecoration(
-            color: _AppColors.uploadBg,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: _AppColors.uploadBorder, width: 1.2),
-          ),
-          child: const Column(
-            children: [
-              Icon(
-                Icons.add_photo_alternate_outlined,
-                size: 36,
-                color: _AppColors.primaryLight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () async {
+              // Navigasi native Flutter ke halaman VisionView
+              final String? resultPath = await Navigator.push<String?>(
+                context,
+                MaterialPageRoute(builder: (context) => const VisionView()),
+              );
+
+              // Masukkan ke controller jika hasil tangkapan kamera valid
+              if (resultPath != null && resultPath.isNotEmpty) {
+                controller.tambahFotoPath(resultPath);
+              }
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              decoration: BoxDecoration(
+                color: _AppColors.uploadBg,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: _AppColors.uploadBorder, width: 1.2),
               ),
-              SizedBox(height: 8),
-              Text(
-                'Klik untuk Ambil Gambar',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: _AppColors.primaryLight,
-                  fontWeight: FontWeight.w600,
+              child: const Column(
+                children: [
+                  Icon(
+                    Icons.camera_enhance_outlined,
+                    size: 36,
+                    color: _AppColors.primaryLight,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Klik untuk Ambil Gambar via Vision Camera',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: _AppColors.primaryLight,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // PREVIEW FOTO YANG TELAH DIAMBIL
+          Obx(() {
+            if (controller.selectedFotoPaths.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: SizedBox(
+                height: 90,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: controller.selectedFotoPaths.length,
+                  itemBuilder: (context, index) {
+                    final path = controller.selectedFotoPaths[index];
+                    return Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      width: 90,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: _AppColors.inputBorder),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(7),
+                        child: path.startsWith('http')
+                            ? Image.network(path, fit: BoxFit.cover)
+                            : Image.file(File(path), fit: BoxFit.cover),
+                      ),
+                    );
+                  },
                 ),
               ),
-            ],
-          ),
-        ),
+            );
+          }),
+        ],
       ),
     );
   }
@@ -168,15 +260,17 @@ class LaporFasilitasView extends StatelessWidget {
       () => SizedBox(
         width: double.infinity,
         height: 52,
-          child: ElevatedButton(
-            onPressed: controller.isSubmitting.value
-                ? null
-                : () async {
-                    final success = await controller.onSubmitLaporan();
-                    if (success && context.mounted) {
-                      Navigator.pop(context, true);
-                    }
-                  },
+        child: ElevatedButton(
+          onPressed: controller.isSubmitting.value
+              ? null
+              : () async {
+                  final success = await controller.onSubmitLaporan();
+                  if (success && context.mounted) {
+                    // Kembalikan nilai true ke halaman list laporan agar otomatis memicu refresh data terbaru
+                    controller.isEditMode.value = false;
+                    Navigator.pop(context, true);
+                  }
+                },
           style: ElevatedButton.styleFrom(
             backgroundColor: _AppColors.primary,
             shape: RoundedRectangleBorder(
