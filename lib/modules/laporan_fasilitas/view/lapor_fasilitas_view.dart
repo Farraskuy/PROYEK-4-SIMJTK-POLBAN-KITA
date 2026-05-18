@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 import '../controller/lapor_fasilitas_controller.dart';
 
 // ============================================================
@@ -35,25 +36,7 @@ class LaporFasilitasView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: _AppColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: _AppColors.textPrimary,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Lapor Kerusakan',
-          style: TextStyle(
-            color: _AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-      ),
+      appBar: const AppDetailAppBar(title: 'Lapor Kerusakan'),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SingleChildScrollView(

@@ -39,7 +39,7 @@ class _C {
 }
 
 // ============================================================
-// ASPIRASI VIEW â€” Entry Point
+// ASPIRASI VIEW Entry Point
 // ============================================================
 class AspirasiView extends StatelessWidget {
   const AspirasiView({super.key});

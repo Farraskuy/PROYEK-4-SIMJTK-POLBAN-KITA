@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 import '../controller/detail_laporan_fasilitas_controller.dart';
 import '../model/laporan_fasilitas_model.dart';
  
@@ -71,7 +72,7 @@ class _DetailLaporanFasilitasViewState
     final laporan = _controller.laporan!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail Laporan')),
+      appBar: const AppDetailAppBar(title: 'Detail Laporan'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -134,7 +135,7 @@ class _DetailLaporanFasilitasViewState
                         laporan.foto_urls[idx],
                         width: 120,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
+                        errorBuilder: (_, _, _) => Container(
                           width: 120,
                           color: Colors.grey.shade200,
                           child: const Icon(Icons.image_not_supported_outlined),

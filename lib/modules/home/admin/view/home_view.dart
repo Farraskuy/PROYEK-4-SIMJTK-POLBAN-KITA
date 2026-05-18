@@ -11,6 +11,7 @@ import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_dashboard_components.dart';
+import 'package:proyek_4_poki_polban_kita/modules/user/view/admin_add_user_view.dart';
 
 // ============================================================
 // DESIGN TOKENS
@@ -88,6 +89,9 @@ class AdminDashboardView extends StatelessWidget {
                       _buildKartuRingkasan(ctrl),
                       const SizedBox(height: 24),
 
+                      _buildTambahUserShortcut(context),
+                      const SizedBox(height: 16),
+
                       // ---- TINDAKAN CEPAT ----
                       _buildTindakanCepat(ctrl),
                       const SizedBox(height: 24),
@@ -105,7 +109,7 @@ class AdminDashboardView extends StatelessWidget {
           ),
         );
       }),
-      bottomNavigationBar: _buildBottomNavBar(ctrl),
+      bottomNavigationBar: _buildBottomNavBar(context, ctrl),
     );
   }
 
@@ -302,6 +306,57 @@ class AdminDashboardView extends StatelessWidget {
     });
   }
 
+  Widget _buildTambahUserShortcut(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const AdminAddUserView())),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _C.cardBg,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _C.divider),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: const Row(
+          children: [
+            _ShortcutIcon(icon: Icons.person_add_alt_1_rounded),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tambah User',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: _C.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Buat akun mahasiswa, dosen, teknisi, TU, atau admin.',
+                    style: TextStyle(fontSize: 12, color: _C.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: _C.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ============================================================
   // TINDAKAN CEPAT
   // ============================================================
@@ -398,7 +453,10 @@ class AdminDashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavBar(AdminDashboardController ctrl) {
+  Widget _buildBottomNavBar(
+    BuildContext context,
+    AdminDashboardController ctrl,
+  ) {
     const items = [
       AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
       AppNavItem(label: 'Layanan', icon: Icons.apartment_rounded),
@@ -410,7 +468,15 @@ class AdminDashboardView extends StatelessWidget {
       () => AppBottomNavBar(
         items: items,
         selectedIndex: ctrl.selectedNavIndex.value,
-        onTap: ctrl.onNavTapped,
+        onTap: (index) {
+          if (index == 3) {
+            Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const AdminAddUserView()));
+            return;
+          }
+          ctrl.onNavTapped(index);
+        },
       ),
     );
   }
@@ -535,6 +601,24 @@ class _LegendDot extends StatelessWidget {
 // ============================================================
 // WIDGET: Kartu Ringkasan Kecil
 // ============================================================
+class _ShortcutIcon extends StatelessWidget {
+  final IconData icon;
+  const _ShortcutIcon({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: _C.tindakanBg,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(icon, size: 24, color: _C.primary),
+    );
+  }
+}
+
 class _RingkasanCard extends AppStatCard {
   const _RingkasanCard({
     required super.icon,
