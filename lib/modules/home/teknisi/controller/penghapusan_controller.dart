@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:uuid/uuid.dart';
 import '../model/penghapusan_model.dart';
- 
+import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 
 class PenghapusanController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -12,9 +12,7 @@ class PenghapusanController extends GetxController {
   final tahunAnggaranCtrl = TextEditingController();
   final pengelolaCtrl = TextEditingController();
 
-  final RxList<Map<String, TextEditingController>> rows =
-      <Map<String, TextEditingController>>[].obs;
-
+  final RxList<Map<String, TextEditingController>> rows = <Map<String, TextEditingController>>[].obs;
   final RxList<PenghapusanModel> dataList = <PenghapusanModel>[].obs;
 
   @override
@@ -39,37 +37,50 @@ class PenghapusanController extends GetxController {
   Future<bool> submit() async {
     if (!formKey.currentState!.validate()) return false;
     isSubmitting.value = true;
-    await Future.delayed(const Duration(milliseconds: 400));
 
-    dataList.add(
-      PenghapusanModel(
+    try {
+      final cleanTahunUsulan = tahunUsulanCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+      final cleanTahunAnggaran = tahunAnggaranCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+      final newUsulan = PenghapusanModel(
         id: const Uuid().v4(),
-        teknisiId: 'TKS001', // TODO: ambil dari session
-        tahunUsulanPenghapusan: tahunUsulanCtrl.text,
-        tahunAnggaran: tahunAnggaranCtrl.text,
-        pengelolaData: pengelolaCtrl.text,
-        items: rows
-            .map(
-              (r) => PenghapusanItem(
-                namaBarang: r['nama']!.text,
-                kondisiBarang: r['kondisi']!.text,
-                noInventaris: r['no_inv']!.text,
-                keterangan: r['ket']!.text,
-              ),
-            )
-            .toList(),
+        teknisiId: 'TKS001',
+        tahunUsulanPenghapusan: int.tryParse(cleanTahunUsulan),
+        tahunAnggaran: int.tryParse(cleanTahunAnggaran),
+        pengelolaData: pengelolaCtrl.text.trim(),
+        items: rows.map((r) => PenghapusanItem(
+          namaBarang: r['nama']!.text.trim(),
+          kondisiBarang: r['kondisi']!.text.trim(),
+          noInventaris: r['no_inv']!.text.trim(),
+          keterangan: r['ket']!.text.trim(),
+        )).toList(),
         createdAt: DateTime.now(),
-      ),
-    );
+      );
 
-    isSubmitting.value = false;
-    Get.snackbar(
-      'Berhasil',
-      'Usulan penghapusan disimpan',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green.shade100,
-    );
-    return true;
+      final dbService = MonggoDBServices();
+      await dbService.ensureConnected();
+      await dbService.insertData('usulan_penghapusan', newUsulan.toJson());
+
+      dataList.add(newUsulan);
+      Get.back();
+      Get.snackbar(
+        'Berhasil',
+        'Usulan penghapusan disimpan ke Database',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.shade100,
+      );
+      return true;
+    } catch (e) {
+      Get.snackbar(
+        'Gagal',
+        'Error: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+      );
+      return false;
+    } finally {
+      isSubmitting.value = false;
+    }
   }
 
   @override
