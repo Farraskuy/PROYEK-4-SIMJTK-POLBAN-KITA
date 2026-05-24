@@ -5,6 +5,8 @@ import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/laporan_fasilitas_model.dart';
 import '../service/laporan_fasilitas_service.dart';
 
+enum LaporanSortMode { populer, terbaru }
+
 class InteraksiLaporanController extends GetxController {
   InteraksiLaporanController({this.role = 'mahasiswa'});
 
@@ -13,7 +15,16 @@ class InteraksiLaporanController extends GetxController {
 
   final listLaporan = <LaporanFasilitasModel>[].obs;
   final isLoading = false.obs;
-  final currentUserId = 'anonymous'.obs;
+  final unreadNotifCount = 3.obs;
+  final sortMode = LaporanSortMode.populer.obs;
+
+  String get currentUserId {
+    final user = AuthService().currentUser;
+    if (user == null) return 'anonymous';
+    return user.id.isNotEmpty ? user.id : user.nomorInduk;
+  }
+
+  String get currentUserName => AuthService().currentUser?.name ?? 'Mahasiswa';
 
   bool get isMahasiswa => role == 'mahasiswa';
   bool get isPetugas => role == 'teknisi' || role == 'petugas';
@@ -22,13 +33,7 @@ class InteraksiLaporanController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadCurrentUser();
     fetchLaporan();
-  }
-
-  Future<void> _loadCurrentUser() async {
-    final user = await AuthService().loadSavedSession();
-    currentUserId.value = user?.id ?? user?.nomorInduk ?? 'anonymous';
   }
 
   Future<void> fetchLaporan() async {
@@ -36,11 +41,36 @@ class InteraksiLaporanController extends GetxController {
     try {
       final data = await _service.getForRole(role);
       listLaporan.assignAll(data);
+      _applySort();
     } catch (e) {
       Get.snackbar('Error', 'Gagal memuat data: $e');
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> refreshData() => fetchLaporan();
+
+  void onNotificationTapped() {
+    unreadNotifCount.value = 0;
+  }
+
+  void setSortMode(LaporanSortMode mode) {
+    if (sortMode.value == mode) return;
+    sortMode.value = mode;
+    _applySort();
+  }
+
+  void _applySort() {
+    switch (sortMode.value) {
+      case LaporanSortMode.populer:
+        listLaporan.sort((a, b) => b.vote_score.compareTo(a.vote_score));
+        break;
+      case LaporanSortMode.terbaru:
+        listLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        break;
+    }
+    listLaporan.refresh();
   }
 
   void upvoteLaporan(String userId, int index) async {
@@ -75,7 +105,7 @@ class InteraksiLaporanController extends GetxController {
     laporan.updatedAt = DateTime.now();
 
     listLaporan[index] = laporan;
-    listLaporan.refresh();
+    _applySort();
 
     await _service.update(laporan);
   }
@@ -84,6 +114,7 @@ class InteraksiLaporanController extends GetxController {
     try {
       await _service.delete(laporanId);
       listLaporan.removeWhere((l) => l.id == laporanId);
+      _applySort();
       Get.snackbar('Sukses', 'Laporan berhasil dihapus');
     } catch (e) {
       Get.snackbar('Gagal', 'Gagal menghapus laporan: $e');
@@ -91,13 +122,4 @@ class InteraksiLaporanController extends GetxController {
   }
 
   Future<void> refreshAfterAction() async => fetchLaporan();
-
-  void sortLaporan(String criteria) {
-    if (criteria == 'terbaru') {
-      listLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    } else {
-      listLaporan.sort((a, b) => b.vote_score.compareTo(a.vote_score));
-    }
-    listLaporan.refresh();
-  }
 }

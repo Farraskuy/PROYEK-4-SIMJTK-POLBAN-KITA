@@ -3,14 +3,12 @@ import 'package:proyek_4_poki_polban_kita/modules/home/admin/view/home_view.dart
 import 'package:proyek_4_poki_polban_kita/modules/home/dosen/view/home_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/view/home_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/teknisi/view/home_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/tu/view/home_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/role_service.dart';
 
 enum HomeDestination {
   mahasiswa,
   dosen,
   teknisi,
-  tu,
   admin,
   unknown,
 }
@@ -27,8 +25,6 @@ class RoleNavigationService {
         return HomeDestination.dosen;
       case AccessControlService.roleTeknisi:
         return HomeDestination.teknisi;
-      case AccessControlService.roleTu:
-        return HomeDestination.tu;
       case AccessControlService.roleAdmin:
         return HomeDestination.admin;
       default:
@@ -44,8 +40,6 @@ class RoleNavigationService {
         return const HomeDosenView();
       case HomeDestination.teknisi:
         return const HomeTeknisiView();
-      case HomeDestination.tu:
-        return const HomeTuView();
       case HomeDestination.admin:
         return const AdminDashboardView();
       case HomeDestination.unknown:

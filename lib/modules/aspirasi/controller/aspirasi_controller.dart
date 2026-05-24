@@ -8,6 +8,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/aspirasi_model.dart';
 
 class AspirasiController  
@@ -34,10 +35,17 @@ class AspirasiController
   /// Status loading
   final RxBool isLoading = false.obs;
 
-  /// ID user yang sedang login (ambil dari AuthController di implementasi nyata)
-  final String currentUserId = 'usr-001';
-  final String currentUserName = 'Budi';
-  final String currentUserProdi = 'D3 Teknik Informatika';
+  /// ID user yang sedang login (diambil langsung dari AuthService)
+  String get currentUserId {
+    final user = AuthService().currentUser;
+    if (user == null) return 'anonymous';
+    return user.id.isNotEmpty ? user.id : user.nomorInduk;
+  }
+
+  String get currentUserName => AuthService().currentUser?.name ?? 'anonymous';
+
+  String get currentUserProdi =>
+      AuthService().currentUser?.programStudy ?? '';
 
   // --------------------------------------------------------
   // STATE OBSERVABLES â€” FORM
