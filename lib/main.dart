@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/log_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/role_navigation_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/role_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/user_credential_seeder.dart';
 
@@ -18,6 +20,7 @@ void main() async {
 
   try {
     await MonggoDBServices().connect();
+    
     await UserCredentialSeeder.seedDefaults();
   } catch (e) {
     await LogService.writeLog(
@@ -72,7 +75,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SIMJTK - Integrated Portal',
+      title: 'SIMJTK',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -83,7 +86,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         textTheme: GoogleFonts.poppinsTextTheme(),
         primaryTextTheme: GoogleFonts.poppinsTextTheme(),
       ),
-      home: const OnboardingView(),
+      home: AuthService().currentUser != null
+          ? RoleNavigationService.buildHomeByRole(AuthService().currentUser?.role)
+          : const OnboardingView(),
     );
   }
 }

@@ -1,5 +1,6 @@
 // lib/modules/laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart
 
+import 'dart:io'; // Tambahkan import dart:io untuk mendukung render path file lokal jika ada
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/interaksi_laporan_controller.dart';
@@ -27,209 +28,471 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: Text(
-          _title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A3A6B),
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (val) => controller.sortLaporan(val),
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: 'vote', child: Text('Vote Terbanyak')),
-              PopupMenuItem(value: 'terbaru', child: Text('Terbaru')),
-            ],
-            icon: const Icon(Icons.sort_rounded, color: Color(0xFF1A3A6B)),
-          ),
-        ],
-      ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF1A3A6B)),
-          );
-        }
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: SafeArea(
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFF1A3A6B)),
+            );
+          }
 
-        if (controller.listLaporan.isEmpty) {
           return RefreshIndicator(
             onRefresh: controller.fetchLaporan,
-            child: ListView(
-              padding: const EdgeInsets.all(24),
-              children: const [
-                SizedBox(height: 120),
-                Icon(Icons.inbox_outlined, size: 56, color: Colors.grey),
-                SizedBox(height: 12),
-                Center(child: Text('Belum ada laporan untuk role ini.')),
-              ],
-            ),
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: controller.fetchLaporan,
-          color: const Color(0xFF1A3A6B),
-          child: ListView.builder(
-            padding: const EdgeInsets.all(12),
-            itemCount: controller.listLaporan.length,
-            itemBuilder: (context, index) {
-              final laporan = controller.listLaporan[index];
-              final currentUserId = controller.currentUserId.value;
-              final isUpvoted = laporan.upvoter_ids.contains(currentUserId);
-              final isDownvoted = laporan.downvoter_ids.contains(currentUserId);
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: InkWell(
-                  onTap: () async {
-                    final changed = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailLaporanFasilitasView(
-                          laporanId: laporan.id,
-                          role: role,
-                        ),
-                      ),
-                    );
-                    if (changed == true) controller.fetchLaporan();
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
+            color: const Color(0xFF1A3A6B),
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              itemCount: controller.listLaporan.length + 1,
+              itemBuilder: (context, index) {
+                // 1. TAMPILAN HEADER
+                if (index == 0) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const CircleAvatar(
+                                radius: 20,
+                                backgroundColor: Color(0xFF1A2E40),
+                                child: Icon(Icons.person, color: Colors.white),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    laporan.judul,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Color(0xFF1A1A2E),
+                                  RichText(
+                                    text: const TextSpan(
+                                      text: 'Halo, ',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Color(0xFF1A3A6B),
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: 'Budi',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    laporan.lokasi,
-                                    style: const TextStyle(
-                                      fontSize: 13,
+                                  const Text(
+                                    'Mahasiswa JTK',
+                                    style: TextStyle(
+                                      fontSize: 12,
                                       color: Colors.grey,
                                     ),
                                   ),
                                 ],
                               ),
+                            ],
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.notifications_none_rounded,
+                              color: Color(0xFF1A3A6B),
                             ),
-                            if (controller.isMahasiswa)
-                              PopupMenuButton<String>(
-                                onSelected: (val) {
-                                  if (val == 'edit') {
-                                    final laporCtrl = Get.put(
-                                      LaporFasilitasController(),
-                                    );
-                                    laporCtrl.setupEditPage(laporan);
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const LaporFasilitasView(),
-                                      ),
-                                    );
-                                  } else if (val == 'delete') {
-                                    controller.deleteLaporan(laporan.id);
-                                  }
-                                },
-                                itemBuilder: (context) => const [
-                                  PopupMenuItem(
-                                    value: 'edit',
-                                    child: Text('Edit'),
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        _title,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1A3A6B),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Laporakan kerusakan fasilitas yang ada dilingkungan Jurusan Teknik Komputer dan Informatika',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                }
+
+                final laporan = controller.listLaporan[index - 1];
+                final currentUserId = controller.currentUserId.value;
+                final isUpvoted = laporan.upvoter_ids.contains(currentUserId);
+                final isDownvoted = laporan.downvoter_ids.contains(
+                  currentUserId,
+                );
+
+                // Ambil path/URL foto secara dinamis dari list foto_urls laporan
+                final String? fotoLaporanPath = laporan.foto_urls.isNotEmpty
+                    ? laporan.foto_urls.first
+                    : null;
+
+                // 2. TAMPILAN KARTU LAPORAN
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () async {
+                      final changed = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailLaporanFasilitasView(
+                            laporanId: laporan.id,
+                            role: role,
+                          ),
+                        ),
+                      );
+                      if (changed == true) controller.fetchLaporan();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Sisi Kiri: Angka Vote & Panah
+                          if (controller.isMahasiswa)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.keyboard_arrow_up_rounded,
+                                    color: isUpvoted
+                                        ? Colors.orange
+                                        : Colors.grey,
+                                    size: 22,
                                   ),
-                                  PopupMenuItem(
-                                    value: 'delete',
-                                    child: Text(
-                                      'Hapus',
-                                      style: TextStyle(color: Colors.red),
+                                  Text(
+                                    '${laporan.vote_score}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                      color: Color(0xFF1A3A6B),
                                     ),
+                                  ),
+                                  Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: isDownvoted
+                                        ? Colors.blue
+                                        : Colors.grey,
+                                    size: 22,
                                   ),
                                 ],
                               ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        if (laporan.catatanPetugas?.isNotEmpty == true)
-                          Text(
-                            'Petugas: ${laporan.catatanPetugas}',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        const SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _buildStatusChip(
-                              laporan.status,
-                              laporan.sudahDicetak,
                             ),
-                            if (controller.isMahasiswa)
-                              _VoteBox(
-                                score: laporan.vote_score,
-                                isUpvoted: isUpvoted,
-                                isDownvoted: isDownvoted,
-                                onUpvote: () => controller.upvoteLaporan(
-                                  currentUserId,
-                                  index,
+                          if (controller.isMahasiswa) const SizedBox(width: 12),
+
+                          // Sisi Kanan: Konten Utama Laporan
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Status Chip berada paling atas (di atas nama pelapor)
+                                _buildStatusChip(
+                                  laporan.status,
+                                  laporan.sudahDicetak,
                                 ),
-                                onDownvote: () => controller.downvoteLaporan(
-                                  currentUserId,
-                                  index,
+                                const SizedBox(height: 10),
+
+                                // Baris Profil Pelapor + Menu Titik Tiga
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Expanded(
+                                      child: Row(
+                                        children: [
+                                          CircleAvatar(
+                                            radius: 14,
+                                            backgroundColor: const Color(
+                                              0xFF1A3A6B,
+                                            ).withOpacity(0.1),
+                                            child: const Text(
+                                              'AH',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF1A3A6B),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  'Ahmad Hidayat',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 13,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                                Text(
+                                                  'D4 Teknik Informatika • 2 jam lalu',
+                                                  style: TextStyle(
+                                                    fontSize: 11,
+                                                    color: Colors.grey.shade600,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (controller.isMahasiswa)
+                                      PopupMenuButton<String>(
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(),
+                                        icon: const Icon(
+                                          Icons.more_vert_rounded,
+                                          color: Colors.grey,
+                                          size: 20,
+                                        ),
+                                        onSelected: (val) {
+                                          if (val == 'edit') {
+                                            final laporCtrl = Get.put(
+                                              LaporFasilitasController(),
+                                            );
+                                            laporCtrl.setupEditPage(laporan);
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const LaporFasilitasView(),
+                                              ),
+                                            );
+                                          } else if (val == 'delete') {
+                                            controller.deleteLaporan(
+                                              laporan.id,
+                                            );
+                                          }
+                                        },
+                                        itemBuilder: (context) => const [
+                                          PopupMenuItem(
+                                            value: 'edit',
+                                            child: Text('Edit'),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'delete',
+                                            child: Text(
+                                              'Hapus',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                  ],
                                 ),
-                              )
-                            else
-                              const Icon(
-                                Icons.chevron_right_rounded,
-                                color: Colors.grey,
-                              ),
-                          ],
-                        ),
-                      ],
+                                const SizedBox(height: 12),
+
+                                // Judul & Lokasi
+                                Text(
+                                  laporan.judul,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: Color(0xFF1A3A6B),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.location_on_outlined,
+                                      size: 14,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      laporan.lokasi,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+
+                                // MODIFIKASI: Gambar Dinamis Berdasarkan Data Laporan Aktual
+                                if (fotoLaporanPath != null) ...[
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: fotoLaporanPath.startsWith('http')
+                                        ? Image.network(
+                                            fotoLaporanPath,
+                                            height: 160,
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    _buildImagePlaceholder(),
+                                          )
+                                        : Image.file(
+                                            File(fotoLaporanPath),
+                                            height: 160,
+                                            width: double.infinity,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) =>
+                                                    _buildImagePlaceholder(),
+                                          ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+
+                                if (laporan.catatanPetugas?.isNotEmpty ==
+                                    true) ...[
+                                  Text(
+                                    'Petugas: ${laporan.catatanPetugas}',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+
+                                // Tombol Aksi Vote Bawah
+                                if (controller.isMahasiswa)
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: ElevatedButton.icon(
+                                          onPressed: () =>
+                                              controller.upvoteLaporan(
+                                                currentUserId,
+                                                index - 1,
+                                              ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: isUpvoted
+                                                ? Colors.orange.shade50
+                                                : const Color(0xFFEFEFEF),
+                                            foregroundColor: isUpvoted
+                                                ? Colors.orange
+                                                : Colors.black87,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 8,
+                                            ),
+                                          ),
+                                          icon: const Icon(
+                                            Icons.arrow_upward_rounded,
+                                            size: 16,
+                                          ),
+                                          label: const Text(
+                                            'Up vote',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: ElevatedButton.icon(
+                                          onPressed: () =>
+                                              controller.downvoteLaporan(
+                                                currentUserId,
+                                                index - 1,
+                                              ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: isDownvoted
+                                                ? Colors.blue.shade50
+                                                : const Color(0xFFEFEFEF),
+                                            foregroundColor: isDownvoted
+                                                ? Colors.blue
+                                                : Colors.black87,
+                                            elevation: 0,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 8,
+                                            ),
+                                          ),
+                                          icon: const Icon(
+                                            Icons.arrow_downward_rounded,
+                                            size: 16,
+                                          ),
+                                          label: const Text(
+                                            'Down Vote',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
-        );
-      }),
-      floatingActionButton: role == 'mahasiswa'
-          ? FloatingActionButton.extended(
-              onPressed: () async {
-                final changed = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LaporFasilitasView(),
-                  ),
                 );
-                if (changed == true) controller.fetchLaporan();
               },
-              backgroundColor: const Color(0xFF1A3A6B),
-              icon: const Icon(Icons.add_comment_rounded, color: Colors.white),
-              label: const Text(
-                'Buat Laporan',
-                style: TextStyle(color: Colors.white),
+            ),
+          );
+        }),
+      ),
+      floatingActionButton: role == 'mahasiswa'
+          ? SizedBox(
+              width: 56,
+              height: 56,
+              child: FloatingActionButton(
+                onPressed: () async {
+                  final changed = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LaporFasilitasView(),
+                    ),
+                  );
+                  if (changed == true) controller.fetchLaporan();
+                },
+                backgroundColor: const Color(0xFF1E78E6),
+                shape: const CircleBorder(),
+                elevation: 4,
+                child: const Icon(Icons.add, color: Colors.white, size: 28),
               ),
             )
           : null,
@@ -237,80 +500,43 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
   }
 
   Widget _buildStatusChip(StatusLaporan status, bool printed) {
-    final color = printed ? Colors.green : const Color(0xFF1565C0);
-    final bg = printed ? const Color(0xFFE8F5E9) : const Color(0xFFE3F2FD);
+    final color = printed ? Colors.teal : const Color(0xFF1E78E6);
+    final bg = printed ? const Color(0xFFE0F2F1) : const Color(0xFFE3F2FD);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        printed ? 'Sudah Dicetak' : status.label,
-        style: TextStyle(
-          fontSize: 11,
-          color: color,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-}
-
-class _VoteBox extends StatelessWidget {
-  const _VoteBox({
-    required this.score,
-    required this.isUpvoted,
-    required this.isDownvoted,
-    required this.onUpvote,
-    required this.onDownvote,
-  });
-
-  final int score;
-  final bool isUpvoted;
-  final bool isDownvoted;
-  final VoidCallback onUpvote;
-  final VoidCallback onDownvote;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFF0F4FA),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton(
-            onPressed: onUpvote,
-            icon: Icon(
-              Icons.arrow_upward_rounded,
-              size: 18,
-              color: isUpvoted ? Colors.orange : Colors.grey,
-            ),
-            constraints: const BoxConstraints(),
-            padding: const EdgeInsets.all(8),
-          ),
+          Icon(Icons.check, size: 12, color: color),
+          const SizedBox(width: 4),
           Text(
-            '$score',
+            printed ? 'Selesai' : status.label,
             style: TextStyle(
+              fontSize: 11,
+              color: color,
               fontWeight: FontWeight.bold,
-              color: (isUpvoted || isDownvoted)
-                  ? Colors.orange
-                  : Colors.black87,
             ),
-          ),
-          IconButton(
-            onPressed: onDownvote,
-            icon: Icon(
-              Icons.arrow_downward_rounded,
-              size: 18,
-              color: isDownvoted ? Colors.blue : Colors.grey,
-            ),
-            constraints: const BoxConstraints(),
-            padding: const EdgeInsets.all(8),
           ),
         ],
+      ),
+    );
+  }
+
+  // Tambahan widget placeholder jika file gambar corrupt/tidak ditemukan
+  Widget _buildImagePlaceholder() {
+    return Container(
+      height: 160,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: const Center(
+        child: Icon(Icons.broken_image_outlined, color: Colors.grey, size: 40),
       ),
     );
   }

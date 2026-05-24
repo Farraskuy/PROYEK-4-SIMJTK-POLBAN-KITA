@@ -38,6 +38,19 @@ class LaporFasilitasController extends GetxController {
     selectedFotoPaths.assignAll(laporan.foto_urls);
   }
 
+  /// ─── FUNGSI BARU PENAMPUNG DATA KAMERA ───
+  /// Menerima path file dari VisionView lokal dan menyimpannya ke dalam list laporan.
+  void tambahFotoPath(String path) {
+    if (path.isNotEmpty) {
+      selectedFotoPaths.add(path);
+      Get.snackbar(
+        'Berhasil',
+        'Foto berhasil ditambahkan ke laporan',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
   Future<bool> onSubmitLaporan() async {
     if (lokasiController.text.trim().isEmpty ||
         deskripsiController.text.trim().isEmpty) {

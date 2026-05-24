@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 import '../controller/home_controller.dart';
 
 class HomeDosenView extends StatelessWidget {
@@ -10,7 +11,7 @@ class HomeDosenView extends StatelessWidget {
     final controller = Get.put(HomeDosenController());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Home Dosen')),
+      appBar: const AppSimpleAppBar(title: 'Home Dosen'),
       body: Center(
         child: Obx(
           () => Column(

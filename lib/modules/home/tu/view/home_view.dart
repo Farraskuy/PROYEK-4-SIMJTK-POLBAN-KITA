@@ -32,13 +32,6 @@ class HomeTuView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppGreeting(
-                      eyebrow: controller.greeting,
-                      title: controller.state.value.title,
-                      subtitle:
-                          'Kelola administrasi akademik, surat, dan agenda layanan JTK.',
-                    ),
-                    const SizedBox(height: 20),
                     Row(
                       children: [
                         Expanded(

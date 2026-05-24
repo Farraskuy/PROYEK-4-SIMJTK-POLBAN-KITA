@@ -12,8 +12,11 @@ class UsulanPemeliharaanController extends GetxController {
   final tahunAnggaranCtrl = TextEditingController();
   final pengelolaCtrl = TextEditingController();
 
+  // Setiap row = 1 item usulan
   final RxList<Map<String, TextEditingController>> rows = <Map<String, TextEditingController>>[].obs;
-  final RxList<UsulanPemeliharaanModel> dataList = <UsulanPemeliharaanModel>[].obs;
+
+  final RxList<UsulanPemeliharaanModel> dataList =
+      <UsulanPemeliharaanModel>[].obs;
 
   @override
   void onInit() {

@@ -62,7 +62,6 @@ class UnknownRoleView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Role Tidak Dikenal')),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16),
