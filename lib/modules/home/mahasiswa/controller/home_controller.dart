@@ -1,7 +1,10 @@
 // lib/modules/home/controller/home_controller.dart
 
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/home_model.dart';
 
 enum MahasiswaNavTarget { laporanFasilitas, aspirasi }
@@ -12,24 +15,19 @@ class HomeController extends GetxController {
   // --------------------------------------------------------
 
   /// Data user yang sedang login (Menggunakan identitas kamu)[cite: 6]
-  final Rx<UserModel> currentUser = const UserModel(
-    id: 'usr-001',
-    name: 'Zidan Taufiqurahman',
-    nomorInduk: '241511006',
-    passwordHash: '',
-    role: 'mahasiswa',
-    isActive: true,
-    email: 'zidan@student.polban.ac.id',
-  ).obs;
+  UserModel? get currentUser => AuthService().currentUser;
 
   final RxList<KalenderAkademikModel> kalenderList =
       <KalenderAkademikModel>[].obs;
   final RxList<AksesCepatModel> aksesCepatList = <AksesCepatModel>[].obs;
-  final RxList<AspirasiModel> aspirasiTrendingList = <AspirasiModel>[].obs;
+    final RxList<LaporanFasilitasModel> laporanTrendingList =
+      <LaporanFasilitasModel>[].obs;
   final RxInt selectedNavIndex = 0.obs;
   final RxInt activeKalenderIndex = 0.obs;
   final RxBool isLoading = false.obs;
   final RxInt unreadNotifCount = 3.obs;
+
+    final LaporanFasilitasService _laporanService = LaporanFasilitasService();
 
   @override
   void onInit() {
@@ -48,9 +46,12 @@ class HomeController extends GetxController {
     kalenderList.assignAll(KalenderAkademikModel.dummyList());
     aksesCepatList.assignAll(AksesCepatModel.dummyList());
 
-    final sorted = AspirasiModel.dummyList()
-      ..sort((a, b) => b.upvoteCount.compareTo(a.upvoteCount));
-    aspirasiTrendingList.assignAll(sorted);
+    try {
+      final laporan = await _laporanService.getForRole('mahasiswa');
+      laporanTrendingList.assignAll(laporan);
+    } catch (_) {
+      laporanTrendingList.clear();
+    }
 
     isLoading.value = false;
   }
@@ -86,45 +87,50 @@ class HomeController extends GetxController {
     activeKalenderIndex.value = index;
   }
 
-  void onUpvoteAspirasi(String aspirasiId) {
-    final idx = aspirasiTrendingList.indexWhere((a) => a.id == aspirasiId);
-    if (idx == -1) return;
+  // void onUpvoteAspirasi(String aspirasiId) {
+  //   final idx = aspirasiTrendingList.indexWhere((a) => a.id == aspirasiId);
+  //   if (idx == -1) return;
 
-    final current = aspirasiTrendingList[idx];
-    final userId = currentUser.value.id;
-    final alreadyVoted = current.upvoterIds.contains(userId);
-    final updatedVoters = List<String>.from(current.upvoterIds);
-    int updatedCount = current.upvoteCount;
+  //   final current = aspirasiTrendingList[idx];
+  //   final userId = AuthService().currentUser?.id ??
+  //     AuthService().currentUser?.nomorInduk ??
+  //     '';
+  //   final alreadyVoted = current.upvoterIds.contains(userId);
+  //   final updatedVoters = List<String>.from(current.upvoterIds);
+  //   int updatedCount = current.upvoteCount;
 
-    if (alreadyVoted) {
-      updatedVoters.remove(userId);
-      updatedCount--;
-    } else {
-      updatedVoters.add(userId);
-      updatedCount++;
-    }
+  //   if (alreadyVoted) {
+  //     updatedVoters.remove(userId);
+  //     updatedCount--;
+  //   } else {
+  //     updatedVoters.add(userId);
+  //     updatedCount++;
+  //   }
 
-    final updated = AspirasiModel(
-      id: current.id,
-      topik: current.topik,
-      isiSaran: current.isiSaran,
-      isAnonymous: current.isAnonymous,
-      pelaporId: current.pelaporId,
-      pelaporName: current.pelaporName,
-      upvoteCount: updatedCount,
-      upvoterIds: updatedVoters,
-      tanggapanJurusan: current.tanggapanJurusan,
-      status: current.status,
-      kategori: current.kategori,
-      createdAt: current.createdAt,
-    );
+  //   final updated = AspirasiModel(
+  //     id: current.id,
+  //     topik: current.topik,
+  //     isiSaran: current.isiSaran,
+  //     isAnonymous: current.isAnonymous,
+  //     pelaporId: current.pelaporId,
+  //     pelaporName: current.pelaporName,
+  //     upvoteCount: updatedCount,
+  //     upvoterIds: updatedVoters,
+  //     tanggapanJurusan: current.tanggapanJurusan,
+  //     status: current.status,
+  //     kategori: current.kategori,
+  //     createdAt: current.createdAt,
+  //   );
 
-    aspirasiTrendingList[idx] = updated;
-    aspirasiTrendingList.sort((a, b) => b.upvoteCount.compareTo(a.upvoteCount));
-  }
+  //   aspirasiTrendingList[idx] = updated;
+  //   aspirasiTrendingList.sort((a, b) => b.upvoteCount.compareTo(a.upvoteCount));
+  // }
 
   bool isUpvoted(AspirasiModel aspirasi) {
-    return aspirasi.upvoterIds.contains(currentUser.value.id);
+    final userId = AuthService().currentUser?.id ??
+        AuthService().currentUser?.nomorInduk ??
+        '';
+    return aspirasi.upvoterIds.contains(userId);
   }
 
   void onNotificationTapped() {
@@ -133,7 +139,8 @@ class HomeController extends GetxController {
 
   void onLihatSemuaKalender() {}
   void onLihatSemuaAksesCepat() {}
-  MahasiswaNavTarget onLihatSemuaAspirasi() => MahasiswaNavTarget.aspirasi;
+  MahasiswaNavTarget onLihatSemuaAspirasi() =>
+      MahasiswaNavTarget.laporanFasilitas;
 
   /// Navigasi dari Grid Akses Cepat di Dashboard[cite: 6]
   MahasiswaNavTarget? onAksesCepatTapped(AksesCepatRoute route) {

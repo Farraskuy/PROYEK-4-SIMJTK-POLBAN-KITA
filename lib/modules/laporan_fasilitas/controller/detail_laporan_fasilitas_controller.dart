@@ -64,7 +64,7 @@ class DetailLaporanFasilitasController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final user = await AuthService().loadSavedSession();
+      final user = AuthService().currentUser ?? await AuthService().loadSavedSession();
       final teknisiId = user?.id ?? user?.nomorInduk ?? 'petugas';
       await _laporanService.tanggapiPetugas(
         laporanId: laporan!.id,
@@ -93,7 +93,7 @@ class DetailLaporanFasilitasController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final user = await AuthService().loadSavedSession();
+      final user = AuthService().currentUser ?? await AuthService().loadSavedSession();
       await _laporanService.tandaiDicetak(
         laporanId: laporan!.id,
         printedBy: user?.id ?? user?.nomorInduk ?? 'tu',

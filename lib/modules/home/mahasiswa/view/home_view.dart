@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/aspirasi_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/controller/home_controller.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/akses_cepat_section.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/aspirasi_section.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/kalender_section.dart';
+import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/laporan_fasilitas_section.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
@@ -31,14 +31,22 @@ class HomeView extends StatelessWidget {
           onRefresh: controller.refreshData,
           child: CustomScrollView(
             slivers: [
-              _buildAppBar(controller),
+              Obx(
+                () => AppHomeAppBar(
+                  title: 'Halo, ${controller.currentUser?.name ?? 'Mahasiswa'}',
+                  subtitle: 'Mahasiswa JTK',
+                  avatarIcon: Icons.person_rounded,
+                  unreadCount: controller.unreadNotifCount.value,
+                  onNotificationTap: controller.onNotificationTapped,
+                ),
+              ),
               SliverToBoxAdapter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 20),
                     KalenderSection(controller: controller),
-                    
+
                     const SizedBox(height: 24),
 
                     AksesCepatSection(
@@ -46,15 +54,15 @@ class HomeView extends StatelessWidget {
                       onNavigate: (target) =>
                           _navigateMahasiswa(context, target),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
-                    AspirasiSection(
+
+                    LaporanFasilitasSection(
                       controller: controller,
                       onNavigate: (target) =>
                           _navigateMahasiswa(context, target),
                     ),
-                    
+
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -64,18 +72,6 @@ class HomeView extends StatelessWidget {
         );
       }),
       bottomNavigationBar: _buildBottomNavBar(context, controller),
-    );
-  }
-
-  Widget _buildAppBar(HomeController controller) {
-    return Obx(
-      () => AppHomeAppBar(
-        title: 'Halo, ${controller.currentUser.value.name}',
-        subtitle: 'Mahasiswa JTK',
-        avatarIcon: Icons.person_rounded,
-        unreadCount: controller.unreadNotifCount.value,
-        onNotificationTap: controller.onNotificationTapped,
-      ),
     );
   }
 

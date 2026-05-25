@@ -15,7 +15,7 @@ import 'modules/onboarding/view/onboarding_view.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load();
+  await dotenv.load(fileName: '.env.example');
   AccessControlService.initSimjtkRoles();
 
   try {
