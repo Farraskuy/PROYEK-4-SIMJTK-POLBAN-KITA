@@ -311,6 +311,7 @@ class AdminDashboardView extends StatelessWidget {
       TindakanCepatType.siarkan: Icons.campaign_rounded,
       TindakanCepatType.moderasi: Icons.verified_user_rounded,
       TindakanCepatType.tambahAgenda: Icons.calendar_month_rounded,
+      TindakanCepatType.kelolaUser: Icons.manage_accounts_rounded,
     };
 
     return Column(
@@ -325,23 +326,27 @@ class AdminDashboardView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Obx(
-          () => Row(
-            children: ctrl.tindakanCepatList.map((item) {
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: ctrl.tindakanCepatList.last == item ? 0 : 10,
-                  ),
-                  child: _TindakanCepatButton(
-                    label: item.label,
-                    icon: iconMap[item.type] ?? Icons.flash_on_rounded,
-                    onTap: () => ctrl.onTindakanCepatTapped(item.type),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // 4 item per baris dengan jarak antar item 10, sehingga 3 celah = 30
+            final itemWidth = ((constraints.maxWidth - 30) / 4).floorToDouble();
+            return Obx(
+              () => Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: ctrl.tindakanCepatList.map((item) {
+                  return SizedBox(
+                    width: itemWidth,
+                    child: _TindakanCepatButton(
+                      label: item.label,
+                      icon: iconMap[item.type] ?? Icons.flash_on_rounded,
+                      onTap: () => ctrl.onTindakanCepatTapped(item.type),
+                    ),
+                  );
+                }).toList(),
+              ),
+            );
+          },
         ),
       ],
     );
