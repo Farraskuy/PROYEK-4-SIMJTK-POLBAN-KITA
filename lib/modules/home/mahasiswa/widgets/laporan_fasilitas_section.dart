@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/controller/home_controller.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/section_header.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_vote_column.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 
 class LaporanFasilitasSection extends StatelessWidget {
@@ -63,7 +64,10 @@ class _LaporanList extends StatelessWidget {
         separatorBuilder: (_, _) =>
             const Divider(height: 1, color: AppColors.border),
         itemBuilder: (context, index) {
-          return _LaporanCard(laporan: visibleItems[index]);
+          return _LaporanCard(
+            laporan: visibleItems[index],
+            controller: controller,
+          );
         },
       );
     });
@@ -72,8 +76,9 @@ class _LaporanList extends StatelessWidget {
 
 class _LaporanCard extends StatelessWidget {
   final LaporanFasilitasModel laporan;
+  final HomeController controller;
 
-  const _LaporanCard({required this.laporan});
+  const _LaporanCard({required this.laporan, required this.controller});
 
   Color get _statusBgColor {
     switch (laporan.status) {
@@ -123,22 +128,12 @@ class _LaporanCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              const Icon(
-                Icons.keyboard_arrow_up_rounded,
-                size: 26,
-                color: AppColors.primary,
-              ),
-              Text(
-                '${laporan.vote_score}',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.title,
-                ),
-              ),
-            ],
+          LaporanFasilitasVoteColumn(
+            voteScore: laporan.vote_score,
+            isUpvoted: controller.isLaporanUpvoted(laporan),
+            isDownvoted: controller.isLaporanDownvoted(laporan),
+            onUpvote: () => controller.onUpvoteLaporan(laporan.id),
+            onDownvote: () => controller.onDownvoteLaporan(laporan.id),
           ),
           const SizedBox(width: 12),
           Expanded(

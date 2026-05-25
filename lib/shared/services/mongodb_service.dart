@@ -7,6 +7,9 @@ import 'package:proyek_4_poki_polban_kita/shared/services/log_service.dart';
 
 class MonggoDBServices {
   static final MonggoDBServices _instance = MonggoDBServices._internal();
+  static const Duration _connectionTimeout = Duration(seconds: 10);
+  static const Duration _operationTimeout = Duration(seconds: 15);
+  static const Duration _closeTimeout = Duration(seconds: 3);
 
   MonggoDBServices._internal();
 
@@ -18,6 +21,20 @@ class MonggoDBServices {
   Future<void>? _connectInFlight;
 
   bool get isConnected => _db?.state == State.open;
+
+  Future<T> _withTimeout<T>(
+    Future<T> future, {
+    required String action,
+    required Duration timeout,
+  }) {
+    return future.timeout(
+      timeout,
+      onTimeout: () => throw TimeoutException(
+        "$action timed out after ${timeout.inSeconds} seconds",
+        timeout,
+      ),
+    );
+  }
 
   Future<void> connect() async {
     if (_connectInFlight != null) {
@@ -62,14 +79,30 @@ class MonggoDBServices {
         _db = null;
       }
 
-      _db = await Db.create(uri);
-      await _db!.open();
+      final db = await _withTimeout(
+        Db.create(uri),
+        action: "Create MongoDB connection",
+        timeout: _connectionTimeout,
+      );
+
+      _db = db;
+      await _withTimeout(
+        db.open(),
+        action: "Open MongoDB connection",
+        timeout: _connectionTimeout,
+      );
 
       await LogService.writeLog(
         "Successfully connected to MongoDB",
         source: "mongodb_service.dart",
       );
     } catch (e) {
+      final db = _db;
+      _db = null;
+      if (db != null) {
+        unawaited(db.close().timeout(_closeTimeout).catchError((_) {}));
+      }
+
       await LogService.writeLog(
         "Failed to connect to MongoDB: $e",
         source: "mongodb_service.dart",
@@ -87,6 +120,31 @@ class MonggoDBServices {
     }
   }
 
+  Future<void> refreshConnection() async {
+    await ensureConnected();
+
+    try {
+      await _withTimeout(
+        _db!.pingCommand(),
+        action: "Ping MongoDB connection",
+        timeout: _operationTimeout,
+      );
+    } catch (e) {
+      if (_isRecoverableConnectionError(e)) {
+        await LogService.writeLog(
+          "MongoDB connection stale, reconnecting...",
+          source: "mongodb_service.dart",
+          level: 1,
+        );
+
+        await _reconnect();
+        return;
+      }
+
+      rethrow;
+    }
+  }
+
   Future<void> _reconnect() async {
     await close(shouldLog: false);
     await connect();
@@ -94,6 +152,10 @@ class MonggoDBServices {
 
   bool _isRecoverableConnectionError(Object error) {
     if (error is SocketException) {
+      return true;
+    }
+
+    if (error is TimeoutException) {
       return true;
     }
 
@@ -112,7 +174,11 @@ class MonggoDBServices {
     await ensureConnected();
 
     try {
-      return await operation();
+      return await _withTimeout(
+        operation(),
+        action: action,
+        timeout: _operationTimeout,
+      );
     } catch (e) {
       if (_isRecoverableConnectionError(e)) {
         await LogService.writeLog(
@@ -122,7 +188,11 @@ class MonggoDBServices {
         );
 
         await _reconnect();
-        return operation();
+        return _withTimeout(
+          operation(),
+          action: "$action setelah reconnect",
+          timeout: _operationTimeout,
+        );
       }
 
       rethrow;
@@ -279,7 +349,11 @@ class MonggoDBServices {
     }
 
     if (isConnected) {
-      await _db!.close();
+      await _withTimeout(
+        _db!.close(),
+        action: "Close MongoDB connection",
+        timeout: _closeTimeout,
+      );
 
       if (shouldLog) {
         await LogService.writeLog(

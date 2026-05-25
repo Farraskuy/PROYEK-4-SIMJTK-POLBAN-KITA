@@ -14,6 +14,7 @@ import '../view/penghapusan_view.dart';
 import '../../../log_harian_teknis/view/log_harian_teknis_view.dart';
 import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import '../../../riwayat_tugas/view/riwayat_tugas_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/profile/view/role_profile_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 
@@ -640,6 +641,15 @@ class HomeTeknisiView extends StatelessWidget {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const RiwayatTugasView()),
+      );
+      return;
+    }
+    if (target == HomeTeknisiNavTarget.profile) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const RoleProfileView(role: 'teknisi'),
+        ),
       );
     }
   }

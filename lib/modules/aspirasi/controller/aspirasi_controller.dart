@@ -8,6 +8,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/aspirasi_model.dart';
 
@@ -35,17 +36,26 @@ class AspirasiController
   /// Status loading
   final RxBool isLoading = false.obs;
 
+  /// Jumlah notifikasi belum dibaca
+  final RxInt unreadNotifCount = 3.obs;
+
+  void onNotificationTapped() {
+    unreadNotifCount.value = 0;
+  }
+
+  /// Data user yang sedang login
+  UserModel? get currentUser => AuthService().currentUser;
+
   /// ID user yang sedang login (diambil langsung dari AuthService)
   String get currentUserId {
-    final user = AuthService().currentUser;
+    final user = currentUser;
     if (user == null) return 'anonymous';
     return user.id.isNotEmpty ? user.id : user.nomorInduk;
   }
 
-  String get currentUserName => AuthService().currentUser?.name ?? 'anonymous';
+  String get currentUserName => currentUser?.name ?? 'anonymous';
 
-  String get currentUserProdi =>
-      AuthService().currentUser?.programStudy ?? '';
+  String get currentUserProdi => currentUser?.programStudy ?? '';
 
   // --------------------------------------------------------
   // STATE OBSERVABLES â€” FORM
@@ -62,6 +72,11 @@ class AspirasiController
 
   /// Error teks deskripsi
   final RxString errorIsiSaran = ''.obs;
+
+  /// Aspirasi yang sedang diedit
+  final Rxn<AspirasiModel> _editingAspirasi = Rxn<AspirasiModel>();
+
+  AspirasiModel? get editingAspirasi => _editingAspirasi.value;
 
   /// Mode â€” true: tampilkan form, false: tampilkan list
   final RxBool showForm = false.obs;
@@ -178,7 +193,20 @@ class AspirasiController
 
   /// Buka form tambah aspirasi
   void onTambahAspirasi() {
+    prepareCreateForm();
     showForm.value = true;
+  }
+
+  void prepareCreateForm() {
+    _editingAspirasi.value = null;
+    _resetForm();
+  }
+
+  void prepareEditForm(AspirasiModel aspirasi) {
+    _editingAspirasi.value = aspirasi;
+    isiSaranController.text = aspirasi.isiSaran;
+    isAnonymous.value = aspirasi.isAnonymous;
+    errorIsiSaran.value = '';
   }
 
   bool get hasDraft => isiSaranController.text.isNotEmpty;
@@ -187,6 +215,7 @@ class AspirasiController
   void onTutupFormConfirmed() {
     _resetForm();
     showForm.value = false;
+    _editingAspirasi.value = null;
   }
 
   // --------------------------------------------------------
@@ -207,43 +236,72 @@ class AspirasiController
 
   /// Submit aspirasi baru
   Future<void> onPostAspirasi() async {
+    await submitAspirasi();
+  }
+
+  Future<void> submitAspirasi() async {
     if (!_validateForm()) return;
 
     isSubmitting.value = true;
     await Future.delayed(const Duration(milliseconds: 800));
 
-    final newAspirasi = AspirasiModel(
-      id: _generateId(),
-      topik: _generateTopik(isiSaranController.text.trim()),
-      isiSaran: isiSaranController.text.trim(),
-      isAnonymous: isAnonymous.value,
-      pelaporId: isAnonymous.value ? null : currentUserId,
-      pelaporName: isAnonymous.value ? null : currentUserName,
-      pelaporProdi: isAnonymous.value ? null : currentUserProdi,
-      upvoteCount: 0,
-      downvoteCount: 0,
-      upvoterIds: const [],
-      downvoterIds: const [],
-      status: StatusAspirasi.open,
-      kategori: KategoriAspirasi.umum,
-      createdAt: DateTime.now(),
-    );
+    final current = _editingAspirasi.value;
+    if (current == null) {
+      final newAspirasi = AspirasiModel(
+        id: _generateId(),
+        topik: _generateTopik(isiSaranController.text.trim()),
+        isiSaran: isiSaranController.text.trim(),
+        isAnonymous: isAnonymous.value,
+        pelaporId: isAnonymous.value ? null : currentUserId,
+        pelaporName: isAnonymous.value ? null : currentUserName,
+        pelaporProdi: isAnonymous.value ? null : currentUserProdi,
+        upvoteCount: 0,
+        downvoteCount: 0,
+        upvoterIds: const [],
+        downvoterIds: const [],
+        status: StatusAspirasi.open,
+        kategori: KategoriAspirasi.umum,
+        createdAt: DateTime.now(),
+      );
 
-    _allAspirasi.insert(0, newAspirasi);
+      _allAspirasi.insert(0, newAspirasi);
+    } else {
+      final idx = _allAspirasi.indexWhere((item) => item.id == current.id);
+      if (idx != -1) {
+        _allAspirasi[idx] = current.copyWith(
+          topik: _generateTopik(isiSaranController.text.trim()),
+          isiSaran: isiSaranController.text.trim(),
+          isAnonymous: isAnonymous.value,
+        );
+      }
+    }
+
     _applyFilter();
     _resetForm();
+    _editingAspirasi.value = null;
     showForm.value = false;
     isSubmitting.value = false;
 
     Get.snackbar(
-      'Aspirasi Terkirim!',
-      'Aspirasi Anda berhasil diposting dan dapat dilihat oleh sesama mahasiswa.',
+      current == null ? 'Aspirasi Terkirim!' : 'Aspirasi Diperbarui!',
+      current == null
+          ? 'Aspirasi Anda berhasil diposting dan dapat dilihat oleh sesama mahasiswa.'
+          : 'Perubahan aspirasi berhasil disimpan.',
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.green.shade100,
       colorText: Colors.green.shade900,
       duration: const Duration(seconds: 3),
       margin: const EdgeInsets.all(16),
     );
+  }
+
+  void deleteAspirasi(String aspirasiId) {
+    _allAspirasi.removeWhere((item) => item.id == aspirasiId);
+    _applyFilter();
+    if (_editingAspirasi.value?.id == aspirasiId) {
+      _editingAspirasi.value = null;
+      _resetForm();
+    }
   }
 
   /// Generate topik singkat dari isi saran (ambil 7 kata pertama)

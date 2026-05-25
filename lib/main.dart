@@ -62,7 +62,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   Future<void> _refreshMongoConnectionSafely() async {
     try {
-      await MonggoDBServices().ensureConnected();
+      await MonggoDBServices().refreshConnection();
     } catch (e) {
       await LogService.writeLog(
         "Failed to refresh MongoDB connection on resume: $e",

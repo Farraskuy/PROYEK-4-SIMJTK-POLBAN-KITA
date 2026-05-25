@@ -8,22 +8,17 @@ import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/lapo
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_sort_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_page_header.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/mahasiswa_bottom_nav_bar.dart';
 
 class LaporanFasilitasMahasiswaView extends StatelessWidget {
   const LaporanFasilitasMahasiswaView({super.key, this.role = 'mahasiswa'});
 
   final String role;
 
-  String get _title {
-    if (role == 'teknisi' || role == 'petugas') return 'Tanggapan Laporan';
-    if (role == 'tu') return 'Cetak Laporan TU';
-    return 'Laporan Fasilitas';
-  }
-
   String get _subtitle {
-    if (role == 'mahasiswa') return 'Mahasiswa JTK';
-    if (role == 'teknisi' || role == 'petugas') return 'Petugas JTK';
-    if (role == 'tu') return 'TU JTK';
+    if (role == 'mahasiswa') return 'Mahasiswa';
+    if (role == 'teknisi' || role == 'petugas') return 'Petugas';
     return 'JTK';
   }
 
@@ -35,7 +30,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(
@@ -57,15 +52,15 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                   onNotificationTap: controller.onNotificationTapped,
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              const SliverToBoxAdapter(child: SizedBox(height: 12)),
               SliverToBoxAdapter(
-                child: LaporanFasilitasHeaderSection(
-                  title: _title,
+                child: AppPageHeader(
+                  title: 'Laporan Fasilitas',
                   description:
-                      'Laporan ditampilkan dari vote tertinggi agar prioritas paling penting muncul lebih dulu.',
+                      'Laporkan masalah atau keluhan terkait fasilitas di kampus.',
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+              const SliverToBoxAdapter(child: SizedBox(height: 12)),
               Obx(
                 () => SliverToBoxAdapter(
                   child: LaporanFasilitasSortBar(
@@ -93,6 +88,11 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
           ),
         );
       }),
+      bottomNavigationBar: role == 'mahasiswa'
+          ? const MahasiswaBottomNavBar(
+              selected: MahasiswaNavDestination.laporanFasilitas,
+            )
+          : null,
       floatingActionButton: role == 'mahasiswa'
           ? SizedBox(
               width: 56,
@@ -109,7 +109,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                     controller.refreshData();
                   }
                 },
-                backgroundColor: const Color(0xFF1E78E6),
+                backgroundColor: AppColors.primary,
                 shape: const CircleBorder(),
                 elevation: 4,
                 child: const Icon(Icons.add, color: Colors.white, size: 28),

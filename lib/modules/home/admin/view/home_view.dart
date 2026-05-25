@@ -12,6 +12,7 @@ import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_dashboard_components.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/view/admin_add_user_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/profile/view/role_profile_view.dart';
 
 // ============================================================
 // DESIGN TOKENS
@@ -90,6 +91,9 @@ class AdminDashboardView extends StatelessWidget {
                       const SizedBox(height: 24),
 
                       _buildTambahUserShortcut(context),
+                      const SizedBox(height: 16),
+
+                      _buildProfilShortcut(context),
                       const SizedBox(height: 16),
 
                       // ---- TINDAKAN CEPAT ----
@@ -351,6 +355,58 @@ class AdminDashboardView extends StatelessWidget {
               ),
             ),
             Icon(Icons.chevron_right_rounded, color: _C.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfilShortcut(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => const RoleProfileView(role: 'admin'),
+        ),
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _C.cardBg,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _C.divider),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: const Row(
+          children: [
+            _ShortcutIcon(icon: Icons.manage_accounts_rounded),
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Profil Admin',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: _C.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 3),
+                  Text(
+                    'Pantau aktivitas pribadi dan ringkasan kontribusi.',
+                    style: TextStyle(fontSize: 12, color: _C.textSecondary),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

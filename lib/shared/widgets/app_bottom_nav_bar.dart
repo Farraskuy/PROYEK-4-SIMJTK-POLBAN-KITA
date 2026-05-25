@@ -36,7 +36,7 @@ class AppBottomNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: SizedBox(
-          height: 64,
+          height: 66,
           child: Row(
             children: List.generate(items.length, (index) {
               final item = items[index];
@@ -47,23 +47,10 @@ class AppBottomNavBar extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: active ? 14 : 0,
-                          vertical: active ? 5 : 0,
-                        ),
-                        decoration: BoxDecoration(
-                          color: active
-                              ? AppColors.blueSoft
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Icon(
-                          item.icon,
-                          size: active ? 21 : 23,
-                          color: active ? AppColors.primary : AppColors.muted,
-                        ),
+                      Icon(
+                        item.icon,
+                        size: active ? 28 : 26,
+                        color: active ? AppColors.primary : AppColors.muted,
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -71,7 +58,7 @@ class AppBottomNavBar extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 12,
                           fontWeight: active
                               ? FontWeight.w700
                               : FontWeight.w500,

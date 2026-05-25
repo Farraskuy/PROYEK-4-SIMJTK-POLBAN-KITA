@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/home_model.dart';
 
-enum HomeTeknisiNavTarget { tugas, riwayat }
+enum HomeTeknisiNavTarget { tugas, riwayat, profile }
 
 class HomeTeknisiController extends GetxController {
   // --------------------------------------------------------
@@ -93,6 +93,8 @@ class HomeTeknisiController extends GetxController {
         return HomeTeknisiNavTarget.tugas;
       case 2:
         return HomeTeknisiNavTarget.riwayat;
+      case 3:
+        return HomeTeknisiNavTarget.profile;
       default:
         return null;
     }

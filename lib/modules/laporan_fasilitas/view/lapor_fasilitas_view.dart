@@ -61,17 +61,7 @@ class _LaporFasilitasViewState extends State<LaporFasilitasView> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: _AppColors.textPrimary,
-          ),
-          onPressed: () {
-            // Pastikan saat keluar dari form, status edit dikembalikan ke false
-            controller.isEditMode.value = false;
-            Navigator.pop(context);
-          },
-        ),
+        automaticallyImplyLeading: false,
         title: const Text(
           'Lapor Kerusakan',
           style: TextStyle(

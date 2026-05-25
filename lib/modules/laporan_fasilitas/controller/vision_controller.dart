@@ -14,17 +14,22 @@ class VisionController extends ChangeNotifier with WidgetsBindingObserver {
 
   List<DetectionResult> currentDetections = [];
   Timer? _mockDetectionTimer;
+  Future<void>? _cameraLifecycleInFlight;
 
   bool isFlashlightOn = false;
   bool isOverlayVisible = true;
 
   VisionController() {
     WidgetsBinding.instance.addObserver(this);
-    initCamera();
+    _cameraLifecycleInFlight = initCamera();
   }
 
   Future<void> initCamera() async {
     try {
+      await controller?.dispose();
+      controller = null;
+      isInitialized = false;
+
       final cameras = await availableCameras();
 
       if (cameras.isEmpty) {
@@ -75,17 +80,22 @@ class VisionController extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final cameraController = controller;
-    if (cameraController == null || !cameraController.value.isInitialized) {
-      return;
-    }
-
     if (state == AppLifecycleState.inactive) {
-      cameraController.dispose();
+      _cameraLifecycleInFlight = _disposeCameraForLifecycle();
+    } else if (state == AppLifecycleState.resumed) {
+      _cameraLifecycleInFlight = (_cameraLifecycleInFlight ?? Future.value())
+          .catchError((_) {})
+          .then((_) => initCamera());
+    }
+  }
+
+  Future<void> _disposeCameraForLifecycle() async {
+    try {
+      await controller?.dispose();
+    } finally {
+      controller = null;
       isInitialized = false;
       notifyListeners();
-    } else if (state == AppLifecycleState.resumed) {
-      initCamera();
     }
   }
 

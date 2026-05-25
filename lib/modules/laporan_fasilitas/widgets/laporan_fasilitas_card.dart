@@ -43,7 +43,7 @@ class LaporanFasilitasCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -85,7 +85,7 @@ class LaporanFasilitasCard extends StatelessWidget {
                                 radius: 14,
                                 backgroundColor: const Color(
                                   0xFF1A3A6B,
-                                ).withValues(alpha: 0.1),
+                                ).withOpacity(0.1),
                                 child: const Text(
                                   'AH',
                                   style: TextStyle(
@@ -123,32 +123,31 @@ class LaporanFasilitasCard extends StatelessWidget {
                           ),
                         ),
                         if (showActions)
-                          PopupMenuButton<String>(
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            icon: const Icon(
-                              Icons.more_vert_rounded,
-                              color: Colors.grey,
-                              size: 20,
-                            ),
-                            onSelected: (val) {
-                              if (val == 'edit') {
-                                onEdit?.call();
-                              } else if (val == 'delete') {
-                                onDelete?.call();
-                              }
-                            },
-                            itemBuilder: (context) => const [
-                              PopupMenuItem(
-                                value: 'edit',
-                                child: Text('Edit'),
-                              ),
-                              PopupMenuItem(
-                                value: 'delete',
-                                child: Text(
-                                  'Hapus',
-                                  style: TextStyle(color: Colors.red),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                onPressed: onEdit,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                icon: const Icon(
+                                  Icons.edit_outlined,
+                                  color: Colors.grey,
+                                  size: 20,
                                 ),
+                                tooltip: 'Edit',
+                              ),
+                              const SizedBox(width: 6),
+                              IconButton(
+                                onPressed: onDelete,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.redAccent,
+                                  size: 20,
+                                ),
+                                tooltip: 'Hapus',
                               ),
                             ],
                           ),

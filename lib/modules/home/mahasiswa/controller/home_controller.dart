@@ -7,7 +7,7 @@ import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/home_model.dart';
 
-enum MahasiswaNavTarget { laporanFasilitas, aspirasi }
+enum MahasiswaNavTarget { laporanFasilitas, aspirasi, profile }
 
 class HomeController extends GetxController {
   // --------------------------------------------------------
@@ -72,13 +72,7 @@ class HomeController extends GetxController {
       case 2:
         return MahasiswaNavTarget.aspirasi;
       case 3:
-        // Profil
-        Get.snackbar(
-          'Profil',
-          'Menuju Profil...',
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        return null;
+        return MahasiswaNavTarget.profile;
     }
     return null;
   }
@@ -87,50 +81,68 @@ class HomeController extends GetxController {
     activeKalenderIndex.value = index;
   }
 
-  // void onUpvoteAspirasi(String aspirasiId) {
-  //   final idx = aspirasiTrendingList.indexWhere((a) => a.id == aspirasiId);
-  //   if (idx == -1) return;
+  String get _currentUserId {
+    final user = currentUser;
+    if (user == null) return '';
+    return user.id.isNotEmpty ? user.id : user.nomorInduk;
+  }
 
-  //   final current = aspirasiTrendingList[idx];
-  //   final userId = AuthService().currentUser?.id ??
-  //     AuthService().currentUser?.nomorInduk ??
-  //     '';
-  //   final alreadyVoted = current.upvoterIds.contains(userId);
-  //   final updatedVoters = List<String>.from(current.upvoterIds);
-  //   int updatedCount = current.upvoteCount;
+  void onUpvoteLaporan(String laporanId) {
+    if (_currentUserId.isEmpty) return;
+    final idx = laporanTrendingList.indexWhere((laporan) => laporan.id == laporanId);
+    if (idx == -1) return;
 
-  //   if (alreadyVoted) {
-  //     updatedVoters.remove(userId);
-  //     updatedCount--;
-  //   } else {
-  //     updatedVoters.add(userId);
-  //     updatedCount++;
-  //   }
+    final current = laporanTrendingList[idx];
+    final alreadyUpvoted = current.upvoter_ids.contains(_currentUserId);
+    final updatedUpvoters = List<String>.from(current.upvoter_ids);
+    final updatedDownvoters = List<String>.from(current.downvoter_ids);
 
-  //   final updated = AspirasiModel(
-  //     id: current.id,
-  //     topik: current.topik,
-  //     isiSaran: current.isiSaran,
-  //     isAnonymous: current.isAnonymous,
-  //     pelaporId: current.pelaporId,
-  //     pelaporName: current.pelaporName,
-  //     upvoteCount: updatedCount,
-  //     upvoterIds: updatedVoters,
-  //     tanggapanJurusan: current.tanggapanJurusan,
-  //     status: current.status,
-  //     kategori: current.kategori,
-  //     createdAt: current.createdAt,
-  //   );
+    if (alreadyUpvoted) {
+      updatedUpvoters.remove(_currentUserId);
+    } else {
+      updatedUpvoters.add(_currentUserId);
+      updatedDownvoters.remove(_currentUserId);
+    }
 
-  //   aspirasiTrendingList[idx] = updated;
-  //   aspirasiTrendingList.sort((a, b) => b.upvoteCount.compareTo(a.upvoteCount));
-  // }
+    laporanTrendingList[idx] = current.copyWith(
+      upvoterIds: updatedUpvoters,
+      downvoterIds: updatedDownvoters,
+      voteScore: updatedUpvoters.length - updatedDownvoters.length,
+      updatedAt: DateTime.now(),
+    );
+  }
 
-  bool isUpvoted(AspirasiModel aspirasi) {
-    final userId = AuthService().currentUser?.id ??
-        AuthService().currentUser?.nomorInduk ??
-        '';
-    return aspirasi.upvoterIds.contains(userId);
+  void onDownvoteLaporan(String laporanId) {
+    if (_currentUserId.isEmpty) return;
+    final idx = laporanTrendingList.indexWhere((laporan) => laporan.id == laporanId);
+    if (idx == -1) return;
+
+    final current = laporanTrendingList[idx];
+    final alreadyDownvoted = current.downvoter_ids.contains(_currentUserId);
+    final updatedUpvoters = List<String>.from(current.upvoter_ids);
+    final updatedDownvoters = List<String>.from(current.downvoter_ids);
+
+    if (alreadyDownvoted) {
+      updatedDownvoters.remove(_currentUserId);
+    } else {
+      updatedDownvoters.add(_currentUserId);
+      updatedUpvoters.remove(_currentUserId);
+    }
+
+    laporanTrendingList[idx] = current.copyWith(
+      upvoterIds: updatedUpvoters,
+      downvoterIds: updatedDownvoters,
+      voteScore: updatedUpvoters.length - updatedDownvoters.length,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  bool isLaporanUpvoted(LaporanFasilitasModel laporan) {
+    return laporan.upvoter_ids.contains(_currentUserId);
+  }
+
+  bool isLaporanDownvoted(LaporanFasilitasModel laporan) {
+    return laporan.downvoter_ids.contains(_currentUserId);
   }
 
   void onNotificationTapped() {

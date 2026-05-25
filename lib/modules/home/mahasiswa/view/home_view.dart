@@ -5,10 +5,11 @@ import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/controller/home
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/akses_cepat_section.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/kalender_section.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/laporan_fasilitas_section.dart';
+import 'package:proyek_4_poki_polban_kita/modules/profile/view/role_profile_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/mahasiswa_bottom_nav_bar.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -18,7 +19,7 @@ class HomeView extends StatelessWidget {
     final controller = Get.put(HomeController());
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(
@@ -51,16 +52,22 @@ class HomeView extends StatelessWidget {
 
                     AksesCepatSection(
                       controller: controller,
-                      onNavigate: (target) =>
-                          _navigateMahasiswa(context, target),
+                      onNavigate: (target) => _navigateMahasiswa(
+                        context,
+                        target,
+                        role: 'mahasiswa',
+                      ),
                     ),
 
                     const SizedBox(height: 24),
 
                     LaporanFasilitasSection(
                       controller: controller,
-                      onNavigate: (target) =>
-                          _navigateMahasiswa(context, target),
+                      onNavigate: (target) => _navigateMahasiswa(
+                        context,
+                        target,
+                        role: 'mahasiswa',
+                      ),
                     ),
 
                     const SizedBox(height: 20),
@@ -71,30 +78,18 @@ class HomeView extends StatelessWidget {
           ),
         );
       }),
-      bottomNavigationBar: _buildBottomNavBar(context, controller),
-    );
-  }
-
-  Widget _buildBottomNavBar(BuildContext context, HomeController controller) {
-    const items = [
-      AppNavItem(label: 'Home', icon: Icons.home_rounded),
-      AppNavItem(label: 'Layanan', icon: Icons.grid_view_rounded),
-      AppNavItem(label: 'Aspirasi', icon: Icons.campaign_rounded),
-      AppNavItem(label: 'Profil', icon: Icons.person_rounded),
-    ];
-
-    return Obx(
-      () => AppBottomNavBar(
-        items: items,
-        selectedIndex: controller.selectedNavIndex.value,
-        onTap: (index) =>
-            _navigateMahasiswa(context, controller.onNavItemTapped(index)),
+      bottomNavigationBar: const MahasiswaBottomNavBar(
+        selected: MahasiswaNavDestination.home,
       ),
     );
   }
 }
 
-void _navigateMahasiswa(BuildContext context, MahasiswaNavTarget? target) {
+void _navigateMahasiswa(
+  BuildContext context,
+  MahasiswaNavTarget? target, {
+  required String role,
+}) {
   if (target == null) return;
 
   if (target == MahasiswaNavTarget.laporanFasilitas) {
@@ -111,6 +106,14 @@ void _navigateMahasiswa(BuildContext context, MahasiswaNavTarget? target) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AspirasiView()),
+    );
+    return;
+  }
+
+  if (target == MahasiswaNavTarget.profile) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RoleProfileView(role: role)),
     );
   }
 }
