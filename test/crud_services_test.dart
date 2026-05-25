@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:proyek_4_poki_polban_kita/modules/kategori_fasilitas/model/kategori_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/kategori_fasilitas/service/kategori_fasilitas_service.dart';
-import 'package:proyek_4_poki_polban_kita/modules/log_harian_teknis/model/log_harian_teknis_model.dart';
-import 'package:proyek_4_poki_polban_kita/modules/log_harian_teknis/service/log_harian_teknis_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
@@ -13,7 +11,6 @@ void main() {
     final userService = UserService();
     final laporanService = LaporanFasilitasService();
     final kategoriService = KategoriFasilitasService();
-    final logService = LogHarianTeknisService();
 
     final userStore = <String, Map<String, dynamic>>{};
     final laporanStore = <String, Map<String, dynamic>>{};
@@ -63,18 +60,6 @@ void main() {
       KategoriFasilitasService.deleteOverride = (collection, id) async {
         kategoriStore.remove(id);
       };
-
-      LogHarianTeknisService.fetchOverride = (collection, filter) async =>
-          logStore.values.toList();
-      LogHarianTeknisService.insertOverride = (collection, data) async {
-        logStore[data['_id'].toString()] = Map<String, dynamic>.from(data);
-      };
-      LogHarianTeknisService.updateOverride = (collection, filter, data) async {
-        logStore[data['_id'].toString()] = Map<String, dynamic>.from(data);
-      };
-      LogHarianTeknisService.deleteOverride = (collection, id) async {
-        logStore.remove(id);
-      };
     });
 
     tearDown(() {
@@ -92,11 +77,6 @@ void main() {
       KategoriFasilitasService.insertOverride = null;
       KategoriFasilitasService.updateOverride = null;
       KategoriFasilitasService.deleteOverride = null;
-
-      LogHarianTeknisService.fetchOverride = null;
-      LogHarianTeknisService.insertOverride = null;
-      LogHarianTeknisService.updateOverride = null;
-      LogHarianTeknisService.deleteOverride = null;
     });
 
     test('users CRUD roundtrip', () async {
@@ -194,36 +174,6 @@ void main() {
 
       await kategoriService.delete('kat-001');
       expect(await kategoriService.getById('kat-001'), isNull);
-    });
-
-    test('log harian teknis CRUD roundtrip', () async {
-      final log = LogHarianTeknisModel(
-        id: 'log-001',
-        teknisiId: 'user-t1',
-        tanggal: DateTime.parse('2026-05-03T00:00:00.000Z'),
-        keterangan: 'AC kembali dingin',
-        createdAt: DateTime.parse('2026-05-03T00:00:00.000Z'),
-      );
-
-      await logService.create(log);
-      expect((await logService.getAll()).length, equals(1));
-      expect(
-        (await logService.getById('log-001'))?.keterangan,
-        equals('AC kembali dingin'),
-      );
-
-      final updated = LogHarianTeknisModel.fromJson({
-        ...log.toJson(),
-        'keterangan': 'Perbaikan AC dan pembersihan filter',
-      });
-      await logService.update(updated);
-      expect(
-        (await logService.getById('log-001'))?.keterangan,
-        equals('Perbaikan AC dan pembersihan filter'),
-      );
-
-      await logService.delete('log-001');
-      expect(await logService.getById('log-001'), isNull);
     });
   });
 }

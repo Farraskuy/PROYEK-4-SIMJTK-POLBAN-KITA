@@ -11,7 +11,7 @@ import '../view/analisa_kerusakan_view.dart';
 import '../view/kontrol_barang_view.dart';
 import '../view/usulan_pemeliharaan_view.dart';
 import '../view/penghapusan_view.dart';
-import '../../../log_harian_teknis/view/log_harian_teknis_view.dart';
+// import '../../../log_harian_teknis/view/log_harian_teknis_view.dart';
 import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import '../../../riwayat_tugas/view/riwayat_tugas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/profile/view/role_profile_view.dart';
@@ -172,12 +172,6 @@ class ModulMaintenanceSection extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => const UsulanPenghapusanView(),
           ),
-        );
-        break;
-      case 'log':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => LogHarianTeknisView()),
         );
         break;
     }
