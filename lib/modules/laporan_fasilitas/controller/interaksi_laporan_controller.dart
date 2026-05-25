@@ -7,6 +7,8 @@ import '../model/laporan_fasilitas_model.dart';
 import '../service/laporan_fasilitas_service.dart';
 import '../service/detail_laporan_fasilitas_service.dart'; // Pastikan path ini benar
 
+enum LaporanSortMode { populer, terbaru }
+
 class InteraksiLaporanController extends GetxController {
   InteraksiLaporanController({this.role = 'mahasiswa'});
 
@@ -58,7 +60,17 @@ class InteraksiLaporanController extends GetxController {
   /// - byUpvote = true  → urut vote_score tertinggi
   /// - byUpvote = false → urut createdAt terbaru
   void sortLaporan({required bool byUpvote}) {
+    sortMode.value = byUpvote ? LaporanSortMode.populer : LaporanSortMode.terbaru;
     if (byUpvote) {
+      listLaporan.sort((a, b) => b.vote_score.compareTo(a.vote_score));
+    } else {
+      listLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+    listLaporan.refresh();
+  }
+
+  void _applySort() {
+    if (sortMode.value == LaporanSortMode.populer) {
       listLaporan.sort((a, b) => b.vote_score.compareTo(a.vote_score));
     } else {
       listLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
