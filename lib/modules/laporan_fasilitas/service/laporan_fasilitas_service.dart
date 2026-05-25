@@ -212,4 +212,21 @@ class LaporanFasilitasService {
       return rawRows; 
     }
   }
+
+  Future<List<LaporanFasilitasModel>> fetchAll() async {
+    // Kita panggil fetch yang sudah ada dengan filter kosong
+    // pastikan method fetch internal Anda menangani filter kosong
+    final mongo = MonggoDBServices();
+    await mongo.ensureConnected();
+    
+    // Asumsi kita menggunakan logic fetch yang sudah Anda buat di service tersebut
+    // Anda mungkin perlu menyesuaikan pemanggilan ke method internal 
+    // jika logic 'enrichment' nama user ada di method lain
+    final rawRows = await mongo.fetch(collectionName, where.sortBy('createdAt', descending: true));
+    
+    // Jika Anda sudah memiliki logic enrichment di service, 
+    // pastikan Anda memanggil fungsi yang benar atau copy logic enrichment ke sini
+    
+    return rawRows.map((e) => LaporanFasilitasModel.fromJson(e)).toList();
+  }
 }
