@@ -226,9 +226,17 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                             backgroundColor: const Color(
                                               0xFF1A3A6B,
                                             ).withOpacity(0.1),
-                                            child: const Text(
-                                              'AH',
-                                              style: TextStyle(
+                                            child: Text(
+                                              laporan.pelapor_nama.length >= 2
+                                                  ? laporan.pelapor_nama
+                                                      .substring(0, 2)
+                                                      .toUpperCase()
+                                                  : (laporan.pelapor_nama.isNotEmpty
+                                                      ? laporan.pelapor_nama
+                                                          .substring(0, 1)
+                                                          .toUpperCase()
+                                                      : '??'),
+                                              style: const TextStyle(
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.bold,
                                                 color: Color(0xFF1A3A6B),
@@ -241,9 +249,9 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                const Text(
-                                                  'Ahmad Hidayat',
-                                                  style: TextStyle(
+                                                Text(
+                                                  laporan.pelapor_nama, // Menggunakan name dari model
+                                                  style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 13,
                                                   ),
@@ -342,7 +350,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 12),
 
-                                // MODIFIKASI: Gambar Dinamis Berdasarkan Data Laporan Aktual
+                                // Gambar Dinamis Berdasarkan Data Laporan Aktual
                                 if (fotoLaporanPath != null) ...[
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
@@ -451,11 +459,12 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                             Icons.arrow_downward_rounded,
                                             size: 16,
                                           ),
-                                          label: const Text(
+                                          label: Text( // <-- Di sini murni menggunakan Text(
                                             'Down Vote',
                                             style: TextStyle(
                                               fontSize: 12,
                                               fontWeight: FontWeight.w600,
+                                              color: isDownvoted ? Colors.blue : Colors.black87,
                                             ),
                                           ),
                                         ),
@@ -526,7 +535,6 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
     );
   }
 
-  // Tambahan widget placeholder jika file gambar corrupt/tidak ditemukan
   Widget _buildImagePlaceholder() {
     return Container(
       height: 160,

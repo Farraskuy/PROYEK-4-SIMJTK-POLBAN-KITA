@@ -172,7 +172,7 @@ class _DetailLaporanFasilitasViewState
                           Expanded(
                             child: _metaItem(
                               label: 'DILAPORKAN OLEH',
-                              value: laporan.pelapor_id,
+                              value: laporan.pelapor_nama, // <-- Diubah menggunakan pelapor_nama
                             ),
                           ),
                           Expanded(
