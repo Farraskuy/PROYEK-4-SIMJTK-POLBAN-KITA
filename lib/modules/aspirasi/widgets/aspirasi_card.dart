@@ -49,16 +49,8 @@ class AspirasiCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: aspirasi.isAnonymous
-                    ? AppColors.border
-                    : AppColors.primary,
-                child: aspirasi.isAnonymous
-                    ? const Icon(
-                        Icons.person_outline_rounded,
-                        color: AppColors.body,
-                        size: 20,
-                      )
-                    : Text(
+                backgroundColor: AppColors.primary,
+                child: Text(
                         aspirasi.initials,
                         style: const TextStyle(
                           color: Colors.white,
@@ -72,10 +64,7 @@ class AspirasiCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      aspirasi.isAnonymous
-                          ? 'Anonim'
-                          : (aspirasi.pelaporName ?? 'Mahasiswa JTK'),
+                    Text((aspirasi.pelaporName ?? 'Mahasiswa JTK'),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
@@ -84,7 +73,7 @@ class AspirasiCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${aspirasi.isAnonymous ? '' : '${aspirasi.pelaporProdi ?? ''} · '}${aspirasi.waktuRelatif}',
+                      '${aspirasi.pelaporProdi ?? ''} · ${aspirasi.waktuRelatif}',
                       style: const TextStyle(
                         fontSize: 11,
                         color: AppColors.body,

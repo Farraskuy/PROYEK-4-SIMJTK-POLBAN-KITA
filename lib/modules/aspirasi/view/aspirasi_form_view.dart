@@ -190,16 +190,6 @@ class _AspirasiFormScaffold extends StatelessWidget {
                       padding: const EdgeInsets.all(16),
                       child: Row(
                         children: [
-                          Obx(
-                            () => Switch(
-                              value: controller.isAnonymous.value,
-                              onChanged: controller.onToggleAnonymous,
-                              activeColor: AppColors.primary,
-                              materialTapTargetSize:
-                                  MaterialTapTargetSize.shrinkWrap,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

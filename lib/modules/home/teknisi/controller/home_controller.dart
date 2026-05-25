@@ -69,7 +69,7 @@ class HomeTeknisiController extends GetxController {
     semuaTugas.assignAll(allTugas);
 
     // Filter tugas mendesak: high priority & belum selesai
-    // Sesuai hak akses Teknisi ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â menerima delegasi dari Admin (UC-06)
+    // Sesuai hak akses Teknisi menerima delegasi dari Admin (UC-06)
     tugasMendesak.assignAll(
       allTugas.where((t) => t.isMendesak).toList()
         ..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
@@ -115,12 +115,12 @@ class HomeTeknisiController extends GetxController {
     );
   }
 
-  /// Mulai kerjakan tugas ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ubah status ke in_progress (UC-07)
+  /// Mulai kerjakan tugas  ubah status ke in_progress (UC-07)
   Future<void> onMulaiKerjakan(TugasTeknisiModel tugas) async {
     final idx = semuaTugas.indexWhere((t) => t.id == tugas.id);
     if (idx == -1) return;
 
-    // Simulasi update ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â di implementasi nyata panggil service
+    // Simulasi update  di implementasi nyata panggil service
     await Future.delayed(const Duration(milliseconds: 300));
 
     // Update di list mendesak
@@ -150,7 +150,7 @@ class HomeTeknisiController extends GetxController {
     );
   }
 
-  /// Selesaikan tugas ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ubah status ke resolved + wajib foto bukti (UC-07)
+  /// Selesaikan tugas  ubah status ke resolved + wajib foto bukti (UC-07)
   void onSelesaikanTugas(TugasTeknisiModel tugas) {
     // TODO: navigasi ke form selesaikan tugas dengan upload foto bukti
     // AppNavigator.push(SelesaikanTugasView(tugas: tugas))

@@ -10,10 +10,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/log_service.dart';
 import '../model/aspirasi_model.dart';
+import '../service/aspirasi_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 
-class AspirasiController  
-    extends GetxController
+class AspirasiController extends GetxController
     with GetSingleTickerProviderStateMixin {
   // --------------------------------------------------------
   // TAB CONTROLLER
@@ -46,16 +48,11 @@ class AspirasiController
   /// Data user yang sedang login
   UserModel? get currentUser => AuthService().currentUser;
 
-  /// ID user yang sedang login (diambil langsung dari AuthService)
-  String get currentUserId {
-    final user = currentUser;
-    if (user == null) return 'anonymous';
-    return user.id.isNotEmpty ? user.id : user.nomorInduk;
-  }
+  final RxString currentUserId = ''.obs;
+  final RxString currentUserName = 'Mahasiswa'.obs;
+  final RxString currentUserProdi = '-'.obs;
 
-  String get currentUserName => currentUser?.name ?? 'anonymous';
-
-  String get currentUserProdi => currentUser?.programStudy ?? '';
+  final AspirasiService _service = AspirasiService();
 
   // --------------------------------------------------------
   // STATE OBSERVABLES â€” FORM
@@ -63,9 +60,6 @@ class AspirasiController
 
   /// Controller teks area aspirasi
   final isiSaranController = TextEditingController();
-
-  /// Toggle anonymous
-  final RxBool isAnonymous = false.obs;
 
   /// Status submitting form
   final RxBool isSubmitting = false.obs;
@@ -96,11 +90,22 @@ class AspirasiController
     super.onInit();
     tabController = TabController(length: 3, vsync: this);
     tabController.addListener(_onTabChanged);
+    _initCurrentUser();
     _loadAspirasi();
 
     isiSaranController.addListener(() {
       if (isiSaranController.text.isNotEmpty) errorIsiSaran.value = '';
     });
+  }
+
+  Future<void> _initCurrentUser() async {
+    final user = await AuthService().loadSavedSession();
+    if (user != null) {
+      // Simpan ID user untuk kebutuhan cek validasi vote
+      currentUserId.value = user.id ?? user.nomorInduk ?? 'anonymous';
+      currentUserName.value = user.name ?? 'Mahasiswa';
+      currentUserProdi.value = user.programStudy ?? '-';
+    }
   }
 
   @override
@@ -117,10 +122,16 @@ class AspirasiController
 
   Future<void> _loadAspirasi() async {
     isLoading.value = true;
-    await Future.delayed(const Duration(milliseconds: 500));
-    _allAspirasi.assignAll(AspirasiModel.dummyList());
-    _applyFilter();
-    isLoading.value = false;
+    try {
+      final data = await _service.fetchAllAspirasi();
+      _allAspirasi.assignAll(data);
+      _applyFilter();
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal mengambil data aspirasi dari server.');
+      debugPrint('Error fetch aspirasi: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void _onTabChanged() {
@@ -181,7 +192,6 @@ class AspirasiController
 
   void _resetForm() {
     isiSaranController.clear();
-    isAnonymous.value = false;
     errorIsiSaran.value = '';
   }
 
@@ -205,7 +215,6 @@ class AspirasiController
   void prepareEditForm(AspirasiModel aspirasi) {
     _editingAspirasi.value = aspirasi;
     isiSaranController.text = aspirasi.isiSaran;
-    isAnonymous.value = aspirasi.isAnonymous;
     errorIsiSaran.value = '';
   }
 
@@ -221,11 +230,6 @@ class AspirasiController
   // --------------------------------------------------------
   // PUBLIC METHODS â€” FORM
   // --------------------------------------------------------
-
-  /// Toggle anonymous mode
-  void onToggleAnonymous(bool value) {
-    isAnonymous.value = value;
-  }
 
   /// Hapus isi form
   bool canHapusForm() => isiSaranController.text.isNotEmpty;
@@ -243,37 +247,61 @@ class AspirasiController
     if (!_validateForm()) return;
 
     isSubmitting.value = true;
-    await Future.delayed(const Duration(milliseconds: 800));
 
-    final current = _editingAspirasi.value;
-    if (current == null) {
-      final newAspirasi = AspirasiModel(
-        id: _generateId(),
-        topik: _generateTopik(isiSaranController.text.trim()),
-        isiSaran: isiSaranController.text.trim(),
-        isAnonymous: isAnonymous.value,
-        pelaporId: isAnonymous.value ? null : currentUserId,
-        pelaporName: isAnonymous.value ? null : currentUserName,
-        pelaporProdi: isAnonymous.value ? null : currentUserProdi,
-        upvoteCount: 0,
-        downvoteCount: 0,
-        upvoterIds: const [],
-        downvoterIds: const [],
-        status: StatusAspirasi.open,
-        kategori: KategoriAspirasi.umum,
-        createdAt: DateTime.now(),
-      );
+    try {
+      // Ambil data user dari Session yang tersimpan
+      final currentUser = await AuthService().loadSavedSession();
+      final pelaporId =
+          currentUser?.id ?? currentUser?.nomorInduk ?? 'anonymous';
+      final pelaporName = currentUser?.name ?? 'Mahasiswa Anonim';
+      final pelaporProdi = currentUser?.programStudy ?? '-';
 
-      _allAspirasi.insert(0, newAspirasi);
-    } else {
-      final idx = _allAspirasi.indexWhere((item) => item.id == current.id);
-      if (idx != -1) {
-        _allAspirasi[idx] = current.copyWith(
+      final current = _editingAspirasi.value;
+      if (current == null) {
+        final newAspirasi = AspirasiModel(
+          id: _generateId(),
           topik: _generateTopik(isiSaranController.text.trim()),
           isiSaran: isiSaranController.text.trim(),
-          isAnonymous: isAnonymous.value,
+          pelaporId: pelaporId,
+          pelaporName: pelaporName,
+          pelaporProdi: pelaporProdi,
+          upvoteCount: 0,
+          downvoteCount: 0,
+          upvoterIds: const [],
+          downvoterIds: const [],
+          status: StatusAspirasi.open,
+          kategori: KategoriAspirasi.umum,
+          createdAt: DateTime.now(),
         );
+
+        _allAspirasi.insert(0, newAspirasi);
+      } else {
+        final idx = _allAspirasi.indexWhere((item) => item.id == current.id);
+        if (idx != -1) {
+          _allAspirasi[idx] = current.copyWith(
+            topik: _generateTopik(isiSaranController.text.trim()),
+            isiSaran: isiSaranController.text.trim(),
+          );
+        }
       }
+
+      Get.snackbar(
+        current == null ? 'Aspirasi Terkirim!' : 'Aspirasi Diperbarui!',
+        current == null
+            ? 'Aspirasi Anda berhasil diposting dan dapat dilihat oleh sesama mahasiswa.'
+            : 'Perubahan aspirasi berhasil disimpan.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.shade100,
+        colorText: Colors.green.shade900,
+        duration: const Duration(seconds: 3),
+        margin: const EdgeInsets.all(16),
+      );
+    } catch (e) {
+      LogService.writeLog(
+        "Gagal submit aspirasi: $e",
+        source: "AspirasiController",
+        level: 1, // ERROR
+      );
     }
 
     _applyFilter();
@@ -281,18 +309,6 @@ class AspirasiController
     _editingAspirasi.value = null;
     showForm.value = false;
     isSubmitting.value = false;
-
-    Get.snackbar(
-      current == null ? 'Aspirasi Terkirim!' : 'Aspirasi Diperbarui!',
-      current == null
-          ? 'Aspirasi Anda berhasil diposting dan dapat dilihat oleh sesama mahasiswa.'
-          : 'Perubahan aspirasi berhasil disimpan.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green.shade100,
-      colorText: Colors.green.shade900,
-      duration: const Duration(seconds: 3),
-      margin: const EdgeInsets.all(16),
-    );
   }
 
   void deleteAspirasi(String aspirasiId) {
@@ -312,80 +328,117 @@ class AspirasiController
   }
 
   // --------------------------------------------------------
-  // PUBLIC METHODS â€” VOTING
+  // SISTEM VOTE (UPVOTE & DOWNVOTE)
   // --------------------------------------------------------
 
-  /// Upvote aspirasi â€” toggle jika sudah upvote
-  void onUpvote(String aspirasiId) {
+  Future<void> onUpvote(String aspirasiId) async {
     final idx = _allAspirasi.indexWhere((a) => a.id == aspirasiId);
     if (idx == -1) return;
 
+    // Ambil user ID yang sedang aktif
+    final currentUser = await AuthService().loadSavedSession();
+    final userId = currentUser?.id ?? currentUser?.nomorInduk ?? 'anonymous';
+
     final current = _allAspirasi[idx];
-    final alreadyUpvoted = current.upvoterIds.contains(currentUserId);
-    final alreadyDownvoted = current.downvoterIds.contains(currentUserId);
+    final alreadyUpvoted = current.upvoterIds.contains(userId);
+    final alreadyDownvoted = current.downvoterIds.contains(userId);
 
     final updatedUpvoters = List<String>.from(current.upvoterIds);
     final updatedDownvoters = List<String>.from(current.downvoterIds);
     int newUpvote = current.upvoteCount;
     int newDownvote = current.downvoteCount;
 
+    // Logika perhitungan vote
     if (alreadyUpvoted) {
-      // Cancel upvote
-      updatedUpvoters.remove(currentUserId);
+      updatedUpvoters.remove(userId);
       newUpvote--;
     } else {
-      // Tambah upvote
-      updatedUpvoters.add(currentUserId);
+      updatedUpvoters.add(userId);
       newUpvote++;
-      // Hapus downvote jika ada
       if (alreadyDownvoted) {
-        updatedDownvoters.remove(currentUserId);
+        updatedDownvoters.remove(userId);
         newDownvote--;
       }
     }
 
-    _allAspirasi[idx] = current.copyWith(
+    // Buat objek AspirasiModel baru yang sudah di-update
+    final updatedAspirasi = current.copyWith(
       upvoteCount: newUpvote,
       downvoteCount: newDownvote,
       upvoterIds: updatedUpvoters,
       downvoterIds: updatedDownvoters,
     );
-    _applyFilter();
+
+    try {
+      // 1. Simpan perubahan ke MongoDB
+      await _service.updateAspirasi(updatedAspirasi);
+
+      // 2. Jika berhasil, perbarui state lokal UI
+      _allAspirasi[idx] = updatedAspirasi;
+      _applyFilter();
+    } catch (e) {
+      Get.snackbar(
+        'Gagal',
+        'Gagal memperbarui vote: $e',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+    }
   }
 
-  /// Downvote aspirasi â€” toggle jika sudah downvote
-  void onDownvote(String aspirasiId) {
+  Future<void> onDownvote(String aspirasiId) async {
     final idx = _allAspirasi.indexWhere((a) => a.id == aspirasiId);
     if (idx == -1) return;
 
+    // Ambil user ID yang sedang aktif
+    final currentUser = await AuthService().loadSavedSession();
+    final userId = currentUser?.id ?? currentUser?.nomorInduk ?? 'anonymous';
+
     final current = _allAspirasi[idx];
-    final alreadyDownvoted = current.downvoterIds.contains(currentUserId);
-    final alreadyUpvoted = current.upvoterIds.contains(currentUserId);
+    final alreadyDownvoted = current.downvoterIds.contains(userId);
+    final alreadyUpvoted = current.upvoterIds.contains(userId);
 
     final updatedUpvoters = List<String>.from(current.upvoterIds);
     final updatedDownvoters = List<String>.from(current.downvoterIds);
     int newUpvote = current.upvoteCount;
     int newDownvote = current.downvoteCount;
 
+    // Logika perhitungan vote
     if (alreadyDownvoted) {
-      updatedDownvoters.remove(currentUserId);
+      updatedDownvoters.remove(userId);
       newDownvote--;
     } else {
-      updatedDownvoters.add(currentUserId);
+      updatedDownvoters.add(userId);
       newDownvote++;
       if (alreadyUpvoted) {
-        updatedUpvoters.remove(currentUserId);
+        updatedUpvoters.remove(userId);
         newUpvote--;
       }
     }
 
-    _allAspirasi[idx] = current.copyWith(
+    // Buat objek AspirasiModel baru yang sudah di-update
+    final updatedAspirasi = current.copyWith(
       upvoteCount: newUpvote,
       downvoteCount: newDownvote,
       upvoterIds: updatedUpvoters,
       downvoterIds: updatedDownvoters,
     );
-    _applyFilter();
+
+    try {
+      // 1. Simpan perubahan ke MongoDB
+      await _service.updateAspirasi(updatedAspirasi);
+
+      // 2. Jika berhasil, perbarui state lokal UI
+      _allAspirasi[idx] = updatedAspirasi;
+      _applyFilter();
+    } catch (e) {
+      Get.snackbar(
+        'Gagal',
+        'Gagal memperbarui vote: $e',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+    }
   }
 
   // ---- GETTERS HELPER ----

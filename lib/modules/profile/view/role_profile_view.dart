@@ -144,11 +144,11 @@ class _RoleProfileViewState extends State<RoleProfileView> {
       if (user.nomorInduk.isNotEmpty) userIds.add(user.nomorInduk);
     }
 
-    final aspirasiList =
-        AspirasiModel.dummyList()
-            .where((item) => userIds.contains(item.pelaporId))
-            .toList()
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final aspirasiList = new List<AspirasiModel>.from({});
+    //     AspirasiModel.dummyList()
+    //         .where((item) => userIds.contains(item.pelaporId))
+    //         .toList()
+    //       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     final laporanList = await LaporanFasilitasService().getAll();
     final ownLaporan =
@@ -896,10 +896,7 @@ class _PinnedTabHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return SizedBox(
-      height: maxExtent,
-      child: child,
-    );
+    return SizedBox(height: maxExtent, child: child);
   }
 
   @override
