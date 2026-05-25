@@ -36,7 +36,9 @@ class LaporanFasilitasService {
       return laporan;
     }
 
-    await MonggoDBServices().insertData(collectionName, data);
+    final mongo = MonggoDBServices();
+    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum insert
+    await mongo.insertData(collectionName, data);
     return laporan;
   }
 
@@ -83,7 +85,9 @@ class LaporanFasilitasService {
       return laporan;
     }
 
-    await MonggoDBServices().updateOneByFilter(
+    final mongo = MonggoDBServices();
+    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum update
+    await mongo.updateOneByFilter(
       collectionName,
       where.eq('_id', laporan.id),
       data,
@@ -129,7 +133,9 @@ class LaporanFasilitasService {
       return;
     }
 
-    await MonggoDBServices().deleteData(collectionName, id);
+    final mongo = MonggoDBServices();
+    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum delete
+    await mongo.deleteData(collectionName, id);
   }
 
   Future<void> _updateById(String id, Map<String, dynamic> data) async {
@@ -138,7 +144,10 @@ class LaporanFasilitasService {
       await override(collectionName, where.eq('_id', id), data);
       return;
     }
-    await MonggoDBServices().updateOneByFilter(
+    
+    final mongo = MonggoDBServices();
+    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum update parsial
+    await mongo.updateOneByFilter(
       collectionName,
       where.eq('_id', id),
       data,
@@ -149,7 +158,58 @@ class LaporanFasilitasService {
     SelectorBuilder filter,
   ) async {
     final override = fetchOverride;
-    if (override != null) return override(collectionName, filter);
-    return MonggoDBServices().fetch(collectionName, filter);
+    List<Map<String, dynamic>> rawRows;
+    final mongo = MonggoDBServices();
+    
+    // Pastikan koneksi aman sebelum menarik data
+    await mongo.ensureConnected(); 
+    
+    if (override != null) {
+      rawRows = await override(collectionName, filter);
+    } else {
+      rawRows = await mongo.fetch(collectionName, filter);
+    }
+
+    if (rawRows.isEmpty) return rawRows;
+
+    // --- PROSES MENGAMBIL NAMA USER DARI KOLEKSI 'users' ---
+    final enrichedRows = <Map<String, dynamic>>[];
+    try {
+      final userIds = rawRows
+          .map((r) => r['pelapor_id']?.toString())
+          .where((id) => id != null && id.isNotEmpty)
+          .toSet()
+          .toList();
+
+      Map<String, String> userMap = {};
+
+      if (userIds.isNotEmpty) {
+        final usersData = await mongo.fetch('users', where.oneFrom('_id', userIds));
+        
+        for (var u in usersData) {
+          final uId = u['_id']?.toString();
+          final uName = u['name']?.toString();
+          if (uId != null && uName != null) {
+            userMap[uId] = uName;
+          }
+        }
+      }
+
+      for (var row in rawRows) {
+        final newRow = Map<String, dynamic>.from(row);
+        final pid = newRow['pelapor_id']?.toString();
+        
+        if (pid != null && userMap.containsKey(pid)) {
+          newRow['pelapor_nama'] = userMap[pid]; 
+        }
+        
+        enrichedRows.add(newRow);
+      }
+      return enrichedRows;
+      
+    } catch (e) {
+      debugPrint('Gagal melakukan join data user: $e');
+      return rawRows; 
+    }
   }
 }

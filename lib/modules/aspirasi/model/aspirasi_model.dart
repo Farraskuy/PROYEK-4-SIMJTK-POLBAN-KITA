@@ -69,9 +69,6 @@ class AspirasiModel {
   /// isiSaran (String)
   final String isiSaran;
 
-  /// isAnonymous (Boolean)
-  final bool isAnonymous;
-
   /// pelaporId (String, Nullable, FK ke User)
   final String? pelaporId;
 
@@ -109,7 +106,6 @@ class AspirasiModel {
     required this.id,
     required this.topik,
     required this.isiSaran,
-    required this.isAnonymous,
     this.pelaporId,
     this.pelaporName,
     this.pelaporProdi,
@@ -127,7 +123,7 @@ class AspirasiModel {
 
   /// Inisial nama untuk avatar
   String get initials {
-    if (isAnonymous || pelaporName == null) return '?';
+    if (pelaporName == null) return '?';
     final parts = pelaporName!.trim().split(' ');
     if (parts.length >= 2) {
       return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
@@ -151,7 +147,6 @@ class AspirasiModel {
   AspirasiModel copyWith({
     String? topik,
     String? isiSaran,
-    bool? isAnonymous,
     int? upvoteCount,
     int? downvoteCount,
     List<String>? upvoterIds,
@@ -163,7 +158,6 @@ class AspirasiModel {
       id: id,
       topik: topik ?? this.topik,
       isiSaran: isiSaran ?? this.isiSaran,
-      isAnonymous: isAnonymous ?? this.isAnonymous,
       pelaporId: pelaporId,
       pelaporName: pelaporName,
       pelaporProdi: pelaporProdi,
@@ -178,104 +172,143 @@ class AspirasiModel {
     );
   }
 
-  // ---- DUMMY DATA ----
-  static List<AspirasiModel> dummyList() => [
-        AspirasiModel(
-          id: 'asp-001',
-          topik: 'Penambahan Fasilitas Air Minum di Gedung Baru',
-          isiSaran:
-              'Mohon dipertimbangkan untuk menambahkan dispenser air minum di setiap lantai gedung perkuliahan baru. Saat ini mahasiswa kesulitan mencari air minum saat pergantian jam kuliah, terutama di lantai atas.',
-          isAnonymous: false,
-          pelaporId: 'usr-010',
-          pelaporName: 'Ahmad Hidayat',
-          pelaporProdi: 'D4 Teknik Informatika',
-          upvoteCount: 128,
-          downvoteCount: 3,
-          upvoterIds: [],
-          downvoterIds: [],
-          tanggapanJurusan:
-              'Terima kasih atas masukannya. Pengadaan dispenser air minum untuk gedung baru sedang dalam proses tender dan ditargetkan akan tersedia di setiap lantai pada awal semester ganjil mendatang.',
-          status: StatusAspirasi.responded,
-          kategori: KategoriAspirasi.fasilitas,
-          createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        ),
-        AspirasiModel(
-          id: 'asp-002',
-          topik: 'AC di Ruang Kelas 302 Rusak',
-          isiSaran:
-              'AC di ruang 302 sudah tidak berfungsi selama 2 minggu. Suasana ruangan sangat panas dan mengganggu konsentrasi belajar mahasiswa. Mohon segera diperbaiki.',
-          isAnonymous: false,
-          pelaporId: 'usr-002',
-          pelaporName: 'Rina Sari',
-          pelaporProdi: 'D3 Teknik Informatika',
-          upvoteCount: 89,
-          downvoteCount: 1,
-          upvoterIds: [],
-          downvoterIds: [],
-          status: StatusAspirasi.inReview,
-          kategori: KategoriAspirasi.fasilitas,
-          createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-        ),
-        AspirasiModel(
-          id: 'asp-003',
-          topik: 'Jadwal Praktikum Jaringan Komputer Bentrok',
-          isiSaran:
-              'Terdapat bentrok jadwal antara praktikum Jaringan Komputer dan mata kuliah Basis Data untuk mahasiswa kelas 2B. Mohon pihak jurusan meninjau ulang jadwal tersebut.',
-          isAnonymous: false,
-          pelaporId: 'usr-003',
-          pelaporName: 'Budi Santoso',
-          pelaporProdi: 'D3 Teknik Informatika',
-          upvoteCount: 67,
-          downvoteCount: 0,
-          upvoterIds: [],
-          downvoterIds: [],
-          status: StatusAspirasi.inReview,
-          kategori: KategoriAspirasi.akademik,
-          createdAt: DateTime.now().subtract(const Duration(hours: 8)),
-        ),
-        AspirasiModel(
-          id: 'asp-004',
-          topik: 'Parkiran Motor Kurang Luas',
-          isiSaran:
-              'Area parkiran motor di depan gedung JTK tidak cukup menampung kendaraan mahasiswa pada jam sibuk. Banyak motor terpaksa parkir di area yang tidak semestinya.',
-          isAnonymous: true,
-          upvoteCount: 54,
-          downvoteCount: 2,
-          upvoterIds: [],
-          downvoterIds: [],
-          status: StatusAspirasi.open,
-          kategori: KategoriAspirasi.fasilitas,
-          createdAt: DateTime.now().subtract(const Duration(days: 1)),
-        ),
-        AspirasiModel(
-          id: 'asp-005',
-          topik: 'Perlu Ruang Diskusi Tambahan',
-          isiSaran:
-              'Mahasiswa sering kesulitan mendapatkan ruang untuk berdiskusi kelompok. Mohon disediakan ruang diskusi tambahan yang bisa digunakan secara bebas tanpa harus melalui proses peminjaman yang rumit.',
-          isAnonymous: false,
-          pelaporId: 'usr-005',
-          pelaporName: 'Siti Nurhaliza',
-          pelaporProdi: 'D4 Teknik Informatika',
-          upvoteCount: 41,
-          downvoteCount: 4,
-          upvoterIds: [],
-          downvoterIds: [],
-          status: StatusAspirasi.open,
-          kategori: KategoriAspirasi.fasilitas,
-          createdAt: DateTime.now().subtract(const Duration(days: 2)),
-        ),
-      ];
+  factory AspirasiModel.fromJson(Map<String, dynamic> json) {
+    return AspirasiModel(
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      topik: json['topik'] ?? '',
+      isiSaran: json['isiSaran'] ?? '',
+      pelaporId: json['pelaporId'],
+      pelaporName: json['pelaporName'],
+      pelaporProdi: json['pelaporProdi'],
+      upvoteCount: json['upvoteCount'] ?? 0,
+      downvoteCount: json['downvoteCount'] ?? 0,
+      upvoterIds: List<String>.from(json['upvoterIds'] ?? []),
+      downvoterIds: List<String>.from(json['downvoterIds'] ?? []),
+      tanggapanJurusan: json['tanggapanJurusan'],
+      status: StatusAspirasi.values.firstWhere(
+        (e) => e.name == json['status'],
+        orElse: () => StatusAspirasi.open,
+      ),
+      kategori: KategoriAspirasi.values.firstWhere(
+        (e) => e.name == json['kategori'],
+        orElse: () => KategoriAspirasi.umum,
+      ),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'].toString())
+          : DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'topik': topik,
+      'isiSaran': isiSaran,
+      'pelaporId': pelaporId,
+      'pelaporName': pelaporName,
+      'pelaporProdi': pelaporProdi,
+      'upvoteCount': upvoteCount,
+      'downvoteCount': downvoteCount,
+      'upvoterIds': upvoterIds,
+      'downvoterIds': downvoterIds,
+      'tanggapanJurusan': tanggapanJurusan,
+      'status': status.name,
+      'kategori': kategori.name,
+      'createdAt': createdAt.toIso8601String(),
+    };
+  }
+
+  // // ---- DUMMY DATA ----
+  // static List<AspirasiModel> dummyList() => [
+  //       AspirasiModel(
+  //         id: 'asp-001',
+  //         topik: 'Penambahan Fasilitas Air Minum di Gedung Baru',
+  //         isiSaran:
+  //             'Mohon dipertimbangkan untuk menambahkan dispenser air minum di setiap lantai gedung perkuliahan baru. Saat ini mahasiswa kesulitan mencari air minum saat pergantian jam kuliah, terutama di lantai atas.',
+  //         pelaporId: 'usr-010',
+  //         pelaporName: 'Ahmad Hidayat',
+  //         pelaporProdi: 'D4 Teknik Informatika',
+  //         upvoteCount: 128,
+  //         downvoteCount: 3,
+  //         upvoterIds: [],
+  //         downvoterIds: [],
+  //         tanggapanJurusan:
+  //             'Terima kasih atas masukannya. Pengadaan dispenser air minum untuk gedung baru sedang dalam proses tender dan ditargetkan akan tersedia di setiap lantai pada awal semester ganjil mendatang.',
+  //         status: StatusAspirasi.responded,
+  //         kategori: KategoriAspirasi.fasilitas,
+  //         createdAt: DateTime.now().subtract(const Duration(hours: 2)),
+  //       ),
+  //       AspirasiModel(
+  //         id: 'asp-002',
+  //         topik: 'AC di Ruang Kelas 302 Rusak',
+  //         isiSaran:
+  //             'AC di ruang 302 sudah tidak berfungsi selama 2 minggu. Suasana ruangan sangat panas dan mengganggu konsentrasi belajar mahasiswa. Mohon segera diperbaiki.',
+  //         pelaporId: 'usr-002',
+  //         pelaporName: 'Rina Sari',
+  //         pelaporProdi: 'D3 Teknik Informatika',
+  //         upvoteCount: 89,
+  //         downvoteCount: 1,
+  //         upvoterIds: [],
+  //         downvoterIds: [],
+  //         status: StatusAspirasi.inReview,
+  //         kategori: KategoriAspirasi.fasilitas,
+  //         createdAt: DateTime.now().subtract(const Duration(hours: 5)),
+  //       ),
+  //       AspirasiModel(
+  //         id: 'asp-003',
+  //         topik: 'Jadwal Praktikum Jaringan Komputer Bentrok',
+  //         isiSaran:
+  //             'Terdapat bentrok jadwal antara praktikum Jaringan Komputer dan mata kuliah Basis Data untuk mahasiswa kelas 2B. Mohon pihak jurusan meninjau ulang jadwal tersebut.',
+  //         pelaporId: 'usr-003',
+  //         pelaporName: 'Budi Santoso',
+  //         pelaporProdi: 'D3 Teknik Informatika',
+  //         upvoteCount: 67,
+  //         downvoteCount: 0,
+  //         upvoterIds: [],
+  //         downvoterIds: [],
+  //         status: StatusAspirasi.inReview,
+  //         kategori: KategoriAspirasi.akademik,
+  //         createdAt: DateTime.now().subtract(const Duration(hours: 8)),
+  //       ),
+  //       AspirasiModel(
+  //         id: 'asp-004',
+  //         topik: 'Parkiran Motor Kurang Luas',
+  //         isiSaran:
+  //             'Area parkiran motor di depan gedung JTK tidak cukup menampung kendaraan mahasiswa pada jam sibuk. Banyak motor terpaksa parkir di area yang tidak semestinya.',
+  //         upvoteCount: 54,
+  //         downvoteCount: 2,
+  //         upvoterIds: [],
+  //         downvoterIds: [],
+  //         status: StatusAspirasi.open,
+  //         kategori: KategoriAspirasi.fasilitas,
+  //         createdAt: DateTime.now().subtract(const Duration(days: 1)),
+  //       ),
+  //       AspirasiModel(
+  //         id: 'asp-005',
+  //         topik: 'Perlu Ruang Diskusi Tambahan',
+  //         isiSaran:
+  //             'Mahasiswa sering kesulitan mendapatkan ruang untuk berdiskusi kelompok. Mohon disediakan ruang diskusi tambahan yang bisa digunakan secara bebas tanpa harus melalui proses peminjaman yang rumit.',
+  //         pelaporId: 'usr-005',
+  //         pelaporName: 'Siti Nurhaliza',
+  //         pelaporProdi: 'D4 Teknik Informatika',
+  //         upvoteCount: 41,
+  //         downvoteCount: 4,
+  //         upvoterIds: [],
+  //         downvoterIds: [],
+  //         status: StatusAspirasi.open,
+  //         kategori: KategoriAspirasi.fasilitas,
+  //         createdAt: DateTime.now().subtract(const Duration(days: 2)),
+  //       ),
+  //     ];
 }
 
 // --------------- FORM INPUT MODEL ---------------
 class AspirasiFormInput {
   final String isiSaran;
-  final bool isAnonymous;
   final KategoriAspirasi kategori;
 
   const AspirasiFormInput({
     this.isiSaran = '',
-    this.isAnonymous = false,
     this.kategori = KategoriAspirasi.umum,
   });
 
@@ -283,12 +316,10 @@ class AspirasiFormInput {
 
   AspirasiFormInput copyWith({
     String? isiSaran,
-    bool? isAnonymous,
     KategoriAspirasi? kategori,
   }) {
     return AspirasiFormInput(
       isiSaran: isiSaran ?? this.isiSaran,
-      isAnonymous: isAnonymous ?? this.isAnonymous,
       kategori: kategori ?? this.kategori,
     );
   }

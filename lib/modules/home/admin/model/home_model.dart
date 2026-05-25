@@ -24,12 +24,12 @@ class AdminUserModel {
   });
 
   factory AdminUserModel.dummy() => const AdminUserModel(
-        id: 'adm-001',
-        name: 'Bapak Admin',
-        nimNip: 'NIP-198501012010011001',
-        email: 'admin@jtk.polban.ac.id',
-        role: 'admin',
-      );
+    id: 'adm-001',
+    name: 'Bapak Admin',
+    nimNip: 'NIP-198501012010011001',
+    email: 'admin@jtk.polban.ac.id',
+    role: 'admin',
+  );
 }
 
 // --------------- STATISTIK LAPORAN MODEL ---------------
@@ -72,13 +72,13 @@ class StatistikLaporanModel {
   bool get isPositif => persenDariBulanLalu >= 0;
 
   factory StatistikLaporanModel.dummy() => const StatistikLaporanModel(
-        totalLaporan: 1248,
-        persenDariBulanLalu: 12,
-        laporanPending: 24,
-        laporanInProgress: 37,
-        laporanResolved: 1165,
-        laporanRejected: 22,
-      );
+    totalLaporan: 1248,
+    persenDariBulanLalu: 12,
+    laporanPending: 24,
+    laporanInProgress: 37,
+    laporanResolved: 1165,
+    laporanRejected: 22,
+  );
 }
 
 // --------------- STATISTIK RINGKASAN MODEL ---------------
@@ -104,20 +104,20 @@ class StatistikRingkasanModel {
   });
 
   factory StatistikRingkasanModel.dummy() => const StatistikRingkasanModel(
-        teknisiAktif: 42,
-        aspirasiTertunda: 18,
-        lostFoundTertunda: 7,
-        agendaBulanIni: 5,
-      );
+    teknisiAktif: 42,
+    aspirasiTertunda: 18,
+    lostFoundTertunda: 7,
+    agendaBulanIni: 5,
+  );
 }
 
 // --------------- AKTIVITAS TERBARU MODEL ---------------
 enum TipeAktivitas {
-  perbaikan,      // Teknisi selesai — dari Tindakan_Fasilitas
-  laporanBaru,    // Mahasiswa buat laporan baru — dari Laporan_Fasilitas
-  aspirasiBaru,   // Mahasiswa kirim aspirasi — dari Saran_Masukan
-  lostFound,      // Barang ditemukan/hilang — dari Lost & Found
-  delegasi,       // Admin mendelegasikan laporan ke teknisi
+  perbaikan, // Teknisi selesai — dari Tindakan_Fasilitas
+  laporanBaru, // Mahasiswa buat laporan baru — dari Laporan_Fasilitas
+  aspirasiBaru, // Mahasiswa kirim aspirasi — dari Saran_Masukan
+  lostFound, // Barang ditemukan/hilang — dari Lost & Found
+  delegasi, // Admin mendelegasikan laporan ke teknisi
 }
 
 extension TipeAktivitasExt on TipeAktivitas {
@@ -234,27 +234,27 @@ class TindakanCepatModel {
   });
 
   static List<TindakanCepatModel> list() => const [
-        TindakanCepatModel(
-          label: 'Tugaskan',
-          type: TindakanCepatType.tugaskan,
-          iconName: 'assignment_ind',
-        ),
-        TindakanCepatModel(
-          label: 'Siarkan',
-          type: TindakanCepatType.siarkan,
-          iconName: 'campaign',
-        ),
-        TindakanCepatModel(
-          label: 'Moderasi',
-          type: TindakanCepatType.moderasi,
-          iconName: 'verified_user',
-        ),
-        TindakanCepatModel(
-          label: 'Tambah\nAgenda',
-          type: TindakanCepatType.tambahAgenda,
-          iconName: 'calendar_add_on',
-        ),
-      ];
+    TindakanCepatModel(
+      label: 'Tugaskan',
+      type: TindakanCepatType.tugaskan,
+      iconName: 'assignment_ind',
+    ),
+    TindakanCepatModel(
+      label: 'Siarkan',
+      type: TindakanCepatType.siarkan,
+      iconName: 'campaign',
+    ),
+    TindakanCepatModel(
+      label: 'Moderasi',
+      type: TindakanCepatType.moderasi,
+      iconName: 'verified_user',
+    ),
+    TindakanCepatModel(
+      label: 'Tambah\nAgenda',
+      type: TindakanCepatType.tambahAgenda,
+      iconName: 'calendar_add_on',
+    ),
+  ];
 }
 
 // --------------- BOTTOM NAV ADMIN MODEL ---------------
@@ -270,9 +270,9 @@ class AdminNavItemModel {
   });
 
   static List<AdminNavItemModel> items() => const [
-        AdminNavItemModel(label: 'Home', iconName: 'dashboard', index: 0),
-        AdminNavItemModel(label: 'Layanan', iconName: 'apartment', index: 1),
-        AdminNavItemModel(label: 'Aspirasi', iconName: 'campaign', index: 2),
-        AdminNavItemModel(label: 'Profil', iconName: 'group', index: 3),
-      ];
+    AdminNavItemModel(label: 'Home', iconName: 'dashboard', index: 0),
+    AdminNavItemModel(label: 'Layanan', iconName: 'apartment', index: 1),
+    AdminNavItemModel(label: 'Aspirasi', iconName: 'campaign', index: 2),
+    AdminNavItemModel(label: 'Profil', iconName: 'group', index: 3),
+  ];
 }

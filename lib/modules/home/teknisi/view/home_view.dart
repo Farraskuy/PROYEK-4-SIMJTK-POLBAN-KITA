@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import '../controller/home_controller.dart';
 import '../model/home_model.dart';
 import '../view/analisa_kerusakan_view.dart';
@@ -78,26 +79,26 @@ IconData _kategoriIcon(String kategori) {
 Color _kategoriIconColor(String kategori) {
   switch (kategori) {
     case 'Jaringan Internet':
-      return _C.jaringanIcon;
+      return AppColors.primary;
     case 'Perangkat PC':
-      return _C.hardwareIcon;
+      return AppColors.danger;
     case 'AC / Pendingin':
-      return _C.acIcon;
+      return AppColors.success;
     default:
-      return _C.umIcon;
+      return AppColors.purple;
   }
 }
 
 Color _kategoriIconBg(String kategori) {
   switch (kategori) {
     case 'Jaringan Internet':
-      return _C.jaringanIconBg;
+      return AppColors.blueSoft;
     case 'Perangkat PC':
-      return _C.hardwareIconBg;
+      return AppColors.redSoft;
     case 'AC / Pendingin':
-      return _C.acIconBg;
+      return AppColors.greenSoft;
     default:
-      return _C.umIconBg;
+      return AppColors.purpleSoft;
   }
 }
 
@@ -111,19 +112,19 @@ class ModulMaintenanceSection extends StatelessWidget {
     {
       'label': 'Analisa\nKerusakan',
       'icon': Icons.analytics_rounded,
-      'color': Color(0xFFE53935),
+      'color': AppColors.danger,
       'route': 'analisa',
     },
     {
       'label': 'Usulan\nPemeliharaan',
       'icon': Icons.build_circle_outlined,
-      'color': Color(0xFF2E7D32),
+      'color': AppColors.success,
       'route': 'pemeliharaan',
     },
     {
       'label': 'Usulan\nPenghapusan',
       'icon': Icons.delete_outline_rounded,
-      'color': Color(0xFFF57C00),
+      'color': AppColors.warning,
       'route': 'penghapusan',
     },
   ];
@@ -159,9 +160,9 @@ class ModulMaintenanceSection extends StatelessWidget {
         const Text(
           'Modul Maintenance',
           style: TextStyle(
-            fontSize: 17,
+            fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1A1A2E),
+            color: AppColors.title,
           ),
         ),
         const SizedBox(height: 12),
@@ -172,7 +173,8 @@ class ModulMaintenanceSection extends StatelessWidget {
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           children: _menus.map((m) {
-            final color = m['color'] as Color;
+            final color = (m['color'] is Color) ? m['color'] as Color : AppColors.warning;
+            final icon = (m['icon'] is IconData) ? m['icon'] as IconData : Icons.help_outline;
             return GestureDetector(
               onTap: () => _navigate(context, m['route'] as String),
               child: Container(
@@ -184,7 +186,7 @@ class ModulMaintenanceSection extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(m['icon'] as IconData, color: color, size: 22),
+                    Icon(icon, color: color, size: 20),
                     const SizedBox(height: 4),
                     Text(
                       m['label'] as String,
@@ -218,22 +220,22 @@ class HomeTeknisiView extends StatelessWidget {
     final ctrl = Get.put(HomeTeknisiController());
 
     return Scaffold(
-      backgroundColor: _C.surface,
+      backgroundColor: AppColors.background,
       body: Obx(() {
         if (ctrl.isLoading.value) {
           return const Center(
-            child: CircularProgressIndicator(color: _C.primary),
+            child: CircularProgressIndicator(color: AppColors.primary),
           );
         }
         return RefreshIndicator(
-          color: _C.primary,
+          color: AppColors.primary,
           onRefresh: ctrl.onRefresh,
           child: CustomScrollView(
             slivers: [
               _buildAppBar(ctrl, context),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -246,7 +248,6 @@ class HomeTeknisiView extends StatelessWidget {
                       _buildTugasMendesakHeader(context),
                       const SizedBox(height: 12),
                       _buildTugasMendesakList(ctrl),
-                      const SizedBox(height: 28),
                     ],
                   ),
                 ),
@@ -265,8 +266,8 @@ class HomeTeknisiView extends StatelessWidget {
   Widget _buildAppBar(HomeTeknisiController ctrl, BuildContext context) {
     return Obx(
       () => AppHomeAppBar(
-        title: 'Technician Portal',
-        subtitle: ctrl.currentTeknisi.value.name,
+        title: 'Halo, ${ctrl.currentTeknisi.value.name}',
+        subtitle: 'Teknisi JTK',
         avatarIcon: Icons.engineering_rounded,
         avatarText: ctrl.currentTeknisi.value.name.isEmpty
             ? null
@@ -314,9 +315,9 @@ class HomeTeknisiView extends StatelessWidget {
 
       return Container(
         decoration: BoxDecoration(
-          color: _C.cardBg,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _C.divider, width: 1),
+          border: Border.all(color: AppColors.border, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -344,7 +345,7 @@ class HomeTeknisiView extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: _C.textSecondary,
+                            color: AppColors.muted,
                             letterSpacing: 0.8,
                           ),
                         ),
@@ -354,9 +355,9 @@ class HomeTeknisiView extends StatelessWidget {
                     Text(
                       '${stat.totalTugas}',
                       style: const TextStyle(
-                        fontSize: 52,
+                        fontSize: 48,
                         fontWeight: FontWeight.w800,
-                        color: _C.textPrimary,
+                        color: AppColors.title,
                         height: 1.0,
                       ),
                     ),
@@ -373,7 +374,7 @@ class HomeTeknisiView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 18),
                     decoration: const BoxDecoration(
-                      color: _C.selesaiBg,
+                      color: AppColors.navy,
                       borderRadius: BorderRadius.only(
                           topRight: Radius.circular(16)),
                     ),
@@ -396,7 +397,7 @@ class HomeTeknisiView extends StatelessWidget {
                             Text(
                               '${stat.tugasSelesai}',
                               style: const TextStyle(
-                                fontSize: 32,
+                                fontSize: 28,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white,
                                 height: 1.0,
@@ -425,7 +426,7 @@ class HomeTeknisiView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 18),
                     decoration: const BoxDecoration(
-                      color: _C.pendingBg,
+                      color: AppColors.blueSoft,
                       borderRadius: BorderRadius.only(
                           bottomRight: Radius.circular(16)),
                     ),
@@ -437,7 +438,7 @@ class HomeTeknisiView extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: _C.textSecondary,
+                            color: AppColors.body,
                             letterSpacing: 0.8,
                           ),
                         ),
@@ -448,9 +449,9 @@ class HomeTeknisiView extends StatelessWidget {
                             Text(
                               '${stat.tugasPending}',
                               style: const TextStyle(
-                                fontSize: 32,
+                                fontSize: 28,
                                 fontWeight: FontWeight.w800,
-                                color: _C.textPrimary,
+                                color: AppColors.title,
                                 height: 1.0,
                               ),
                             ),
@@ -458,7 +459,7 @@ class HomeTeknisiView extends StatelessWidget {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: _C.primary.withOpacity(0.1),
+                                color: AppColors.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Icon(Icons.access_time_rounded,
@@ -487,7 +488,7 @@ class HomeTeknisiView extends StatelessWidget {
         const Text(
           'Tugas Mendesak',
           style: TextStyle(
-            fontSize: 17,
+            fontSize: 16,
             fontWeight: FontWeight.w700,
             color: _C.textPrimary,
           ),
@@ -525,7 +526,7 @@ class HomeTeknisiView extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFEBEE),
+              color: AppColors.redSoft,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -536,7 +537,7 @@ class HomeTeknisiView extends StatelessWidget {
                 Text(
                   'Analisa',
                   style: TextStyle(
-                    color: Color(0xFFD32F2F),
+                    color: AppColors.danger,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
@@ -677,7 +678,7 @@ class _LaporanCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: _C.cardBg,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: const Color(0xFFE5E9F2), width: 1),
           boxShadow: [
@@ -745,8 +746,6 @@ class _LaporanCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
-
-                      // Lokasi
                       Row(
                         children: [
                           const Icon(Icons.location_on_outlined,
@@ -835,7 +834,7 @@ class _EmptyMendesak extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 36),
       decoration: BoxDecoration(
-        color: _C.cardBg,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFE5E9F2), width: 1),
       ),
@@ -850,7 +849,7 @@ class _EmptyMendesak extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: _C.textSecondary,
+              color: AppColors.body,
             ),
           ),
           SizedBox(height: 4),

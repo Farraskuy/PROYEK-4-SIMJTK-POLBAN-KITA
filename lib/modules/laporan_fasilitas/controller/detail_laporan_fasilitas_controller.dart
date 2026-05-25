@@ -20,7 +20,14 @@ class DetailLaporanFasilitasController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      laporan = await _detailService.getLaporanById(id);
+      // ── MENGGUNAKAN SERVICE YANG SUDAH DIUPDATE JOIN USERNYA ──
+      // Mengganti _detailService.getLaporanById menjadi _laporanService.getById
+      final fetchedLaporan = await _laporanService.getById(id);
+      
+      // Jika karena alasan tertentu data tidak ditemukan di _laporanService,
+      // lakukan fallback menggunakan _detailService.
+      laporan = fetchedLaporan ?? await _detailService.getLaporanById(id);
+      
     } catch (e) {
       errorMessage = 'Gagal memuat laporan: $e';
     } finally {
@@ -57,7 +64,7 @@ class DetailLaporanFasilitasController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final user = await AuthService().loadSavedSession();
+      final user = AuthService().currentUser ?? await AuthService().loadSavedSession();
       final teknisiId = user?.id ?? user?.nomorInduk ?? 'petugas';
       await _laporanService.tanggapiPetugas(
         laporanId: laporan!.id,
@@ -86,7 +93,7 @@ class DetailLaporanFasilitasController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final user = await AuthService().loadSavedSession();
+      final user = AuthService().currentUser ?? await AuthService().loadSavedSession();
       await _laporanService.tandaiDicetak(
         laporanId: laporan!.id,
         printedBy: user?.id ?? user?.nomorInduk ?? 'tu',

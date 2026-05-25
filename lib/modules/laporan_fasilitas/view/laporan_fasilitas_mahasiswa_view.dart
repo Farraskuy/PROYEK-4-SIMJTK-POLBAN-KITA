@@ -126,10 +126,13 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                 }
 
                 final laporan = controller.listLaporan[index - 1];
-                final currentUserId = controller.currentUserId.value;
-                final isUpvoted = laporan.upvoter_ids.contains(currentUserId);
-                final isDownvoted =
-                    laporan.downvoter_ids.contains(currentUserId);
+// Kode baru (hapus .value)
+final currentUserId = controller.currentUserId;                final isUpvoted = laporan.upvoter_ids.contains(currentUserId);
+                final isDownvoted = laporan.downvoter_ids.contains(
+                  currentUserId,
+                );
+
+                // Ambil path/URL foto secara dinamis dari list foto_urls laporan
                 final String? fotoLaporanPath = laporan.foto_urls.isNotEmpty
                     ? laporan.foto_urls.first
                     : null;
@@ -219,11 +222,19 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                           CircleAvatar(
                                             radius: 14,
                                             backgroundColor: const Color(
-                                                    0xFF1A3A6B)
-                                                .withOpacity(0.1),
-                                            child: const Text(
-                                              'AH',
-                                              style: TextStyle(
+                                              0xFF1A3A6B,
+                                            ).withOpacity(0.1),
+                                            child: Text(
+                                              laporan.pelapor_nama.length >= 2
+                                                  ? laporan.pelapor_nama
+                                                      .substring(0, 2)
+                                                      .toUpperCase()
+                                                  : (laporan.pelapor_nama.isNotEmpty
+                                                      ? laporan.pelapor_nama
+                                                          .substring(0, 1)
+                                                          .toUpperCase()
+                                                      : '??'),
+                                              style: const TextStyle(
                                                 fontSize: 10,
                                                 fontWeight: FontWeight.bold,
                                                 color: Color(0xFF1A3A6B),
@@ -236,9 +247,9 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                const Text(
-                                                  'Ahmad Hidayat',
-                                                  style: TextStyle(
+                                                Text(
+                                                  laporan.pelapor_nama, // Menggunakan name dari model
+                                                  style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 13,
                                                   ),
@@ -323,7 +334,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 12),
 
-                                // Foto
+                                // Gambar Dinamis Berdasarkan Data Laporan Aktual
                                 if (fotoLaporanPath != null) ...[
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
@@ -413,12 +424,19 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                                 vertical: 8),
                                           ),
                                           icon: const Icon(
-                                              Icons.arrow_downward_rounded,
-                                              size: 16),
-                                          label: const Text('Down Vote',
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600)),
+                                            Icons.arrow_downward_rounded,
+                                            size: 16,
+                                          ),
+                                          label: Text( // <-- Hapus const di sini
+  'Down Vote',
+  style: TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    color: isDownvoted
+        ? Colors.blue
+        : Colors.black87,
+  ),
+),
                                         ),
                                       ),
                                     ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 import '../controller/detail_laporan_fasilitas_controller.dart';
 import '../model/laporan_fasilitas_model.dart';
 
@@ -172,7 +171,7 @@ class _DetailLaporanFasilitasViewState
                           Expanded(
                             child: _metaItem(
                               label: 'DILAPORKAN OLEH',
-                              value: laporan.pelapor_id,
+                              value: laporan.pelapor_nama, // <-- Diubah menggunakan pelapor_nama
                             ),
                           ),
                           Expanded(

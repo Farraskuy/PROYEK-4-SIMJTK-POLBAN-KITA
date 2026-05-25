@@ -61,7 +61,8 @@ class LaporFasilitasController extends GetxController {
     isSubmitting.value = true;
     try {
       final now = DateTime.now();
-      final currentUser = await AuthService().loadSavedSession();
+      final currentUser =
+        AuthService().currentUser ?? await AuthService().loadSavedSession();
       final pelaporId =
           currentUser?.id ?? currentUser?.nomorInduk ?? 'anonymous';
       final old = _laporanLama;

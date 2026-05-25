@@ -16,7 +16,16 @@ class InteraksiLaporanController extends GetxController {
 
   final listLaporan = <LaporanFasilitasModel>[].obs;
   final isLoading = false.obs;
-  final currentUserId = 'anonymous'.obs;
+  final unreadNotifCount = 3.obs;
+  final sortMode = LaporanSortMode.populer.obs;
+
+  String get currentUserId {
+    final user = AuthService().currentUser;
+    if (user == null) return 'anonymous';
+    return user.id.isNotEmpty ? user.id : user.nomorInduk;
+  }
+
+  String get currentUserName => AuthService().currentUser?.name ?? 'Mahasiswa';
 
   bool get isMahasiswa => role == 'mahasiswa';
   bool get isPetugas => role == 'teknisi' || role == 'petugas';
@@ -25,13 +34,7 @@ class InteraksiLaporanController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadCurrentUser();
     fetchLaporan();
-  }
-
-  Future<void> _loadCurrentUser() async {
-    final user = await AuthService().loadSavedSession();
-    currentUserId.value = user?.id ?? user?.nomorInduk ?? 'anonymous';
   }
 
   Future<void> fetchLaporan() async {
@@ -124,7 +127,7 @@ class InteraksiLaporanController extends GetxController {
     laporan.updatedAt = DateTime.now();
 
     listLaporan[index] = laporan;
-    listLaporan.refresh();
+    _applySort();
 
     await _service.update(laporan);
   }
@@ -133,6 +136,7 @@ class InteraksiLaporanController extends GetxController {
     try {
       await _service.delete(laporanId);
       listLaporan.removeWhere((l) => l.id == laporanId);
+      _applySort();
       Get.snackbar('Sukses', 'Laporan berhasil dihapus');
     } catch (e) {
       Get.snackbar('Gagal', 'Gagal menghapus laporan: $e');
