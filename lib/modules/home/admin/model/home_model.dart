@@ -220,7 +220,7 @@ class AktivitasTerbaruModel {
 }
 
 // --------------- TINDAKAN CEPAT MODEL ---------------
-enum TindakanCepatType { tugaskan, siarkan, moderasi, tambahAgenda, kelolaUser }
+enum TindakanCepatType { tugaskan, siarkan, moderasi, tambahAgenda }
 
 class TindakanCepatModel {
   final String label;
@@ -253,11 +253,6 @@ class TindakanCepatModel {
       label: 'Tambah\nAgenda',
       type: TindakanCepatType.tambahAgenda,
       iconName: 'calendar_add_on',
-    ),
-    TindakanCepatModel(
-      label: 'Kelola\nUser',
-      type: TindakanCepatType.kelolaUser,
-      iconName: 'manage_accounts',
     ),
   ];
 }

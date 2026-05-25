@@ -366,7 +366,6 @@ class AdminDashboardView extends StatelessWidget {
       TindakanCepatType.siarkan: Icons.campaign_rounded,
       TindakanCepatType.moderasi: Icons.verified_user_rounded,
       TindakanCepatType.tambahAgenda: Icons.calendar_month_rounded,
-      TindakanCepatType.kelolaUser: Icons.manage_accounts_rounded,
     };
 
     return Column(

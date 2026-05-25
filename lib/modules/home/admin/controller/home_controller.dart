@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/home_model.dart';
+import '../../../aspirasi/view/admin_aspirasi_view.dart';
  
 // // Import file view/screen admin yang sudah ada
 // import '../../../laporan_fasilitas/view/admin_laporan_fasilitas_screen.dart';
@@ -68,10 +69,15 @@ class AdminDashboardController extends GetxController {
   // NAVIGATION & ACTIONS (FIXED: Murni GetX)
   // --------------------------------------------------------
   void onNavTapped(int index) {
-    selectedNavIndex.value = index;
+    // Kita tidak mengubah selectedNavIndex.value jika melakukan navigasi push 
+    // agar saat user memencet "Back", tab Home masih terlihat aktif.
+    
     if (index == 1) {
-      // Navigasi ke admin fasilitas tanpa Provider agar tidak error[cite: 11]
+      // Navigasi ke admin fasilitas
       // AppNavigator.push(const AdminLaporanFasilitasScreen());
+    } else if (index == 2) {
+      // Navigasi ke Halaman Aspirasi Admin
+      Get.to(() => const AdminAspirasiView());
     }
   }
 
