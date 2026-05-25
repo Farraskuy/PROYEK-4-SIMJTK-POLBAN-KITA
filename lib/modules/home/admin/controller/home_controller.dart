@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/home_model.dart';
 import '../../../aspirasi/view/admin_aspirasi_view.dart';
+import '../../../laporan_fasilitas/view/admin_laporan_fasilitas_view.dart';
  
 // // Import file view/screen admin yang sudah ada
 // import '../../../laporan_fasilitas/view/admin_laporan_fasilitas_screen.dart';
@@ -74,7 +75,7 @@ class AdminDashboardController extends GetxController {
     
     if (index == 1) {
       // Navigasi ke admin fasilitas
-      // AppNavigator.push(const AdminLaporanFasilitasScreen());
+      Get.to(() => const AdminLaporanFasilitasView());
     } else if (index == 2) {
       // Navigasi ke Halaman Aspirasi Admin
       Get.to(() => const AdminAspirasiView());
