@@ -45,7 +45,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
 
         return RefreshIndicator(
           color: AppColors.primary,
-          onRefresh: controller.refreshData,
+          onRefresh: controller.fetchLaporan,
           child: CustomScrollView(
             slivers: [
               Obx(
@@ -54,7 +54,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                   subtitle: _subtitle,
                   avatarIcon: Icons.person_rounded,
                   unreadCount: controller.unreadNotifCount.value,
-                  onNotificationTap: controller.onNotificationTapped,
+                  onNotificationTap: () => (),
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
@@ -70,7 +70,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                 () => SliverToBoxAdapter(
                   child: LaporanFasilitasSortBar(
                     selectedIndex: controller.sortMode.value.index,
-                    onChanged: (index) => controller.setSortMode(
+                    onChanged: (index) => controller.sortMode(
                       index == 0
                           ? LaporanSortMode.populer
                           : LaporanSortMode.terbaru,
