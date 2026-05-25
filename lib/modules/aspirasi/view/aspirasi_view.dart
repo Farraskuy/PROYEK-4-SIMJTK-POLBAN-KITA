@@ -35,7 +35,6 @@ class _C {
   static const tanggapanBorder = Color(0xFFB0C0E0);
   static const errorColor = Color(0xFFD32F2F);
   static const avatarBg = Color(0xFF2B5BAE);
-  static const anonymousBg = Color(0xFFE5E9F2);
 }
 
 // ============================================================
@@ -437,49 +436,7 @@ class _AspirasiFormPage extends StatelessWidget {
                     ),
                   ),
 
-                  const Divider(height: 1, color: _C.divider),
 
-                  // ---- TOGGLE ANONYMOUS ----
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Obx(
-                          () => Switch(
-                            value: ctrl.isAnonymous.value,
-                            onChanged: ctrl.onToggleAnonymous,
-                            activeColor: _C.primary,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                'Post as Anonymous',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: _C.textPrimary,
-                                ),
-                              ),
-                              SizedBox(height: 2),
-                              Text(
-                                'Identitas Anda akan disembunyikan.',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: _C.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -596,23 +553,15 @@ class _AspirasiCard extends StatelessWidget {
               // Avatar
               CircleAvatar(
                 radius: 20,
-                backgroundColor: aspirasi.isAnonymous
-                    ? _C.anonymousBg
-                    : _C.avatarBg,
-                child: aspirasi.isAnonymous
-                    ? const Icon(
-                        Icons.person_outline_rounded,
-                        color: _C.textSecondary,
-                        size: 20,
-                      )
-                    : Text(
-                        aspirasi.initials,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                backgroundColor: _C.avatarBg,
+                child: Text(
+                  aspirasi.initials,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
               const SizedBox(width: 10),
 
@@ -622,9 +571,7 @@ class _AspirasiCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      aspirasi.isAnonymous
-                          ? 'Anonim'
-                          : (aspirasi.pelaporName ?? 'Mahasiswa JTK'),
+                      aspirasi.pelaporName ?? 'Mahasiswa JTK',
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -632,7 +579,7 @@ class _AspirasiCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${aspirasi.isAnonymous ? '' : '${aspirasi.pelaporProdi ?? ''} Â· '}${aspirasi.waktuRelatif}',
+                      '${aspirasi.pelaporProdi ?? ''} · ${aspirasi.waktuRelatif}',
                       style: const TextStyle(
                         fontSize: 11,
                         color: _C.textSecondary,
