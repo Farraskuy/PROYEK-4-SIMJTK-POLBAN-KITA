@@ -82,47 +82,146 @@ class AppHomeAppBar extends StatelessWidget {
   }
 }
 
-class AppGreeting extends StatelessWidget {
-  final String eyebrow;
+class AppDetailAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final String subtitle;
+  final String? subtitle;
+  final List<Widget>? actions;
+  final VoidCallback? onBack;
 
-  const AppGreeting({
+  const AppDetailAppBar({
     super.key,
-    required this.eyebrow,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
+    this.actions,
+    this.onBack,
   });
 
   @override
   Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: AppColors.surface,
+      surfaceTintColor: AppColors.surface,
+      elevation: 0,
+      centerTitle: false,
+      leading: IconButton(
+        onPressed: onBack ?? () => Navigator.maybePop(context),
+        icon: const Icon(Icons.arrow_back_rounded, color: AppColors.title),
+      ),
+      title: _AppBarTitle(title: title, subtitle: subtitle),
+      actions: actions,
+    );
+  }
+
+  @override
+  Size get preferredSize => Size.fromHeight(
+    subtitle == null || subtitle!.isEmpty ? kToolbarHeight : 64,
+  );
+}
+
+class AppSimpleAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
+  final String? subtitle;
+  final bool showBack;
+  final List<Widget>? actions;
+
+  const AppSimpleAppBar({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.showBack = false,
+    this.actions,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: AppColors.surface,
+      surfaceTintColor: AppColors.surface,
+      elevation: 0,
+      centerTitle: false,
+      automaticallyImplyLeading: showBack,
+      title: _AppBarTitle(title: title, subtitle: subtitle),
+      actions: actions,
+    );
+  }
+
+  @override
+  Size get preferredSize => Size.fromHeight(
+    subtitle == null || subtitle!.isEmpty ? kToolbarHeight : 64,
+  );
+}
+
+class AppSliverDetailAppBar extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+  final List<Widget>? actions;
+  final VoidCallback? onBack;
+
+  const AppSliverDetailAppBar({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.actions,
+    this.onBack,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverAppBar(
+      backgroundColor: AppColors.surface,
+      surfaceTintColor: AppColors.surface,
+      elevation: 0,
+      floating: true,
+      pinned: false,
+      centerTitle: false,
+      titleSpacing: 0,
+      leading: IconButton(
+        onPressed: onBack ?? () => Navigator.maybePop(context),
+        icon: const Icon(Icons.arrow_back_rounded, color: AppColors.title),
+      ),
+      title: _AppBarTitle(title: title, subtitle: subtitle),
+      actions: actions,
+    );
+  }
+}
+
+class _AppBarTitle extends StatelessWidget {
+  final String title;
+  final String? subtitle;
+
+  const _AppBarTitle({required this.title, this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasSubtitle = subtitle != null && subtitle!.isNotEmpty;
+
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          eyebrow.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.8,
-            color: AppColors.body,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
           title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w800,
             color: AppColors.title,
-            height: 1.12,
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
           ),
         ),
-        const SizedBox(height: 6),
-        Text(
-          subtitle,
-          style: const TextStyle(fontSize: 13, color: AppColors.body),
-        ),
+        if (hasSubtitle) ...[
+          const SizedBox(height: 2),
+          Text(
+            subtitle!,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppColors.body,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ],
     );
   }

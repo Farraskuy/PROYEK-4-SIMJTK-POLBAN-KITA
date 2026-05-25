@@ -66,8 +66,7 @@ class AcademicCalendarService {
         _prefsFactory = prefsFactory ?? SharedPreferences.getInstance,
         _now = now ?? DateTime.now;
 
-  static const String calendarPageUrl =
-      'https://www.polban.ac.id/tentang-polban/kalender-akademik/';
+  static const String calendarPageUrl = 'https://www.polban.ac.id/tentang-polban/kalender-akademik/';
 
   static const Duration refreshInterval = Duration(days: 30);
 

@@ -250,6 +250,7 @@ class _VisionViewState extends State<VisionView>
   }
 
   /// Build layered stack: kamera + overlay + shutter flash
+  /// Build layered stack: kamera + overlay + shutter flash
   Widget _buildVisionStack() {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -266,7 +267,8 @@ class _VisionViewState extends State<VisionView>
             // LAYER 1: Hardware Camera Preview
             ClipRect(
               child: FittedBox(
-                fit: BoxFit.cover,
+                // 🛑 UBAH DI SINI: Dari BoxFit.cover menjadi BoxFit.contain
+                fit: BoxFit.contain,
                 child: SizedBox(
                   width: constraints.maxWidth,
                   height: constraints.maxWidth / displayRatio,
