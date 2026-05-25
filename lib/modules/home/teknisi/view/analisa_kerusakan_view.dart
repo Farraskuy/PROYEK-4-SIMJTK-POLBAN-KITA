@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import '../controller/analisa_kerusakan_controller.dart';
 import '../model/analisa_kerusakan_model.dart';
 import 'form_analisa_view.dart';
- 
 
 class AnalisaKerusakanView extends StatelessWidget {
   const AnalisaKerusakanView({super.key});
@@ -30,7 +30,7 @@ class AnalisaKerusakanView extends StatelessWidget {
           onRefresh: ctrl.loadData,
           child: CustomScrollView(
             slivers: [
-              //  Header stats 
+              // ── HEADER STATS & BANNER STATIS ──────────────────────────
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
@@ -38,7 +38,7 @@ class AnalisaKerusakanView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Analisa Masalah',
+                        'Tanggapan Tugas',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 24,
@@ -47,52 +47,82 @@ class AnalisaKerusakanView extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Formulir Analisa Masalah Kerusakan â€” POLBAN',
+                        'Formulir Tanggapan Masalah Kerusakan — POLBAN',
                         style: TextStyle(color: Colors.grey[500], fontSize: 13),
                       ),
                       const SizedBox(height: 16),
                       _buildStatsRow(ctrl),
                       const SizedBox(height: 12),
 
-                      // Banner laporan belum dianalisa
                       if (ctrl.laporanBelumDianalisa.isNotEmpty)
-                        _buildPendingBanner(context, ctrl),
-                      const SizedBox(height: 8),
-
-                      // Filter chips
-                      _buildFilterChips(ctrl),
-                      const SizedBox(height: 4),
-                      Obx(
-                        () => Text(
-                          '${ctrl.filteredAnalisa.length} formulir ditemukan',
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
+                        _buildStaticPendingBanner(ctrl),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
               ),
 
-              //  List analisa 
-              Obx(
-                () => ctrl.filteredAnalisa.isEmpty
-                    ? SliverFillRemaining(child: _buildEmpty())
-                    : SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate(
-                            (ctx, i) => _AnalisaCard(
-                              analisa: ctrl.filteredAnalisa[i],
-                              formatRupiah: ctrl.formatRupiah,
-                            ),
-                            childCount: ctrl.filteredAnalisa.length,
-                          ),
-                        ),
-                      ),
+              // ── FILTER CHIPS & RUNNING TEXT DATA ──────────────────────
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildFilterChips(ctrl),
+                      const SizedBox(height: 4),
+                      Obx(() => Text(
+                            '${ctrl.laporanBelumDianalisa.length} tugas baru, ${ctrl.filteredAnalisa.length} tanggapan terkirim',
+                            style: const TextStyle(color: Colors.grey, fontSize: 12),
+                          )),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
               ),
+
+              // ── SEKSI 1: LIST TUGAS MENDESAK (BELUM DIRESPONS) ────────
+              Obx(() {
+                final pendingTasks = ctrl.laporanBelumDianalisa;
+                if (pendingTasks.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+
+                return SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        return _PendingTaskCard(
+                          task: pendingTasks[index],
+                          ctrl: ctrl,
+                        );
+                      },
+                      childCount: pendingTasks.length,
+                    ),
+                  ),
+                );
+              }),
+
+              // ── SEKSI 2: RIWAYAT TANGGAPAN YANG SUDAH TERKIRIM ─────────
+              Obx(() {
+                final isEmpty = ctrl.filteredAnalisa.isEmpty && ctrl.laporanBelumDianalisa.isEmpty;
+                
+                if (isEmpty) {
+                  return SliverFillRemaining(child: _buildEmpty());
+                }
+
+                return SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (ctx, i) => _AnalisaCard(
+                        analisa: ctrl.filteredAnalisa[i],
+                        formatRupiah: ctrl.formatRupiah,
+                      ),
+                      childCount: ctrl.filteredAnalisa.length,
+                    ),
+                  ),
+                );
+              }),
             ],
           ),
         );
@@ -115,10 +145,7 @@ class AnalisaKerusakanView extends StatelessWidget {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(
-    AnalisaKerusakanController ctrl,
-    BuildContext context,
-  ) {
+  PreferredSizeWidget _buildAppBar(AnalisaKerusakanController ctrl, BuildContext context) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -127,159 +154,74 @@ class AnalisaKerusakanView extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       titleSpacing: 0,
-      title: Row(
+      title: const Row(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 16,
             backgroundColor: _primary,
             child: Icon(Icons.engineering, color: Colors.white, size: 18),
           ),
-          const SizedBox(width: 10),
-          const Column(
+          SizedBox(width: 10),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Modul Teknisi',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(color: Colors.black, fontSize: 13, fontWeight: FontWeight.w700),
               ),
               Text(
-                'Analisa Kerusakan',
+                'Tanggapan Tugas',
                 style: TextStyle(color: Colors.grey, fontSize: 11),
               ),
             ],
           ),
         ],
       ),
-      actions: [
-        Obx(() {
-          final pending = ctrl.laporanBelumDianalisa.length;
-          return Stack(
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.black,
-                ),
-                onPressed: () {},
-              ),
-              if (pending > 0)
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    width: 16,
-                    height: 16,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '$pending',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          );
-        }),
-      ],
     );
   }
 
   Widget _buildStatsRow(AnalisaKerusakanController ctrl) {
     return Obx(() {
       final total = ctrl.analisaList.length;
-      final berat = ctrl.analisaList
-          .where(
-            (a) =>
-                a.tingkatKerusakan == TingkatKerusakan.berat ||
-                a.tingkatKerusakan == TingkatKerusakan.total,
-          )
-          .length;
+      final berat = ctrl.analisaList.where((a) => a.tingkatKerusakan == TingkatKerusakan.berat || a.tingkatKerusakan == TingkatKerusakan.total).length;
       final pending = ctrl.laporanBelumDianalisa.length;
 
       return Row(
         children: [
-          _StatChip(
-            label: 'Total Formulir',
-            count: total,
-            color: _primary,
-            icon: Icons.description_outlined,
-          ),
+          _StatChip(label: 'Total Formulir', count: total, color: _primary, icon: Icons.description_outlined),
           const SizedBox(width: 10),
-          _StatChip(
-            label: 'Kerusakan Berat',
-            count: berat,
-            color: Colors.red,
-            icon: Icons.warning_amber_outlined,
-          ),
+          _StatChip(label: 'Kerusakan Berat', count: berat, color: Colors.red, icon: Icons.warning_amber_outlined),
           const SizedBox(width: 10),
-          _StatChip(
-            label: 'Belum Dianalisa',
-            count: pending,
-            color: Colors.orange,
-            icon: Icons.pending_outlined,
-          ),
+          _StatChip(label: 'Belum Dianalisa', count: pending, color: Colors.orange, icon: Icons.pending_outlined),
         ],
       );
     });
   }
 
-  Widget _buildPendingBanner(
-    BuildContext context,
-    AnalisaKerusakanController ctrl,
-  ) {
+  Widget _buildStaticPendingBanner(AnalisaKerusakanController ctrl) {
     return Obx(
-      () => GestureDetector(
-        onTap: () {
-          ctrl.resetForm();
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const FormAnalisaView()),
-          );
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.orange.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.orange.withOpacity(0.3)),
-          ),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.assignment_late_outlined,
-                color: Colors.orange,
-                size: 18,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  '${ctrl.laporanBelumDianalisa.length} laporan menunggu formulir analisa',
-                  style: const TextStyle(
-                    color: Colors.orange,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
+      () => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.orange.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.orange.withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.assignment_late_outlined, color: Colors.orange, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '${ctrl.laporanBelumDianalisa.length} laporan menunggu formulir analisa',
+                style: const TextStyle(
+                  color: Colors.orange,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 13,
-                color: Colors.orange,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -294,11 +236,11 @@ class AnalisaKerusakanView extends StatelessWidget {
       {'key': 'instalasi', 'label': 'Instalasi'},
     ];
 
-    return Obx(
-      () => SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: filters.map((f) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: filters.map((f) {
+          return Obx(() {
             final isActive = ctrl.filterKategori.value == f['key'];
             return Padding(
               padding: const EdgeInsets.only(right: 8, bottom: 8),
@@ -306,16 +248,11 @@ class AnalisaKerusakanView extends StatelessWidget {
                 onTap: () => ctrl.filterKategori.value = f['key']!,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
                     color: isActive ? _primary : Colors.white,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: isActive ? _primary : Colors.grey.shade300,
-                    ),
+                    border: Border.all(color: isActive ? _primary : Colors.grey.shade300),
                   ),
                   child: Text(
                     f['label']!,
@@ -328,8 +265,8 @@ class AnalisaKerusakanView extends StatelessWidget {
                 ),
               ),
             );
-          }).toList(),
-        ),
+          });
+        }).toList(),
       ),
     );
   }
@@ -341,22 +278,12 @@ class AnalisaKerusakanView extends StatelessWidget {
         children: [
           Icon(Icons.description_outlined, size: 64, color: Colors.grey[300]),
           const SizedBox(height: 12),
-          Text(
-            'Belum ada formulir analisa',
-            style: TextStyle(color: Colors.grey[400], fontSize: 14),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Ketuk tombol + untuk menambahkan',
-            style: TextStyle(color: Colors.grey[400], fontSize: 12),
-          ),
+          Text('Belum ada tugas atau tanggapan', style: TextStyle(color: Colors.grey[400], fontSize: 14)),
         ],
       ),
     );
   }
 }
-
-//  Stat Chip 
 
 class _StatChip extends StatelessWidget {
   final String label;
@@ -375,38 +302,46 @@ class _StatChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.2)),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 16, color: color),
-            const SizedBox(width: 6),
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 18, color: color),
+            ),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
+                    label,
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
                     '$count',
                     style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
                       color: color,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  Text(
-                    label,
-                    style: const TextStyle(color: Colors.grey, fontSize: 9),
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -418,312 +353,126 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-//  Analisa Card 
+// ── KARTU TUGAS MENDESAK (100% MATCH DENGAN SCREENSHOT) ─────────────────────
+class _PendingTaskCard extends StatelessWidget {
+  final LaporanFasilitasModel task;
+  final AnalisaKerusakanController ctrl;
 
-class _AnalisaCard extends StatelessWidget {
-  final AnalisaKerusakanModel analisa;
-  final String Function(double?) formatRupiah;
+  const _PendingTaskCard({required this.task, required this.ctrl});
 
-  const _AnalisaCard({required this.analisa, required this.formatRupiah});
-
-  static const Color _primary = Color(0xFF1E3A5F);
+  // Design Tokens menyelaraskan dengan Laporan Fasilitas View
+  static const Color _primaryBlue = Color(0xFF1A3A6B);
+  static const Color _borderCol = Color(0xFFDDE3EF);
+  static const Color _textDark = Color(0xFF1A1A2E);
+  static const Color _textGrey = Color(0xFF6B7280);
 
   @override
   Widget build(BuildContext context) {
-    final tingkatColor = _tingkatColor(analisa.tingkatKerusakan);
-    final kategoriColor = _kategoriColor(analisa.kategoriKerusakan);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border:
-            analisa.tingkatKerusakan == TingkatKerusakan.total ||
-                analisa.tingkatKerusakan == TingkatKerusakan.berat
-            ? Border.all(color: Colors.red.withOpacity(0.2), width: 1.5)
-            : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Padding(
+    return GestureDetector(
+      onTap: () {
+        ctrl.resetForm();
+        ctrl.setLaporan(task);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const FormAnalisaView()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
-        child: Column(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _borderCol, width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            //  Top: kategori + tingkat 
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: kategoriColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    analisa.kategoriKerusakan.label,
-                    style: TextStyle(
-                      color: kategoriColor,
-                      fontSize: 11,
+            // Ikon Kotak Biru di Kiri (Sesuai Screenshot)
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: _primaryBlue.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.assignment_outlined,
+                  color: _primaryBlue,
+                  size: 24,
+                ),
+              ),
+            ),
+            const SizedBox(width: 14),
+            
+            // Konten Kanan
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Judul
+                  Text(
+                    task.judul,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: _textDark,
                     ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                // Dasar pemeriksaan badge
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    analisa.dasarPemeriksaan ==
-                            DasarPemeriksaan.pemeriksaanBerkala
-                        ? 'Berkala'
-                        : 'Keluhan Pemakai',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                // Tingkat kerusakan badge
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 9,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: tingkatColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: tingkatColor.withOpacity(0.3)),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.circle, size: 6, color: tingkatColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        analisa.tingkatKerusakan.label,
-                        style: TextStyle(
-                          color: tingkatColor,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            //  No. Kerusakan + Nama Alat 
-            Row(
-              children: [
-                Text(
-                  'No. ${analisa.noKerusakan}',
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Â·',
-                  style: TextStyle(color: Colors.grey.shade300, fontSize: 10),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    analisa.kodeAlat,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-
-            // Nama Alat (judul utama)
-            Text(
-              analisa.namaAlat,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                color: _primary,
-              ),
-            ),
-            const SizedBox(height: 2),
-
-            // Laporan terkait
-            Text(
-              'Laporan: ${analisa.judulLaporan}',
-              style: TextStyle(
-                color: Colors.grey.shade500,
-                fontSize: 11,
-                fontStyle: FontStyle.italic,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 8),
-
-            //  Analisa Masalah (ringkasan) 
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade200),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'ANALISA MASALAH',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    analisa.analisaMasalah,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                      height: 1.4,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            //  Rekomendasi Perbaikan 
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: _primary.withOpacity(0.04),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: _primary.withOpacity(0.1)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.build_outlined,
-                        size: 11,
-                        color: _primary,
-                      ),
-                      const SizedBox(width: 4),
-                      const Text(
-                        'REKOMENDASI PERBAIKAN',
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: _primary,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    analisa.rekomendasiPerbaikan,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: _primary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            //  Rekomendasi Tempat 
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(
-                  Icons.location_on_outlined,
-                  size: 12,
-                  color: Colors.grey,
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    analisa.rekomendasiTempatPerbaikan,
-                    style: const TextStyle(color: Colors.grey, fontSize: 11),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            //  Meta info 
-            Wrap(
-              spacing: 12,
-              runSpacing: 4,
-              children: [
-                _metaItem(Icons.tag, 'Inv: ${analisa.noInventaris}'),
-                if (analisa.estimasiWaktuPerbaikanHari != null)
-                  _metaItem(
-                    Icons.schedule_outlined,
-                    '${analisa.estimasiWaktuPerbaikanHari} hari',
+                  const SizedBox(height: 4),
+                  
+                  // Lokasi
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, size: 14, color: _textGrey),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          task.lokasi,
+                          style: const TextStyle(color: _textGrey, fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                if (analisa.estimasiBiaya != null)
-                  _metaItem(
-                    Icons.payments_outlined,
-                    formatRupiah(analisa.estimasiBiaya),
+                  const SizedBox(height: 12),
+                  
+                  // Baris Bawah: Tanggal & Badge
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Tanggal (Kiri Bawah)
+                      Text(
+                        _formatDate(task.createdAt),
+                        style: const TextStyle(
+                          color: _textGrey, 
+                          fontSize: 12, 
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      
+                      // Badge Status & Upvote (Kanan Bawah)
+                      Row(
+                        children: [
+                          _buildStatusBadge(task.status.toString()),
+                          const SizedBox(width: 6),
+                          _buildVoteBadge(task.vote_score ?? 0),
+                        ],
+                      ),
+                    ],
                   ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            //  Footer: sync + tanggal 
-            Row(
-              children: [
-                _SyncBadge(status: analisa.syncStatus),
-                const Spacer(),
-                Text(
-                  _fmtDate(analisa.createdAt),
-                  style: const TextStyle(color: Colors.grey, fontSize: 11),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -731,16 +480,240 @@ class _AnalisaCard extends StatelessWidget {
     );
   }
 
-  Widget _metaItem(IconData icon, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+  // Helper Tanggal ke format dd/MM/yyyy
+  String _formatDate(dynamic date) {
+    if (date == null) return '-';
+    DateTime dt;
+    if (date is DateTime) dt = date;
+    else dt = DateTime.tryParse(date.toString()) ?? DateTime.now();
+    
+    return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
+  }
+
+  // Helper Status Badge (Warna identik dengan screenshot)
+  Widget _buildStatusBadge(String statusRaw) {
+    final s = statusRaw.toLowerCase();
+    String text = 'Terkirim';
+    Color bg = Colors.green.shade50;
+    Color fg = Colors.green.shade700;
+
+    if (s.contains('tolak') || s.contains('reject')) {
+      text = 'Ditolak';
+      bg = Colors.red.shade50;
+      fg = Colors.red.shade700;
+    } else if (s.contains('progress') || s.contains('proses')) {
+      text = 'Diproses';
+      bg = Colors.orange.shade50;
+      fg = Colors.orange.shade800;
+    } else if (s.contains('selesai') || s.contains('resolve')) {
+      text = 'Selesai';
+      bg = Colors.blue.shade50;
+      fg = Colors.blue.shade700;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(6)),
+      child: Text(
+        text,
+        style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  // Helper Upvote Badge
+  Widget _buildVoteBadge(int votes) {
+    final bool isPositive = votes >= 0;
+    final Color bg = isPositive ? Colors.green.shade50 : Colors.red.shade50;
+    final Color fg = isPositive ? Colors.green.shade700 : Colors.red.shade700;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(6)),
+      child: Row(
+        children: [
+          Icon(
+            isPositive ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+            size: 12,
+            color: fg,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '${votes.abs()}',
+            style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── KARTU RIWAYAT TANGGAPAN (DISELARASKAN DENGAN DESIGN SYSTEM BARU) ────────
+class _AnalisaCard extends StatelessWidget {
+  final AnalisaKerusakanModel analisa;
+  final String Function(double?) formatRupiah;
+
+  const _AnalisaCard({required this.analisa, required this.formatRupiah});
+
+  static const Color _primaryBlue = Color(0xFF1A3A6B);
+  static const Color _borderCol = Color(0xFFDDE3EF);
+  static const Color _textDark = Color(0xFF1A1A2E);
+
+  @override
+  Widget build(BuildContext context) {
+    final tingkatColor = _tingkatColor(analisa.tingkatKerusakan);
+    final isCritical = analisa.tingkatKerusakan == TingkatKerusakan.total ||
+                       analisa.tingkatKerusakan == TingkatKerusakan.berat;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: isCritical ? Colors.red.withOpacity(0.4) : _borderCol, 
+          width: isCritical ? 1.5 : 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // HEADER KARTU (Layout disamakan dengan Laporan Card)
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.build_circle_outlined, color: Colors.grey, size: 24),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        analisa.namaAlat,
+                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: _textDark),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.qr_code, size: 12, color: Colors.grey.shade500),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              '${analisa.kodeAlat} • ${analisa.noInventaris}',
+                              style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      // Badges
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: tingkatColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                            child: Text(
+                              analisa.tingkatKerusakan.label,
+                              style: TextStyle(color: tingkatColor, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(6)),
+                            child: Text(
+                              analisa.kategoriKerusakan.label,
+                              style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // PEMBATAS
+          Divider(height: 1, color: Colors.grey.shade200),
+
+          // ISI TANGGAPAN
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionInfo('TANGGAPAN MASALAH', analisa.analisaMasalah),
+                const SizedBox(height: 12),
+                _buildSectionInfo('REKOMENDASI PERBAIKAN', analisa.rekomendasiPerbaikan),
+                const SizedBox(height: 16),
+                
+                // BARIS BAWAH: Meta Info & Sync
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        _SyncBadge(status: analisa.syncStatus),
+                        const SizedBox(width: 10),
+                        Text(
+                          _fmtDate(analisa.createdAt),
+                          style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+                        ),
+                      ],
+                    ),
+                    if (analisa.estimasiBiaya != null)
+                      Text(
+                        formatRupiah(analisa.estimasiBiaya),
+                        style: const TextStyle(
+                          color: _primaryBlue,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionInfo(String title, String content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 11, color: Colors.grey),
-        const SizedBox(width: 3),
         Text(
-          text,
-          style: const TextStyle(color: Colors.grey, fontSize: 11),
-          overflow: TextOverflow.ellipsis,
+          title,
+          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          content,
+          style: TextStyle(color: Colors.grey.shade700, fontSize: 12, height: 1.4),
         ),
       ],
     );
@@ -748,40 +721,29 @@ class _AnalisaCard extends StatelessWidget {
 
   Color _tingkatColor(TingkatKerusakan t) {
     switch (t) {
-      case TingkatKerusakan.ringan:
-        return Colors.green;
-      case TingkatKerusakan.sedang:
-        return Colors.orange;
-      case TingkatKerusakan.berat:
-        return Colors.red;
-      case TingkatKerusakan.total:
-        return Colors.red.shade900;
+      case TingkatKerusakan.ringan: return Colors.green;
+      case TingkatKerusakan.sedang: return Colors.orange;
+      case TingkatKerusakan.berat: return Colors.red;
+      case TingkatKerusakan.total: return Colors.red.shade900;
     }
   }
 
   Color _kategoriColor(KategoriKerusakan k) {
     switch (k) {
-      case KategoriKerusakan.hardware:
-        return Colors.blue;
-      case KategoriKerusakan.software:
-        return Colors.purple;
-      case KategoriKerusakan.jaringan:
-        return Colors.teal;
-      case KategoriKerusakan.instalasi:
-        return Colors.orange;
-      case KategoriKerusakan.lainnya:
-        return Colors.grey;
+      case KategoriKerusakan.hardware: return Colors.blue;
+      case KategoriKerusakan.software: return Colors.purple;
+      case KategoriKerusakan.jaringan: return Colors.teal;
+      case KategoriKerusakan.instalasi: return Colors.orange;
+      case KategoriKerusakan.lainnya: return Colors.grey;
     }
   }
 
   String _fmtDate(DateTime dt) {
-    final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m lalu';
-    if (diff.inHours < 24) return '${diff.inHours}j lalu';
-    return '${dt.day}/${dt.month}/${dt.year}';
+    return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
   }
 }
 
+// ── SYNC BADGE CLOUD STATE ───────────────────────────────────────────────────
 class _SyncBadge extends StatelessWidget {
   final String status;
   const _SyncBadge({required this.status});
@@ -794,16 +756,16 @@ class _SyncBadge extends StatelessWidget {
       children: [
         Icon(
           isSynced ? Icons.cloud_done_outlined : Icons.cloud_off_outlined,
-          size: 12,
+          size: 14,
           color: isSynced ? Colors.green : Colors.orange,
         ),
-        const SizedBox(width: 3),
+        const SizedBox(width: 4),
         Text(
-          isSynced ? 'Synced' : 'Local',
+          isSynced ? 'Tersinkron' : 'Lokal',
           style: TextStyle(
             fontSize: 10,
             color: isSynced ? Colors.green : Colors.orange,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],

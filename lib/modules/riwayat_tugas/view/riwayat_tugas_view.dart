@@ -1,12 +1,14 @@
 // ============================================================
 // FILE: modules/home/teknisi/riwayat/view/riwayat_tugas_view.dart
 // Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
+// MODIFIKASI:
+//   - Data dari DB: laporan dengan teknisi_id == user login & status resolved
+//   - Tampilkan ID petugas (teknisi_id)
 // ============================================================
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/riwayat_tugas_controller.dart';
-import '../model/riwayat_tugas_model.dart';
 
 // ============================================================
 // DESIGN TOKENS
@@ -22,31 +24,13 @@ class _C {
   static const divider = Color(0xFFE5E9F2);
   static const searchBg = Color(0xFFFFFFFF);
   static const searchBorder = Color(0xFFDDE3EF);
-
-  // Filter chip
   static const chipActive = Color(0xFF1A3A6B);
-  static const chipActiveFg = Colors.white;
   static const chipInactiveBg = Color(0xFFFFFFFF);
   static const chipInactiveFg = Color(0xFF6B7280);
   static const chipInactiveBorder = Color(0xFFDDE3EF);
-
-  // Badge SELESAI
   static const selesaiBg = Color(0xFF1A3A6B);
-  static const selesaiFg = Colors.white;
-
-  // Nav
   static const navActive = Color(0xFF1A3A6B);
   static const navInactive = Color(0xFF9CA3AF);
-
-  // Kategori icon
-  static const jaringanColor = Color(0xFF2B5BAE);
-  static const jaringanBg = Color(0xFFE8EDF8);
-  static const acColor = Color(0xFF2E7D32);
-  static const acBg = Color(0xFFE8F5E9);
-  static const pcColor = Color(0xFFE53935);
-  static const pcBg = Color(0xFFFFEBEE);
-  static const umColor = Color(0xFF6A1B9A);
-  static const umBg = Color(0xFFF3E5F5);
 }
 
 // ============================================================
@@ -63,38 +47,28 @@ class RiwayatTugasView extends StatelessWidget {
       backgroundColor: _C.surface,
       body: Column(
         children: [
-          // ---- HEADER FIXED ----
-          _buildHeader(ctrl),
-
-          // ---- SEARCH BAR FIXED ----
+          _buildHeader(ctrl, context),
           _buildSearchBar(ctrl),
-
-          // ---- FILTER CHIPS FIXED ----
           _buildFilterChips(ctrl),
-
-          // ---- LIST SCROLLABLE ----
           Expanded(
             child: Obx(() {
               if (ctrl.isLoading.value) {
                 return const Center(
                     child: CircularProgressIndicator(color: _C.primary));
               }
-
               if (ctrl.riwayatTampil.isEmpty) {
                 return _EmptyState(
                   isSearch: ctrl.isSearchActive,
                   filter: ctrl.activeFilter.value,
                 );
               }
-
               return RefreshIndicator(
                 color: _C.primary,
                 onRefresh: ctrl.onRefresh,
                 child: ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   itemCount: ctrl.riwayatTampil.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: 10),
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final item = ctrl.riwayatTampil[index];
                     return _RiwayatCard(
@@ -115,7 +89,7 @@ class RiwayatTugasView extends StatelessWidget {
   // ============================================================
   // HEADER
   // ============================================================
-  Widget _buildHeader(RiwayatTugasController ctrl) {
+  Widget _buildHeader(RiwayatTugasController ctrl, BuildContext context) {
     return Container(
       color: _C.white,
       child: SafeArea(
@@ -125,12 +99,11 @@ class RiwayatTugasView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // App bar row
               Row(
                 children: [
                   IconButton(
-                    onPressed: ctrl.onMenuTapped,
-                    icon: const Icon(Icons.menu_rounded,
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_rounded,
                         color: _C.textPrimary, size: 24),
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -148,14 +121,11 @@ class RiwayatTugasView extends StatelessWidget {
                   const CircleAvatar(
                     radius: 18,
                     backgroundColor: _C.primary,
-                    child:
-                        Icon(Icons.person, color: Colors.white, size: 18),
+                    child: Icon(Icons.person, color: Colors.white, size: 18),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
-
-              // Judul
               const Text(
                 'Riwayat Tugas',
                 style: TextStyle(
@@ -167,10 +137,36 @@ class RiwayatTugasView extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               const Text(
-                'Daftar tugas yang telah diselesaikan.',
-                style:
-                    TextStyle(fontSize: 13, color: _C.textSecondary),
+                'Laporan yang telah Anda selesaikan.',
+                style: TextStyle(fontSize: 13, color: _C.textSecondary),
               ),
+
+              // ─── Info ID Petugas ───
+              const SizedBox(height: 8),
+              Obx(() => Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEDF2FF),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.badge_rounded,
+                            size: 13, color: _C.primary),
+                        const SizedBox(width: 5),
+                        Text(
+                          'ID Petugas: ${ctrl.currentTeknisiId}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: _C.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
             ],
           ),
         ),
@@ -187,12 +183,11 @@ class RiwayatTugasView extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Obx(() => TextField(
             controller: ctrl.searchController,
-            style: const TextStyle(
-                fontSize: 14, color: _C.textPrimary),
+            style: const TextStyle(fontSize: 14, color: _C.textPrimary),
             decoration: InputDecoration(
-              hintText: 'Cari tugas...',
-              hintStyle: const TextStyle(
-                  color: _C.textLight, fontSize: 14),
+              hintText: 'Cari riwayat tugas...',
+              hintStyle:
+                  const TextStyle(color: _C.textLight, fontSize: 14),
               prefixIcon: const Icon(Icons.search_rounded,
                   color: _C.textLight, size: 20),
               suffixIcon: ctrl.isSearchActive
@@ -204,12 +199,11 @@ class RiwayatTugasView extends StatelessWidget {
                   : null,
               filled: true,
               fillColor: _C.searchBg,
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(vertical: 12),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    const BorderSide(color: _C.searchBorder, width: 1.2),
+                borderSide: const BorderSide(
+                    color: _C.searchBorder, width: 1.2),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -285,9 +279,10 @@ class RiwayatTugasView extends StatelessWidget {
             color: _C.white,
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, -2))
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 12,
+                offset: const Offset(0, -2),
+              ),
             ],
           ),
           child: SafeArea(
@@ -384,12 +379,9 @@ class _FilterChip extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: isActive
-                    ? FontWeight.w700
-                    : FontWeight.w500,
-                color: isActive
-                    ? _C.chipActiveFg
-                    : _C.chipInactiveFg,
+                fontWeight:
+                    isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive ? Colors.white : _C.chipInactiveFg,
               ),
             ),
             if (count > 0) ...[
@@ -421,57 +413,18 @@ class _FilterChip extends StatelessWidget {
 }
 
 // ============================================================
-// WIDGET: Kartu Riwayat
+// WIDGET: Kartu Riwayat — dari LaporanFasilitasModel
 // ============================================================
 class _RiwayatCard extends StatelessWidget {
-  final ItemRiwayatModel item;
+  final RiwayatLaporanModel item;
   final VoidCallback onTap;
 
   const _RiwayatCard({required this.item, required this.onTap});
 
-  Color get _iconColor {
-    switch (item.kategori) {
-      case 'Jaringan Internet':
-        return _C.jaringanColor;
-      case 'AC / Pendingin':
-        return _C.acColor;
-      case 'Perangkat PC':
-        return _C.pcColor;
-      default:
-        return _C.umColor;
-    }
-  }
-
-  Color get _iconBg {
-    switch (item.kategori) {
-      case 'Jaringan Internet':
-        return _C.jaringanBg;
-      case 'AC / Pendingin':
-        return _C.acBg;
-      case 'Perangkat PC':
-        return _C.pcBg;
-      default:
-        return _C.umBg;
-    }
-  }
-
-  IconData get _iconData {
-    switch (item.kategori) {
-      case 'Jaringan Internet':
-        return Icons.wifi_rounded;
-      case 'AC / Pendingin':
-        return Icons.ac_unit_rounded;
-      case 'Perangkat PC':
-        return Icons.computer_rounded;
-      case 'Listrik & Proyektor':
-        return Icons.electrical_services_rounded;
-      default:
-        return Icons.build_rounded;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final laporan = item.laporan;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -485,38 +438,30 @@ class _RiwayatCard extends StatelessWidget {
               color: Colors.black.withOpacity(0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
-            )
+            ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ---- Baris atas: ID + Badge SELESAI ----
+            // ---- Baris atas: ID Laporan + Badge SELESAI ----
             Row(
               children: [
-                // Ikon kategori
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: _iconBg,
-                    borderRadius: BorderRadius.circular(9),
-                  ),
-                  child: Icon(_iconData, size: 18, color: _iconColor),
-                ),
-                const SizedBox(width: 10),
-
-                // Nomor ID
-                Text(
-                  'ID: ${item.nomorId}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: _C.textLight,
-                    letterSpacing: 0.3,
+                // ID Laporan (ID laporan dari DB)
+                Expanded(
+                  child: Text(
+                    'ID: ${laporan.id}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: _C.textLight,
+                      letterSpacing: 0.3,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(width: 8),
 
                 // Badge SELESAI
                 Container(
@@ -546,11 +491,11 @@ class _RiwayatCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
-            // ---- Judul tugas ----
+            // ---- Judul laporan ----
             Text(
-              item.judul,
+              laporan.judul,
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
@@ -560,7 +505,26 @@ class _RiwayatCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
+
+            // ---- Lokasi ----
+            Row(
+              children: [
+                const Icon(Icons.location_on_outlined,
+                    size: 13, color: _C.textLight),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    laporan.lokasi,
+                    style: const TextStyle(
+                        fontSize: 12, color: _C.textSecondary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
 
             // ---- Tanggal selesai ----
             Row(
@@ -569,7 +533,7 @@ class _RiwayatCard extends StatelessWidget {
                     size: 13, color: _C.textLight),
                 const SizedBox(width: 5),
                 Text(
-                  item.tanggalLabel,
+                  'Selesai: ${item.tanggalLabel}',
                   style: const TextStyle(
                     fontSize: 12,
                     color: _C.textSecondary,
@@ -579,12 +543,35 @@ class _RiwayatCard extends StatelessWidget {
               ],
             ),
 
-            // ---- Catatan pengerjaan (jika ada) ----
-            if (item.catatanPengerjaan != null &&
-                item.catatanPengerjaan!.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              const Divider(height: 1, color: _C.divider),
-              const SizedBox(height: 10),
+            const SizedBox(height: 10),
+            const Divider(height: 1, color: _C.divider),
+            const SizedBox(height: 10),
+
+            // ---- ID Petugas yang menanggapi ----
+            Row(
+              children: [
+                const Icon(Icons.engineering_rounded,
+                    size: 13, color: _C.textLight),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    'Ditangani oleh: ${laporan.teknisi_id ?? "-"}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: _C.primary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+
+            // ---- Catatan petugas (jika ada) ----
+            if (laporan.catatanPetugas != null &&
+                laporan.catatanPetugas!.isNotEmpty) ...[
+              const SizedBox(height: 6),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -593,7 +580,7 @@ class _RiwayatCard extends StatelessWidget {
                   const SizedBox(width: 5),
                   Expanded(
                     child: Text(
-                      item.catatanPengerjaan!,
+                      laporan.catatanPetugas!,
                       style: const TextStyle(
                         fontSize: 12,
                         color: _C.textSecondary,
@@ -608,19 +595,17 @@ class _RiwayatCard extends StatelessWidget {
             ],
 
             // ---- Foto bukti count ----
-            if (item.fotoBuktiUrls.isNotEmpty) ...[
-              const SizedBox(height: 8),
+            if (laporan.foto_urls.isNotEmpty) ...[
+              const SizedBox(height: 6),
               Row(
                 children: [
                   const Icon(Icons.photo_library_outlined,
                       size: 13, color: _C.textLight),
                   const SizedBox(width: 5),
                   Text(
-                    '${item.fotoBuktiUrls.length} foto bukti',
+                    '${laporan.foto_urls.length} foto bukti',
                     style: const TextStyle(
-                      fontSize: 11,
-                      color: _C.textLight,
-                    ),
+                        fontSize: 11, color: _C.textLight),
                   ),
                 ],
               ),
@@ -655,7 +640,7 @@ class _EmptyState extends StatelessWidget {
                 : 'Belum ada riwayat tugas';
     final subtitle = isSearch
         ? 'Coba kata kunci lain atau ubah filter'
-        : 'Riwayat akan muncul setelah tugas diselesaikan';
+        : 'Riwayat akan muncul setelah laporan Anda diselesaikan';
 
     return Center(
       child: Column(
@@ -674,19 +659,11 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             subtitle,
-            style: const TextStyle(
-                fontSize: 12, color: Color(0xFFB0B8CC)),
+            style: const TextStyle(fontSize: 12, color: Color(0xFFB0B8CC)),
             textAlign: TextAlign.center,
           ),
         ],
       ),
     );
-  }
-}
-
-// Extension untuk onMenuTapped
-extension on RiwayatTugasController {
-  void onMenuTapped() {
-    // TODO: buka drawer
   }
 }

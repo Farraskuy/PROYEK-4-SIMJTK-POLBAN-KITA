@@ -1,26 +1,26 @@
 // lib/modules/teknisi/analisa_kerusakan/model/analisa_kerusakan_model.dart
 
 class AnalisaKerusakanModel {
-  final String id; // UUIDv4
-  final String laporanId; // Reference ke laporan_fasilitas._id
-  final String teknisiId; // Reference ke users._id
+  final String id; // Di-mapping dari '_id' MongoDB
+  final String laporanId;
+  final String teknisiId;
   final String teknisiName;
 
-  // ── Identitas Alat (sesuai Formulir POLBAN) ───────────────────────────────
-  final DasarPemeriksaan dasarPemeriksaan; // Pemeriksaan Berkala / Keluhan Pemakai
-  final String namaAlat;       // Nama Alat
-  final String kodeAlat;       // Kode Alat
-  final String noInventaris;   // No. Inventaris
-  final String lokasi;         // Lokasi
-  final String noKerusakan;    // No. Kerusakan
+  // ── Identitas Alat ──────────────────────────────────────────────
+  final DasarPemeriksaan dasarPemeriksaan;
+  final String namaAlat;
+  final String kodeAlat;
+  final String noInventaris;
+  final String lokasi;
+  final String noKerusakan;
 
-  // ── Isi Formulir ──────────────────────────────────────────────────────────
-  final String analisaMasalah;           // Analisa Masalah (diagnosa teknis)
-  final String rekomendasiPerbaikan;     // Rekomendasi Perbaikan
-  final String rekomendasiTempatPerbaikan; // Rekomendasi Tempat Perbaikan
+  // ── Isi Formulir ────────────────────────────────────────────────
+  final String analisaMasalah;
+  final String rekomendasiPerbaikan;
+  final String rekomendasiTempatPerbaikan;
 
-  // ── Field tambahan (internal / display) ──────────────────────────────────
-  final String judulLaporan;     // denormalized dari laporan
+  // ── Field tambahan ─────────────────────────────────────────────
+  final String judulLaporan;
   final String kategoriLaporan;
   final KategoriKerusakan kategoriKerusakan;
   final TingkatKerusakan tingkatKerusakan;
@@ -28,7 +28,7 @@ class AnalisaKerusakanModel {
   final int? estimasiWaktuPerbaikanHari;
   final double? estimasiBiaya;
 
-  final String syncStatus; // 'local' | 'synced'
+  final String syncStatus;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -57,6 +57,96 @@ class AnalisaKerusakanModel {
     required this.createdAt,
     required this.updatedAt,
   });
+
+  // ─── CONSTRUCTOR DARI MONGODB (JSON / MAP) ──────────────────────
+  factory AnalisaKerusakanModel.fromJson(Map<String, dynamic> json) {
+    // Helper function untuk parsing enum dengan aman (fallback jika null/salah)
+    DasarPemeriksaan getDasar(String? val) => DasarPemeriksaan.values.firstWhere(
+        (e) => e.value == val, orElse: () => DasarPemeriksaan.keluhanPemakai);
+        
+    KategoriKerusakan getKategori(String? val) => KategoriKerusakan.values.firstWhere(
+        (e) => e.value == val, orElse: () => KategoriKerusakan.lainnya);
+        
+    TingkatKerusakan getTingkat(String? val) => TingkatKerusakan.values.firstWhere(
+        (e) => e.value == val, orElse: () => TingkatKerusakan.sedang);
+
+    // Helper untuk parsing DateTime (menangani format String ISO atau objek DateTime native dari Mongo)
+    DateTime parseDate(dynamic dateData) {
+      if (dateData == null) return DateTime.now();
+      if (dateData is DateTime) return dateData;
+      return DateTime.tryParse(dateData.toString()) ?? DateTime.now();
+    }
+
+    // Helper untuk angka (menghindari error casting int <-> double)
+    double? parseBiaya(dynamic val) {
+      if (val == null) return null;
+      if (val is num) return val.toDouble();
+      return double.tryParse(val.toString());
+    }
+
+    return AnalisaKerusakanModel(
+      // MongoDB menggunakan field '_id', ObjectId akan dikonversi ke string
+      id: json['_id']?.toString() ?? '', 
+      laporanId: json['laporan_id'] ?? '',
+      teknisiId: json['teknisi_id'] ?? '',
+      teknisiName: json['teknisi_name'] ?? '',
+      judulLaporan: json['judul_laporan'] ?? '',
+      kategoriLaporan: json['kategori_laporan'] ?? '',
+      dasarPemeriksaan: getDasar(json['dasar_pemeriksaan']),
+      namaAlat: json['nama_alat'] ?? '',
+      kodeAlat: json['kode_alat'] ?? '',
+      noInventaris: json['no_inventaris'] ?? '',
+      lokasi: json['lokasi'] ?? '',
+      noKerusakan: json['no_kerusakan'] ?? '',
+      analisaMasalah: json['analisa_masalah'] ?? '',
+      rekomendasiPerbaikan: json['rekomendasi_perbaikan'] ?? '',
+      rekomendasiTempatPerbaikan: json['rekomendasi_tempat_perbaikan'] ?? '',
+      kategoriKerusakan: getKategori(json['kategori_kerusakan']),
+      tingkatKerusakan: getTingkat(json['tingkat_kerusakan']),
+      fotoAnalisaUrls: (json['foto_analisa_urls'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ?? [],
+      estimasiWaktuPerbaikanHari: json['estimasi_waktu_perbaikan_hari'] is int
+          ? json['estimasi_waktu_perbaikan_hari']
+          : int.tryParse(json['estimasi_waktu_perbaikan_hari']?.toString() ?? ''),
+      estimasiBiaya: parseBiaya(json['estimasi_biaya']),
+      syncStatus: json['sync_status'] ?? 'synced',
+      createdAt: parseDate(json['created_at']),
+      updatedAt: parseDate(json['updated_at']),
+    );
+  }
+
+  // ─── METHOD EXPORT KE MONGODB (JSON / MAP) ──────────────────────
+  // Diubah namanya menjadi toMap() agar konsisten dengan panggilan di Service
+  Map<String, dynamic> toMap() => {
+        // Jangan paksa kirim string kosong ke _id, biarkan Mongo meng-generate-nya
+        if (id.isNotEmpty) '_id': id,
+        'laporan_id': laporanId,
+        'teknisi_id': teknisiId,
+        'teknisi_name': teknisiName,
+        'judul_laporan': judulLaporan,
+        'kategori_laporan': kategoriLaporan,
+        'dasar_pemeriksaan': dasarPemeriksaan.value,
+        'nama_alat': namaAlat,
+        'kode_alat': kodeAlat,
+        'no_inventaris': noInventaris,
+        'lokasi': lokasi,
+        'no_kerusakan': noKerusakan,
+        'analisa_masalah': analisaMasalah,
+        'rekomendasi_perbaikan': rekomendasiPerbaikan,
+        'rekomendasi_tempat_perbaikan': rekomendasiTempatPerbaikan,
+        'kategori_kerusakan': kategoriKerusakan.value,
+        'tingkat_kerusakan': tingkatKerusakan.value,
+        'foto_analisa_urls': fotoAnalisaUrls,
+        'estimasi_waktu_perbaikan_hari': estimasiWaktuPerbaikanHari,
+        'estimasi_biaya': estimasiBiaya,
+        'sync_status': syncStatus,
+        // mongo_dart native menangani objek DateTime, tidak perlu toIso8601String() 
+        // kecuali Anda menggunakan REST API (seperti Dio/Http). 
+        // Mengirim native DateTime membuat sorting query di Mongo jauh lebih cepat.
+        'created_at': createdAt,
+        'updated_at': updatedAt,
+      };
 
   AnalisaKerusakanModel copyWith({
     DasarPemeriksaan? dasarPemeriksaan,
@@ -104,32 +194,6 @@ class AnalisaKerusakanModel {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-
-  Map<String, dynamic> toJson() => {
-        '_id': id,
-        'laporan_id': laporanId,
-        'teknisi_id': teknisiId,
-        'teknisi_name': teknisiName,
-        'judul_laporan': judulLaporan,
-        'kategori_laporan': kategoriLaporan,
-        'dasar_pemeriksaan': dasarPemeriksaan.value,
-        'nama_alat': namaAlat,
-        'kode_alat': kodeAlat,
-        'no_inventaris': noInventaris,
-        'lokasi': lokasi,
-        'no_kerusakan': noKerusakan,
-        'analisa_masalah': analisaMasalah,
-        'rekomendasi_perbaikan': rekomendasiPerbaikan,
-        'rekomendasi_tempat_perbaikan': rekomendasiTempatPerbaikan,
-        'kategori_kerusakan': kategoriKerusakan.value,
-        'tingkat_kerusakan': tingkatKerusakan.value,
-        'foto_analisa_urls': fotoAnalisaUrls,
-        'estimasi_waktu_perbaikan_hari': estimasiWaktuPerbaikanHari,
-        'estimasi_biaya': estimasiBiaya,
-        'sync_status': syncStatus,
-        'created_at': createdAt.toIso8601String(),
-        'updated_at': updatedAt.toIso8601String(),
-      };
 }
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
@@ -166,99 +230,3 @@ enum TingkatKerusakan {
   final String deskripsi;
   const TingkatKerusakan(this.value, this.label, this.deskripsi);
 }
-
-// ── Dummy laporan aktif ───────────────────────────────────────────────────────
-
-class LaporanSingkat {
-  final String id;
-  final String judul;
-  final String lokasi;
-  final String kategori;
-  final String status;
-  final String pelaporName;
-  final DateTime createdAt;
-
-  const LaporanSingkat({
-    required this.id,
-    required this.judul,
-    required this.lokasi,
-    required this.kategori,
-    required this.status,
-    required this.pelaporName,
-    required this.createdAt,
-  });
-}
-
-final List<LaporanSingkat> dummyLaporanAktif = [
-  LaporanSingkat(
-    id: 'lap-uuid-001',
-    judul: 'AC Central Ruang Kelas 10A Mati',
-    lokasi: 'Gedung B, Lt. 2, Ruang 10A',
-    kategori: 'AC & Pendingin',
-    status: 'in_progress',
-    pelaporName: 'Budi Santoso',
-    createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-  ),
-  LaporanSingkat(
-    id: 'lap-uuid-002',
-    judul: 'Proyektor Lab Komputer Tidak Menyala',
-    lokasi: 'Lab Komputer C, Gedung A',
-    kategori: 'Proyektor',
-    status: 'in_progress',
-    pelaporName: 'Rina Sari',
-    createdAt: DateTime.now().subtract(const Duration(days: 1)),
-  ),
-  LaporanSingkat(
-    id: 'lap-uuid-003',
-    judul: 'Switch Jaringan Lantai 3 Tidak Responsif',
-    lokasi: 'Gedung C, Lt. 3, Server Room',
-    kategori: 'Jaringan',
-    status: 'in_progress',
-    pelaporName: 'Ahmad Fauzi',
-    createdAt: DateTime.now().subtract(const Duration(hours: 3)),
-  ),
-  LaporanSingkat(
-    id: 'lap-uuid-004',
-    judul: 'PC Lab Rusak - Tidak Bisa Booting',
-    lokasi: 'Lab Komputer D, Gedung B',
-    kategori: 'PC & Komputer',
-    status: 'in_progress',
-    pelaporName: 'Dewi Putri',
-    createdAt: DateTime.now().subtract(const Duration(hours: 8)),
-  ),
-];
-
-// ── Dummy analisa list ────────────────────────────────────────────────────────
-
-List<AnalisaKerusakanModel> dummyAnalisaList = [
-  AnalisaKerusakanModel(
-    id: 'analisa-uuid-001',
-    laporanId: 'lap-uuid-002',
-    teknisiId: 'user-t1',
-    teknisiName: 'Budi Santoso',
-    judulLaporan: 'Proyektor Lab Komputer Tidak Menyala',
-    kategoriLaporan: 'Proyektor',
-    dasarPemeriksaan: DasarPemeriksaan.keluhanPemakai,
-    namaAlat: 'Proyektor Epson EB-X41',
-    kodeAlat: 'PRY-LAB-C-001',
-    noInventaris: 'INV/2021/PRY/003',
-    lokasi: 'Lab Komputer C, Gedung A',
-    noKerusakan: 'KRS-2024-0042',
-    analisaMasalah:
-        'Lampu proyektor sudah melebihi batas jam penggunaan (3000 jam). '
-        'Ballast rusak dan tidak dapat menyalakan lampu. '
-        'Indikator lampu berkedip merah 3 kali yang menandakan umur lampu habis.',
-    rekomendasiPerbaikan:
-        'Penggantian lampu proyektor (part no. ELPLP88) dan ballast. '
-        'Estimasi penggantian 3 hari kerja.',
-    rekomendasiTempatPerbaikan:
-        'Bengkel Teknik Komputer POLBAN / Authorized Service Center Epson Bandung.',
-    kategoriKerusakan: KategoriKerusakan.hardware,
-    tingkatKerusakan: TingkatKerusakan.berat,
-    estimasiWaktuPerbaikanHari: 3,
-    estimasiBiaya: 1500000,
-    syncStatus: 'local',
-    createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-    updatedAt: DateTime.now().subtract(const Duration(hours: 2)),
-  ),
-];

@@ -1,6 +1,7 @@
 // ============================================================
 // FILE: modules/home/teknisi/view/home_teknisi_view.dart
-// Kelompok A7 Ã¢â‚¬â€œ SIMJTK (Sistem Informasi Mahasiswa JTK)
+// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
+// MODIFIKASI: Tugas Mendesak dari DB laporan_fasilitas, sort by vote_score
 // ============================================================
 
 import 'package:flutter/material.dart';
@@ -8,10 +9,9 @@ import 'package:get/get.dart';
 import '../controller/home_controller.dart';
 import '../model/home_model.dart';
 import '../view/analisa_kerusakan_view.dart';
-import '../view/kontrol_barang_view.dart';
 import '../view/usulan_pemeliharaan_view.dart';
 import '../view/penghapusan_view.dart';
-import '../../../log_harian_teknis/view/log_harian_teknis_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import '../../../riwayat_tugas/view/riwayat_tugas_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
@@ -33,11 +33,8 @@ class _C {
   static const navBg = Color(0xFFFFFFFF);
   static const navActive = Color(0xFF1A3A6B);
   static const navInactive = Color(0xFF9CA3AF);
-  static const selesaiBg = Color(0xFF1A3A6B); // dark blue card
-  static const pendingBg = Color(0xFFEDF2FF); // light blue card
-  static const highPriorityBar = Color(0xFFE53935);
-  static const medPriorityBar = Color(0xFF1A3A6B);
-  static const lowPriorityBar = Color(0xFF9CA3AF);
+  static const selesaiBg = Color(0xFF1A3A6B);
+  static const pendingBg = Color(0xFFEDF2FF);
   static const highPriorityBadge = Color(0xFFFFEBEE);
   static const highPriorityText = Color(0xFFD32F2F);
   static const medPriorityBadge = Color(0xFFE3F2FD);
@@ -52,8 +49,8 @@ class _C {
   static const acIconBg = Color(0xFFE8F5E9);
   static const umIcon = Color(0xFF6A1B9A);
   static const umIconBg = Color(0xFFF3E5F5);
-  static const offlineBadge = Color(0xFFFFF3E0);
-  static const offlineText = Color(0xFFE65100);
+  static const upvoteBg = Color(0xFFE8F5E9);
+  static const upvoteText = Color(0xFF2E7D32);
 }
 
 // ============================================================
@@ -104,7 +101,9 @@ Color _kategoriIconBg(String kategori) {
   }
 }
 
-// Widget section Modul Maintenance
+// ============================================================
+// MODUL MAINTENANCE SECTION
+// ============================================================
 class ModulMaintenanceSection extends StatelessWidget {
   const ModulMaintenanceSection({super.key});
 
@@ -114,12 +113,6 @@ class ModulMaintenanceSection extends StatelessWidget {
       'icon': Icons.analytics_rounded,
       'color': Color(0xFFE53935),
       'route': 'analisa',
-    },
-    {
-      'label': 'Kontrol\nBarang/Alat',
-      'icon': Icons.inventory_2_outlined,
-      'color': Color(0xFF1565C0),
-      'route': 'kontrol',
     },
     {
       'label': 'Usulan\nPemeliharaan',
@@ -133,12 +126,6 @@ class ModulMaintenanceSection extends StatelessWidget {
       'color': Color(0xFFF57C00),
       'route': 'penghapusan',
     },
-    {
-      'label': 'Log\nHarian',
-      'icon': Icons.note_alt_outlined,
-      'color': Color(0xFF6A1B9A),
-      'route': 'log',
-    },
   ];
 
   void _navigate(BuildContext context, String route) {
@@ -146,37 +133,19 @@ class ModulMaintenanceSection extends StatelessWidget {
       case 'analisa':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const AnalisaKerusakanView()),
-        );
-        break;
-      case 'kontrol':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const DataKontrolBarangView(),
-          ),
+          MaterialPageRoute(builder: (_) => const AnalisaKerusakanView()),
         );
         break;
       case 'pemeliharaan':
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const UsulanPemeliharaanView(),
-          ),
+          MaterialPageRoute(builder: (_) => const UsulanPemeliharaanView()),
         );
         break;
       case 'penghapusan':
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const UsulanPenghapusanView(),
-          ),
-        );
-        break;
-      case 'log':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => LogHarianTeknisView()),
+          MaterialPageRoute(builder: (_) => const UsulanPenghapusanView()),
         );
         break;
     }
@@ -197,7 +166,7 @@ class ModulMaintenanceSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         GridView.count(
-          crossAxisCount: 5,
+          crossAxisCount: 3,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 8,
@@ -221,8 +190,7 @@ class ModulMaintenanceSection extends StatelessWidget {
                       m['label'] as String,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize:
-                            8.5, // Sedikit diperkecil agar pas di grid 5 kolom
+                        fontSize: 10,
                         color: color,
                         fontWeight: FontWeight.w700,
                         height: 1.1,
@@ -262,27 +230,19 @@ class HomeTeknisiView extends StatelessWidget {
           onRefresh: ctrl.onRefresh,
           child: CustomScrollView(
             slivers: [
-              // ---- APP BAR ----
               _buildAppBar(ctrl, context),
-
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ---- SAPAAN ----
                       _buildSapaan(ctrl),
                       const SizedBox(height: 20),
-
-                      // ---- STATISTIK TUGAS ----
                       _buildStatistik(ctrl),
                       const SizedBox(height: 28),
-
                       const ModulMaintenanceSection(),
                       const SizedBox(height: 28),
-
-                      // ---- TUGAS MENDESAK ----
                       _buildTugasMendesakHeader(context),
                       const SizedBox(height: 12),
                       _buildTugasMendesakList(ctrl),
@@ -345,7 +305,7 @@ class HomeTeknisiView extends StatelessWidget {
   }
 
   // ============================================================
-  // STATISTIK TUGAS Ã¢â‚¬â€ kartu gabungan sesuai Figma
+  // STATISTIK TUGAS
   // ============================================================
   Widget _buildStatistik(HomeTeknisiController ctrl) {
     return Obx(() {
@@ -367,7 +327,6 @@ class HomeTeknisiView extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Kolom kiri Ã¢â‚¬â€ total tugas
             Expanded(
               flex: 4,
               child: Padding(
@@ -377,14 +336,11 @@ class HomeTeknisiView extends StatelessWidget {
                   children: [
                     Row(
                       children: const [
-                        Icon(
-                          Icons.assignment_rounded,
-                          color: _C.primary,
-                          size: 18,
-                        ),
+                        Icon(Icons.assignment_rounded,
+                            color: _C.primary, size: 18),
                         SizedBox(width: 6),
                         Text(
-                          'TUGAS HARI INI',
+                          'TUGAS AKTIF',
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
@@ -408,24 +364,18 @@ class HomeTeknisiView extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Kolom kanan Ã¢â‚¬â€ SELESAI & PENDING
             Expanded(
               flex: 5,
               child: Column(
                 children: [
-                  // SELESAI (dark card)
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 18,
-                    ),
+                        horizontal: 20, vertical: 18),
                     decoration: const BoxDecoration(
                       color: _C.selesaiBg,
                       borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(16),
-                      ),
+                          topRight: Radius.circular(16)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -470,19 +420,14 @@ class HomeTeknisiView extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // PENDING (light card)
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 18,
-                    ),
+                        horizontal: 20, vertical: 18),
                     decoration: const BoxDecoration(
                       color: _C.pendingBg,
                       borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(16),
-                      ),
+                          bottomRight: Radius.circular(16)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -516,11 +461,8 @@ class HomeTeknisiView extends StatelessWidget {
                                 color: _C.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(
-                                Icons.access_time_rounded,
-                                color: _C.primary,
-                                size: 18,
-                              ),
+                              child: const Icon(Icons.access_time_rounded,
+                                  color: _C.primary, size: 18),
                             ),
                           ],
                         ),
@@ -539,9 +481,6 @@ class HomeTeknisiView extends StatelessWidget {
   // ============================================================
   // TUGAS MENDESAK HEADER
   // ============================================================
-  // ============================================================
-  // TUGAS MENDESAK HEADER
-  // ============================================================
   Widget _buildTugasMendesakHeader(BuildContext context) {
     return Row(
       children: [
@@ -553,14 +492,35 @@ class HomeTeknisiView extends StatelessWidget {
             color: _C.textPrimary,
           ),
         ),
+        const SizedBox(width: 6),
+        // Label keterangan sort
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: _C.upvoteBg,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            children: const [
+              Icon(Icons.arrow_upward_rounded,
+                  size: 11, color: _C.upvoteText),
+              SizedBox(width: 3),
+              Text(
+                'Top Upvote',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: _C.upvoteText,
+                ),
+              ),
+            ],
+          ),
+        ),
         const Spacer(),
-        // MENGGANTI ICON STATIS MENJADI TOMBOL ANALISA
         GestureDetector(
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const AnalisaKerusakanView(),
-            ),
+            MaterialPageRoute(builder: (_) => const AnalisaKerusakanView()),
           ),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -570,15 +530,11 @@ class HomeTeknisiView extends StatelessWidget {
             ),
             child: Row(
               children: const [
-                Icon(
-                  Icons
-                      .analytics_rounded, // Icon yang lebih relevan untuk analisa
-                  color: Color(0xFFD32F2F),
-                  size: 16,
-                ),
+                Icon(Icons.analytics_rounded,
+                    color: Color(0xFFD32F2F), size: 16),
                 SizedBox(width: 4),
                 Text(
-                  "Analisa",
+                  'Analisa',
                   style: TextStyle(
                     color: Color(0xFFD32F2F),
                     fontSize: 11,
@@ -594,7 +550,7 @@ class HomeTeknisiView extends StatelessWidget {
   }
 
   // ============================================================
-  // TUGAS MENDESAK LIST
+  // TUGAS MENDESAK LIST — dari LaporanFasilitasModel
   // ============================================================
   Widget _buildTugasMendesakList(HomeTeknisiController ctrl) {
     return Obx(() {
@@ -604,17 +560,18 @@ class HomeTeknisiView extends StatelessWidget {
         return _EmptyMendesak();
       }
 
+      // Tampilkan maksimal 5 tugas teratas di home
+      final displayList = list.take(5).toList();
+
       return ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        itemCount: list.length,
+        itemCount: displayList.length,
         separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
-          return _TugasCard(
-            tugas: list[index],
-            onTap: () => ctrl.onTugasTapped(list[index]),
-            onMulai: () => ctrl.onMulaiKerjakan(list[index]),
-            onSelesai: () => ctrl.onSelesaikanTugas(list[index]),
+          return _LaporanCard(
+            laporan: displayList[index],
+            onTap: () => ctrl.onTugasTapped(displayList[index]),
           );
         },
       );
@@ -624,13 +581,14 @@ class HomeTeknisiView extends StatelessWidget {
   // ============================================================
   // BOTTOM NAV BAR
   // ============================================================
-  void _navigateBottomBar(BuildContext context, HomeTeknisiNavTarget? target) {
+  void _navigateBottomBar(
+      BuildContext context, HomeTeknisiNavTarget? target) {
     if (target == null) return;
     if (target == HomeTeknisiNavTarget.tugas) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>
+          builder: (_) =>
               const LaporanFasilitasMahasiswaView(role: 'teknisi'),
         ),
       );
@@ -639,12 +597,13 @@ class HomeTeknisiView extends StatelessWidget {
     if (target == HomeTeknisiNavTarget.riwayat) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const RiwayatTugasView()),
+        MaterialPageRoute(builder: (_) => const RiwayatTugasView()),
       );
     }
   }
 
-  Widget _buildBottomNavBar(BuildContext context, HomeTeknisiController ctrl) {
+  Widget _buildBottomNavBar(
+      BuildContext context, HomeTeknisiController ctrl) {
     const items = [
       AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
       AppNavItem(label: 'Tugas', icon: Icons.assignment_rounded),
@@ -656,60 +615,59 @@ class HomeTeknisiView extends StatelessWidget {
       () => AppBottomNavBar(
         items: items,
         selectedIndex: ctrl.selectedNavIndex.value,
-        onTap: (index) => _navigateBottomBar(context, ctrl.onNavTapped(index)),
+        onTap: (index) =>
+            _navigateBottomBar(context, ctrl.onNavTapped(index)),
       ),
     );
   }
 }
 
 // ============================================================
-// WIDGET: Kartu Tugas Mendesak
+// WIDGET: Kartu Laporan Mendesak (dari LaporanFasilitasModel)
 // ============================================================
-class _TugasCard extends StatelessWidget {
-  final TugasTeknisiModel tugas;
+class _LaporanCard extends StatelessWidget {
+  final LaporanFasilitasModel laporan;
   final VoidCallback onTap;
-  final VoidCallback onMulai;
-  final VoidCallback onSelesai;
 
-  const _TugasCard({
-    required this.tugas,
-    required this.onTap,
-    required this.onMulai,
-    required this.onSelesai,
-  });
+  const _LaporanCard({required this.laporan, required this.onTap});
 
-  // Warna garis prioritas di sisi kiri card
-  Color get _barColor {
-    switch (tugas.prioritas) {
-      case PrioritasTugas.high:
-        return _C.highPriorityBar;
-      case PrioritasTugas.medium:
-        return _C.medPriorityBar;
-      case PrioritasTugas.low:
-        return _C.lowPriorityBar;
+  // Badge warna berdasarkan status
+  Color get _statusBg {
+    switch (laporan.status) {
+      case StatusLaporan.pending:
+        return const Color(0xFFFFF3E0);
+      case StatusLaporan.in_progress:
+        return const Color(0xFFE3F2FD);
+      case StatusLaporan.escalated_to_upt:
+        return const Color(0xFFFFEBEE);
+      default:
+        return const Color(0xFFE8F5E9);
     }
   }
 
-  // Warna & teks badge prioritas
-  Color get _badgeBg {
-    switch (tugas.prioritas) {
-      case PrioritasTugas.high:
-        return _C.highPriorityBadge;
-      case PrioritasTugas.medium:
-        return _C.medPriorityBadge;
-      case PrioritasTugas.low:
-        return _C.lowPriorityBadge;
+  Color get _statusText {
+    switch (laporan.status) {
+      case StatusLaporan.pending:
+        return const Color(0xFFE65100);
+      case StatusLaporan.in_progress:
+        return const Color(0xFF1565C0);
+      case StatusLaporan.escalated_to_upt:
+        return const Color(0xFFD32F2F);
+      default:
+        return const Color(0xFF2E7D32);
     }
   }
 
-  Color get _badgeText {
-    switch (tugas.prioritas) {
-      case PrioritasTugas.high:
-        return _C.highPriorityText;
-      case PrioritasTugas.medium:
-        return _C.medPriorityText;
-      case PrioritasTugas.low:
-        return _C.lowPriorityText;
+  String get _statusLabel {
+    switch (laporan.status) {
+      case StatusLaporan.pending:
+        return 'Pending';
+      case StatusLaporan.in_progress:
+        return 'Dikerjakan';
+      case StatusLaporan.escalated_to_upt:
+        return 'Eskalasi UPT';
+      default:
+        return 'Selesai';
     }
   }
 
@@ -721,7 +679,7 @@ class _TugasCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: _C.cardBg,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _C.divider, width: 1),
+          border: Border.all(color: const Color(0xFFE5E9F2), width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -734,11 +692,15 @@ class _TugasCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ---- Garis prioritas kiri ----
+              // Garis kiri — warna berdasarkan vote score
               Container(
                 width: 4,
                 decoration: BoxDecoration(
-                  color: _barColor,
+                  color: laporan.vote_score >= 10
+                      ? const Color(0xFFE53935)
+                      : laporan.vote_score >= 5
+                          ? _C.primary
+                          : const Color(0xFF9CA3AF),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(14),
                     bottomLeft: Radius.circular(14),
@@ -746,88 +708,55 @@ class _TugasCard extends StatelessWidget {
                 ),
               ),
 
-              // ---- Ikon kategori ----
+              // Ikon kategori
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 14, 0, 14),
                 child: Container(
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: _kategoriIconBg(tugas.kategori),
+                    color: _kategoriIconBg(laporan.lokasi),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    _kategoriIcon(tugas.kategori),
+                    _kategoriIcon(laporan.lokasi),
                     size: 22,
-                    color: _kategoriIconColor(tugas.kategori),
+                    color: _kategoriIconColor(laporan.lokasi),
                   ),
                 ),
               ),
 
-              // ---- Konten utama ----
+              // Konten utama
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Judul + offline badge
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              tugas.judul,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: _C.textPrimary,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          // Badge offline (syncStatus: local)
-                          if (!tugas.isSynced) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _C.offlineBadge,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Text(
-                                'Offline',
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: _C.offlineText,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
+                      // Judul
+                      Text(
+                        laporan.judul,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: _C.textPrimary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
 
                       // Lokasi
                       Row(
                         children: [
-                          const Icon(
-                            Icons.location_on_outlined,
-                            size: 12,
-                            color: _C.textLight,
-                          ),
+                          const Icon(Icons.location_on_outlined,
+                              size: 12, color: _C.textLight),
                           const SizedBox(width: 3),
                           Expanded(
                             child: Text(
-                              tugas.lokasi,
+                              laporan.lokasi,
                               style: const TextStyle(
-                                fontSize: 12,
-                                color: _C.textSecondary,
-                              ),
+                                  fontSize: 12, color: _C.textSecondary),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -836,49 +765,52 @@ class _TugasCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
 
-                      // Badge prioritas + estimasi jam
+                      // Badge status + upvote count
                       Row(
                         children: [
-                          // Badge prioritas
+                          // Status badge
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
+                                horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: _badgeBg,
+                              color: _statusBg,
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              tugas.prioritas.label,
+                              _statusLabel,
                               style: TextStyle(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
-                                color: _badgeText,
+                                color: _statusText,
                               ),
                             ),
                           ),
                           const SizedBox(width: 8),
 
-                          // Estimasi jam
-                          if (tugas.estimasiSelesai != null) ...[
-                            const Icon(
-                              Icons.access_time_rounded,
-                              size: 12,
-                              color: _C.textLight,
+                          // Upvote count — kunci sorting tugas mendesak
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: _C.upvoteBg,
+                              borderRadius: BorderRadius.circular(4),
                             ),
-                            const SizedBox(width: 3),
-                            Text(
-                              tugas.jamEstimasi,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: _C.textSecondary,
-                                fontWeight: FontWeight.w500,
-                              ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.arrow_upward_rounded,
+                                    size: 11, color: _C.upvoteText),
+                                const SizedBox(width: 3),
+                                Text(
+                                  '${laporan.vote_score}',
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w700,
+                                    color: _C.upvoteText,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-
-                          const Spacer(),
+                          ),
                         ],
                       ),
                     ],
@@ -886,43 +818,6 @@ class _TugasCard extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// WIDGET: Action Chip (tombol kecil di card)
-// ============================================================
-class _ActionChip extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionChip({
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -942,19 +837,16 @@ class _EmptyMendesak extends StatelessWidget {
       decoration: BoxDecoration(
         color: _C.cardBg,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _C.divider, width: 1),
+        border: Border.all(color: const Color(0xFFE5E9F2), width: 1),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
-          Icon(
-            Icons.check_circle_outline_rounded,
-            size: 44,
-            color: Color(0xFF81C784),
-          ),
+          Icon(Icons.check_circle_outline_rounded,
+              size: 44, color: Color(0xFF81C784)),
           SizedBox(height: 10),
           Text(
-            'Tidak ada tugas mendesak',
+            'Tidak ada laporan mendesak',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -963,7 +855,7 @@ class _EmptyMendesak extends StatelessWidget {
           ),
           SizedBox(height: 4),
           Text(
-            'Semua tugas high priority sudah diselesaikan!',
+            'Belum ada laporan fasilitas yang masuk',
             style: TextStyle(fontSize: 12, color: _C.textLight),
           ),
         ],

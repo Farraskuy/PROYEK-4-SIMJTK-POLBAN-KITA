@@ -1,15 +1,15 @@
 // ============================================================
 // FILE: modules/home/teknisi/controller/home_teknisi_controller.dart
-// Kelompok A7 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“ SIMJTK (Sistem Informasi Mahasiswa JTK)
+// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
 // Sesuai UC-07: Mengelola Tindakan Teknisi
-// ============================================================
-//
-// Dependency: get: ^4.6.6
+// MODIFIKASI: Tugas Mendesak dari DB laporan_fasilitas, sort by vote_score
 // ============================================================
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/home_model.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
 
 enum HomeTeknisiNavTarget { tugas, riwayat }
 
@@ -24,11 +24,10 @@ class HomeTeknisiController extends GetxController {
   /// Statistik tugas hari ini
   final Rx<StatistikTugasModel?> statistik = Rx<StatistikTugasModel?>(null);
 
-  /// Semua tugas yang didelegasikan ke teknisi ini
-  final RxList<TugasTeknisiModel> semuaTugas = <TugasTeknisiModel>[].obs;
-
-  /// Hanya tugas mendesak (high priority, belum selesai)
-  final RxList<TugasTeknisiModel> tugasMendesak = <TugasTeknisiModel>[].obs;
+  /// Tugas mendesak — laporan fasilitas pending/in_progress,
+  /// diurutkan berdasarkan vote_score tertinggi (Top Upvote)
+  final RxList<LaporanFasilitasModel> tugasMendesak =
+      <LaporanFasilitasModel>[].obs;
 
   /// Index bottom nav aktif
   final RxInt selectedNavIndex = 0.obs;
@@ -41,6 +40,11 @@ class HomeTeknisiController extends GetxController {
 
   /// Jumlah notifikasi belum dibaca
   final RxInt unreadNotif = 2.obs;
+
+  // --------------------------------------------------------
+  // SERVICES
+  // --------------------------------------------------------
+  final LaporanFasilitasService _laporanService = LaporanFasilitasService();
 
   // --------------------------------------------------------
   // LIFECYCLE
@@ -59,23 +63,44 @@ class HomeTeknisiController extends GetxController {
   Future<void> _loadData() async {
     isLoading.value = true;
 
-    // Simulasi fetch data dari server / local cache (offline-first)
-    // TODO: ganti dengan service call nyata
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      // Ambil semua laporan dengan role teknisi
+      // (status: pending | in_progress | escalated_to_upt)
+      final allLaporan = await _laporanService.getForRole('teknisi');
 
-    statistik.value = StatistikTugasModel.dummy();
+      // Urutkan berdasarkan vote_score tertinggi (Top Upvote) untuk Tugas Mendesak
+      final sorted = List<LaporanFasilitasModel>.from(allLaporan)
+        ..sort((a, b) => b.vote_score.compareTo(a.vote_score));
 
-    final allTugas = TugasTeknisiModel.dummyList();
-    semuaTugas.assignAll(allTugas);
+      tugasMendesak.assignAll(sorted);
 
-    // Filter tugas mendesak: high priority & belum selesai
-    // Sesuai hak akses Teknisi ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â menerima delegasi dari Admin (UC-06)
-    tugasMendesak.assignAll(
-      allTugas.where((t) => t.isMendesak).toList()
-        ..sort((a, b) => a.createdAt.compareTo(b.createdAt)),
-    );
+      // Hitung statistik dari data real
+      final selesai = allLaporan
+          .where((l) => l.status == StatusLaporan.resolved)
+          .length;
+      final pending = allLaporan
+          .where((l) =>
+              l.status == StatusLaporan.pending ||
+              l.status == StatusLaporan.in_progress)
+          .length;
 
-    isLoading.value = false;
+      statistik.value = StatistikTugasModel(
+        totalTugas: allLaporan.length,
+        tugasSelesai: selesai,
+        tugasPending: pending,
+        tugasInProgress: allLaporan
+            .where((l) => l.status == StatusLaporan.in_progress)
+            .length,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Gagal Memuat Data',
+        'Terjadi kesalahan: $e',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   // --------------------------------------------------------
@@ -104,57 +129,10 @@ class HomeTeknisiController extends GetxController {
   }
 
   /// Tap pada kartu tugas mendesak.
-  void onTugasTapped(TugasTeknisiModel tugas) {
+  void onTugasTapped(LaporanFasilitasModel laporan) {
     Get.snackbar(
-      tugas.judul,
-      '${tugas.lokasi} - ${tugas.prioritas.label}',
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-    );
-  }
-
-  /// Mulai kerjakan tugas ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ubah status ke in_progress (UC-07)
-  Future<void> onMulaiKerjakan(TugasTeknisiModel tugas) async {
-    final idx = semuaTugas.indexWhere((t) => t.id == tugas.id);
-    if (idx == -1) return;
-
-    // Simulasi update ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â di implementasi nyata panggil service
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    // Update di list mendesak
-    final idxMendesak = tugasMendesak.indexWhere((t) => t.id == tugas.id);
-    if (idxMendesak != -1) {
-      final updated = TugasTeknisiModel(
-        id: tugas.id,
-        judul: tugas.judul,
-        lokasi: tugas.lokasi,
-        kategori: tugas.kategori,
-        prioritas: tugas.prioritas,
-        status: StatusTugas.inProgress,
-        estimasiSelesai: tugas.estimasiSelesai,
-        isSynced: isOnline.value,
-        createdAt: tugas.createdAt,
-      );
-      tugasMendesak[idxMendesak] = updated;
-    }
-
-    Get.snackbar(
-      'Status Diperbarui',
-      '"${tugas.judul}" sedang dikerjakan.',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green.shade100,
-      colorText: Colors.green.shade900,
-      margin: const EdgeInsets.all(16),
-    );
-  }
-
-  /// Selesaikan tugas ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ubah status ke resolved + wajib foto bukti (UC-07)
-  void onSelesaikanTugas(TugasTeknisiModel tugas) {
-    // TODO: navigasi ke form selesaikan tugas dengan upload foto bukti
-    // AppNavigator.push(SelesaikanTugasView(tugas: tugas))
-    Get.snackbar(
-      'Selesaikan Tugas',
-      'Upload foto bukti untuk menyelesaikan "${tugas.judul}"',
+      laporan.judul,
+      '${laporan.lokasi} • ${laporan.vote_score} upvote',
       snackPosition: SnackPosition.BOTTOM,
       margin: const EdgeInsets.all(16),
     );
@@ -175,13 +153,4 @@ class HomeTeknisiController extends GetxController {
     if (hour < 18) return 'Sore yang produktif untuk JTK yang lebih baik';
     return 'Terima kasih atas dedikasi Anda hari ini';
   }
-
-  /// Jumlah tugas yang belum dikerjakan
-  int get jumlahTugasBelumDikerjakan => semuaTugas
-      .where(
-        (t) =>
-            t.status == StatusTugas.assigned ||
-            t.status == StatusTugas.inProgress,
-      )
-      .length;
 }

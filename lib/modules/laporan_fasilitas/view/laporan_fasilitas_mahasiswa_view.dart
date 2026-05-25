@@ -1,6 +1,7 @@
 // lib/modules/laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart
+// VERSI LENGKAP — semua patch sudah diterapkan ke file asli.
 
-import 'dart:io'; // Tambahkan import dart:io untuk mendukung render path file lokal jika ada
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/interaksi_laporan_controller.dart';
@@ -14,9 +15,10 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
 
   final String role;
 
+  // ── PERUBAHAN 1: title teknisi -> "Laporan Kerusakan" ──
   String get _title {
     if (role == 'tu') return 'Cetak Laporan TU';
-    if (role == 'teknisi' || role == 'petugas') return 'Tanggapan Laporan';
+    if (role == 'teknisi' || role == 'petugas') return 'Laporan Kerusakan';
     return 'Laporan Fasilitas';
   }
 
@@ -44,7 +46,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               itemCount: controller.listLaporan.length + 1,
               itemBuilder: (context, index) {
-                // 1. TAMPILAN HEADER
+                // ── HEADER ──
                 if (index == 0) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,8 +77,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                         TextSpan(
                                           text: 'Budi',
                                           style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                              fontWeight: FontWeight.bold),
                                         ),
                                       ],
                                     ),
@@ -84,19 +85,15 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                   const Text(
                                     'Mahasiswa JTK',
                                     style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
+                                        fontSize: 12, color: Colors.grey),
                                   ),
                                 ],
                               ),
                             ],
                           ),
                           IconButton(
-                            icon: const Icon(
-                              Icons.notifications_none_rounded,
-                              color: Color(0xFF1A3A6B),
-                            ),
+                            icon: const Icon(Icons.notifications_none_rounded,
+                                color: Color(0xFF1A3A6B)),
                             onPressed: () {},
                           ),
                         ],
@@ -114,12 +111,16 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                       const Text(
                         'Laporakan kerusakan fasilitas yang ada dilingkungan Jurusan Teknik Komputer dan Informatika',
                         style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
-                          height: 1.4,
-                        ),
+                            fontSize: 13, color: Colors.black54, height: 1.4),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
+
+                      // ── PERUBAHAN 2: Sort chips khusus teknisi ──
+                      if (role == 'teknisi' || role == 'petugas') ...[
+                        _TeknisiSortBar(controller: controller),
+                        const SizedBox(height: 12),
+                      ] else
+                        const SizedBox(height: 4),
                     ],
                   );
                 }
@@ -127,16 +128,13 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                 final laporan = controller.listLaporan[index - 1];
                 final currentUserId = controller.currentUserId.value;
                 final isUpvoted = laporan.upvoter_ids.contains(currentUserId);
-                final isDownvoted = laporan.downvoter_ids.contains(
-                  currentUserId,
-                );
-
-                // Ambil path/URL foto secara dinamis dari list foto_urls laporan
+                final isDownvoted =
+                    laporan.downvoter_ids.contains(currentUserId);
                 final String? fotoLaporanPath = laporan.foto_urls.isNotEmpty
                     ? laporan.foto_urls.first
                     : null;
 
-                // 2. TAMPILAN KARTU LAPORAN
+                // ── CARD LAPORAN ──
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
@@ -169,7 +167,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Sisi Kiri: Angka Vote & Panah
+                          // Vote arrows — hanya mahasiswa
                           if (controller.isMahasiswa)
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
@@ -200,21 +198,18 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                 ],
                               ),
                             ),
-                          if (controller.isMahasiswa) const SizedBox(width: 12),
+                          if (controller.isMahasiswa)
+                            const SizedBox(width: 12),
 
-                          // Sisi Kanan: Konten Utama Laporan
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Status Chip berada paling atas (di atas nama pelapor)
                                 _buildStatusChip(
-                                  laporan.status,
-                                  laporan.sudahDicetak,
-                                ),
+                                    laporan.status, laporan.sudahDicetak),
                                 const SizedBox(height: 10),
 
-                                // Baris Profil Pelapor + Menu Titik Tiga
+                                // Profil pelapor + menu
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
@@ -224,8 +219,8 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                           CircleAvatar(
                                             radius: 14,
                                             backgroundColor: const Color(
-                                              0xFF1A3A6B,
-                                            ).withOpacity(0.1),
+                                                    0xFF1A3A6B)
+                                                .withOpacity(0.1),
                                             child: const Text(
                                               'AH',
                                               style: TextStyle(
@@ -277,35 +272,28 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                         onSelected: (val) {
                                           if (val == 'edit') {
                                             final laporCtrl = Get.put(
-                                              LaporFasilitasController(),
-                                            );
+                                                LaporFasilitasController());
                                             laporCtrl.setupEditPage(laporan);
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) =>
+                                                builder: (_) =>
                                                     const LaporFasilitasView(),
                                               ),
                                             );
                                           } else if (val == 'delete') {
-                                            controller.deleteLaporan(
-                                              laporan.id,
-                                            );
+                                            controller.deleteLaporan(laporan.id);
                                           }
                                         },
                                         itemBuilder: (context) => const [
                                           PopupMenuItem(
-                                            value: 'edit',
-                                            child: Text('Edit'),
-                                          ),
+                                              value: 'edit',
+                                              child: Text('Edit')),
                                           PopupMenuItem(
                                             value: 'delete',
-                                            child: Text(
-                                              'Hapus',
-                                              style: TextStyle(
-                                                color: Colors.red,
-                                              ),
-                                            ),
+                                            child: Text('Hapus',
+                                                style: TextStyle(
+                                                    color: Colors.red)),
                                           ),
                                         ],
                                       ),
@@ -313,7 +301,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 12),
 
-                                // Judul & Lokasi
+                                // Judul & lokasi
                                 Text(
                                   laporan.judul,
                                   style: const TextStyle(
@@ -325,24 +313,17 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                 const SizedBox(height: 4),
                                 Row(
                                   children: [
-                                    const Icon(
-                                      Icons.location_on_outlined,
-                                      size: 14,
-                                      color: Colors.grey,
-                                    ),
+                                    const Icon(Icons.location_on_outlined,
+                                        size: 14, color: Colors.grey),
                                     const SizedBox(width: 4),
-                                    Text(
-                                      laporan.lokasi,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
+                                    Text(laporan.lokasi,
+                                        style: const TextStyle(
+                                            fontSize: 12, color: Colors.grey)),
                                   ],
                                 ),
                                 const SizedBox(height: 12),
 
-                                // MODIFIKASI: Gambar Dinamis Berdasarkan Data Laporan Aktual
+                                // Foto
                                 if (fotoLaporanPath != null) ...[
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
@@ -352,18 +333,16 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                             height: 160,
                                             width: double.infinity,
                                             fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) =>
-                                                    _buildImagePlaceholder(),
+                                            errorBuilder: (_, __, ___) =>
+                                                _buildImagePlaceholder(),
                                           )
                                         : Image.file(
                                             File(fotoLaporanPath),
                                             height: 160,
                                             width: double.infinity,
                                             fit: BoxFit.cover,
-                                            errorBuilder:
-                                                (context, error, stackTrace) =>
-                                                    _buildImagePlaceholder(),
+                                            errorBuilder: (_, __, ___) =>
+                                                _buildImagePlaceholder(),
                                           ),
                                   ),
                                   const SizedBox(height: 12),
@@ -376,14 +355,12 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.black87,
-                                    ),
+                                        fontSize: 12, color: Colors.black87),
                                   ),
                                   const SizedBox(height: 12),
                                 ],
 
-                                // Tombol Aksi Vote Bawah
+                                // Vote buttons — mahasiswa
                                 if (controller.isMahasiswa)
                                   Row(
                                     children: [
@@ -391,9 +368,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                         child: ElevatedButton.icon(
                                           onPressed: () =>
                                               controller.upvoteLaporan(
-                                                currentUserId,
-                                                index - 1,
-                                              ),
+                                                  currentUserId, index - 1),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: isUpvoted
                                                 ? Colors.orange.shade50
@@ -403,24 +378,18 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                                 : Colors.black87,
                                             elevation: 0,
                                             shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8)),
                                             padding: const EdgeInsets.symmetric(
-                                              vertical: 8,
-                                            ),
+                                                vertical: 8),
                                           ),
                                           icon: const Icon(
-                                            Icons.arrow_upward_rounded,
-                                            size: 16,
-                                          ),
-                                          label: const Text(
-                                            'Up vote',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
+                                              Icons.arrow_upward_rounded,
+                                              size: 16),
+                                          label: const Text('Up vote',
+                                              style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600)),
                                         ),
                                       ),
                                       const SizedBox(width: 12),
@@ -428,9 +397,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                         child: ElevatedButton.icon(
                                           onPressed: () =>
                                               controller.downvoteLaporan(
-                                                currentUserId,
-                                                index - 1,
-                                              ),
+                                                  currentUserId, index - 1),
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: isDownvoted
                                                 ? Colors.blue.shade50
@@ -440,27 +407,73 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                                                 : Colors.black87,
                                             elevation: 0,
                                             shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8)),
                                             padding: const EdgeInsets.symmetric(
-                                              vertical: 8,
-                                            ),
+                                                vertical: 8),
                                           ),
                                           icon: const Icon(
-                                            Icons.arrow_downward_rounded,
-                                            size: 16,
-                                          ),
-                                          label: const Text(
-                                            'Down Vote',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
+                                              Icons.arrow_downward_rounded,
+                                              size: 16),
+                                          label: const Text('Down Vote',
+                                              style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600)),
                                         ),
                                       ),
                                     ],
+                                  ),
+
+                                // ── PERUBAHAN 3: Ambil & Kerjakan — teknisi ──
+                                if ((role == 'teknisi' || role == 'petugas') &&
+                                    (laporan.teknisi_id == null ||
+                                        laporan.teknisi_id!.isEmpty))
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton.icon(
+                                        onPressed: () =>
+                                            controller.ambilLaporan(laporan),
+                                        icon: const Icon(
+                                            Icons.engineering_rounded,
+                                            size: 16),
+                                        label: const Text('Ambil & Kerjakan',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w700)),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xFF1A3A6B),
+                                          foregroundColor: Colors.white,
+                                          elevation: 0,
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 10),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8)),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                // Info sudah diambil teknisi lain
+                                if ((role == 'teknisi' || role == 'petugas') &&
+                                    laporan.teknisi_id != null &&
+                                    laporan.teknisi_id!.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8),
+                                    child: Row(
+                                      children: const [
+                                        Icon(Icons.person_rounded,
+                                            size: 13, color: Colors.grey),
+                                        SizedBox(width: 4),
+                                        Text(
+                                          'Sedang dikerjakan teknisi lain',
+                                          style: TextStyle(
+                                              fontSize: 11, color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                               ],
                             ),
@@ -484,8 +497,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                   final changed = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const LaporFasilitasView(),
-                    ),
+                        builder: (_) => const LaporFasilitasView()),
                   );
                   if (changed == true) controller.fetchLaporan();
                 },
@@ -501,13 +513,12 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
 
   Widget _buildStatusChip(StatusLaporan status, bool printed) {
     final color = printed ? Colors.teal : const Color(0xFF1E78E6);
-    final bg = printed ? const Color(0xFFE0F2F1) : const Color(0xFFE3F2FD);
+    final bg =
+        printed ? const Color(0xFFE0F2F1) : const Color(0xFFE3F2FD);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -516,27 +527,105 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
           Text(
             printed ? 'Selesai' : status.label,
             style: TextStyle(
-              fontSize: 11,
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
+                fontSize: 11, color: color, fontWeight: FontWeight.bold),
           ),
         ],
       ),
     );
   }
 
-  // Tambahan widget placeholder jika file gambar corrupt/tidak ditemukan
   Widget _buildImagePlaceholder() {
     return Container(
       height: 160,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
-      ),
+          color: Colors.grey[200], borderRadius: BorderRadius.circular(12)),
       child: const Center(
-        child: Icon(Icons.broken_image_outlined, color: Colors.grey, size: 40),
+          child: Icon(Icons.broken_image_outlined,
+              color: Colors.grey, size: 40)),
+    );
+  }
+}
+
+// ============================================================
+// WIDGET: Sort Bar khusus teknisi
+// ============================================================
+class _TeknisiSortBar extends StatefulWidget {
+  final InteraksiLaporanController controller;
+  const _TeknisiSortBar({required this.controller});
+
+  @override
+  State<_TeknisiSortBar> createState() => _TeknisiSortBarState();
+}
+
+class _TeknisiSortBarState extends State<_TeknisiSortBar> {
+  bool _isTopUpvote = true;
+
+  void _toggle(bool topUpvote) {
+    if (_isTopUpvote == topUpvote) return;
+    setState(() => _isTopUpvote = topUpvote);
+    widget.controller.sortLaporan(byUpvote: topUpvote);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _chip(
+          label: 'Top Upvote',
+          icon: Icons.arrow_upward_rounded,
+          active: _isTopUpvote,
+          onTap: () => _toggle(true),
+        ),
+        const SizedBox(width: 8),
+        _chip(
+          label: 'Terbaru',
+          icon: Icons.schedule_rounded,
+          active: !_isTopUpvote,
+          onTap: () => _toggle(false),
+        ),
+      ],
+    );
+  }
+
+  Widget _chip({
+    required String label,
+    required IconData icon,
+    required bool active,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: active ? const Color(0xFF1A3A6B) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: active
+                ? const Color(0xFF1A3A6B)
+                : const Color(0xFFDDE3EF),
+            width: 1.2,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon,
+                size: 13,
+                color: active ? Colors.white : const Color(0xFF6B7280)),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                color: active ? Colors.white : const Color(0xFF6B7280),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
