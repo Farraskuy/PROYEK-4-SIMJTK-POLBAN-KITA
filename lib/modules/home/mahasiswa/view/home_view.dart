@@ -18,7 +18,7 @@ class HomeView extends StatelessWidget {
     final controller = Get.put(HomeController());
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: AppColors.background,
       body: Obx(() {
         if (controller.isLoading.value) {
           return const Center(
@@ -63,7 +63,7 @@ class HomeView extends StatelessWidget {
                           _navigateMahasiswa(context, target),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),

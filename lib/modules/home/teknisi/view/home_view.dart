@@ -1,10 +1,11 @@
 // ============================================================
-// FILE: modules/home/teknisi/view/home_teknisi_view.dart
-// Kelompok A7 Ã¢â‚¬â€œ SIMJTK (Sistem Informasi Mahasiswa JTK)
+// FILE: modules/home/teknisi/view/home_view.dart
+// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
 // ============================================================
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import '../controller/home_controller.dart';
 import '../model/home_model.dart';
 import '../view/analisa_kerusakan_view.dart';
@@ -16,45 +17,6 @@ import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import '../../../riwayat_tugas/view/riwayat_tugas_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
-
-// ============================================================
-// DESIGN TOKENS
-// ============================================================
-class _C {
-  static const primary = Color(0xFF1A3A6B);
-  static const primaryLight = Color(0xFF2B5BAE);
-  static const surface = Color(0xFFF0F4FA);
-  static const white = Colors.white;
-  static const cardBg = Color(0xFFFFFFFF);
-  static const textPrimary = Color(0xFF1A1A2E);
-  static const textSecondary = Color(0xFF6B7280);
-  static const textLight = Color(0xFFB0B8CC);
-  static const divider = Color(0xFFE5E9F2);
-  static const navBg = Color(0xFFFFFFFF);
-  static const navActive = Color(0xFF1A3A6B);
-  static const navInactive = Color(0xFF9CA3AF);
-  static const selesaiBg = Color(0xFF1A3A6B); // dark blue card
-  static const pendingBg = Color(0xFFEDF2FF); // light blue card
-  static const highPriorityBar = Color(0xFFE53935);
-  static const medPriorityBar = Color(0xFF1A3A6B);
-  static const lowPriorityBar = Color(0xFF9CA3AF);
-  static const highPriorityBadge = Color(0xFFFFEBEE);
-  static const highPriorityText = Color(0xFFD32F2F);
-  static const medPriorityBadge = Color(0xFFE3F2FD);
-  static const medPriorityText = Color(0xFF1565C0);
-  static const lowPriorityBadge = Color(0xFFF5F5F5);
-  static const lowPriorityText = Color(0xFF616161);
-  static const jaringanIcon = Color(0xFF2B5BAE);
-  static const jaringanIconBg = Color(0xFFE8EDF8);
-  static const hardwareIcon = Color(0xFFE53935);
-  static const hardwareIconBg = Color(0xFFFFEBEE);
-  static const acIcon = Color(0xFF2E7D32);
-  static const acIconBg = Color(0xFFE8F5E9);
-  static const umIcon = Color(0xFF6A1B9A);
-  static const umIconBg = Color(0xFFF3E5F5);
-  static const offlineBadge = Color(0xFFFFF3E0);
-  static const offlineText = Color(0xFFE65100);
-}
 
 // ============================================================
 // ICON MAP untuk kategori fasilitas
@@ -81,26 +43,26 @@ IconData _kategoriIcon(String kategori) {
 Color _kategoriIconColor(String kategori) {
   switch (kategori) {
     case 'Jaringan Internet':
-      return _C.jaringanIcon;
+      return AppColors.primary;
     case 'Perangkat PC':
-      return _C.hardwareIcon;
+      return AppColors.danger;
     case 'AC / Pendingin':
-      return _C.acIcon;
+      return AppColors.success;
     default:
-      return _C.umIcon;
+      return AppColors.purple;
   }
 }
 
 Color _kategoriIconBg(String kategori) {
   switch (kategori) {
     case 'Jaringan Internet':
-      return _C.jaringanIconBg;
+      return AppColors.blueSoft;
     case 'Perangkat PC':
-      return _C.hardwareIconBg;
+      return AppColors.redSoft;
     case 'AC / Pendingin':
-      return _C.acIconBg;
+      return AppColors.greenSoft;
     default:
-      return _C.umIconBg;
+      return AppColors.purpleSoft;
   }
 }
 
@@ -112,31 +74,31 @@ class ModulMaintenanceSection extends StatelessWidget {
     {
       'label': 'Analisa\nKerusakan',
       'icon': Icons.analytics_rounded,
-      'color': Color(0xFFE53935),
+      'color': AppColors.danger,
       'route': 'analisa',
     },
     {
       'label': 'Kontrol\nBarang/Alat',
       'icon': Icons.inventory_2_outlined,
-      'color': Color(0xFF1565C0),
+      'color': AppColors.primary,
       'route': 'kontrol',
     },
     {
       'label': 'Usulan\nPemeliharaan',
       'icon': Icons.build_circle_outlined,
-      'color': Color(0xFF2E7D32),
+      'color': AppColors.success,
       'route': 'pemeliharaan',
     },
     {
       'label': 'Usulan\nPenghapusan',
       'icon': Icons.delete_outline_rounded,
-      'color': Color(0xFFF57C00),
+      'color': AppColors.warning,
       'route': 'penghapusan',
     },
     {
       'label': 'Log\nHarian',
       'icon': Icons.note_alt_outlined,
-      'color': Color(0xFF6A1B9A),
+      'color': AppColors.purple,
       'route': 'log',
     },
   ];
@@ -190,9 +152,9 @@ class ModulMaintenanceSection extends StatelessWidget {
         const Text(
           'Modul Maintenance',
           style: TextStyle(
-            fontSize: 17,
+            fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF1A1A2E),
+            color: AppColors.title,
           ),
         ),
         const SizedBox(height: 12),
@@ -203,7 +165,8 @@ class ModulMaintenanceSection extends StatelessWidget {
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           children: _menus.map((m) {
-            final color = m['color'] as Color;
+            final color = (m['color'] is Color) ? m['color'] as Color : AppColors.warning;
+            final icon = (m['icon'] is IconData) ? m['icon'] as IconData : Icons.help_outline;
             return GestureDetector(
               onTap: () => _navigate(context, m['route'] as String),
               child: Container(
@@ -215,14 +178,13 @@ class ModulMaintenanceSection extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(m['icon'] as IconData, color: color, size: 22),
+                    Icon(icon, color: color, size: 20),
                     const SizedBox(height: 4),
                     Text(
                       m['label'] as String,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize:
-                            8.5, // Sedikit diperkecil agar pas di grid 5 kolom
+                        fontSize: 8,
                         color: color,
                         fontWeight: FontWeight.w700,
                         height: 1.1,
@@ -250,15 +212,15 @@ class HomeTeknisiView extends StatelessWidget {
     final ctrl = Get.put(HomeTeknisiController());
 
     return Scaffold(
-      backgroundColor: _C.surface,
+      backgroundColor: AppColors.background,
       body: Obx(() {
         if (ctrl.isLoading.value) {
           return const Center(
-            child: CircularProgressIndicator(color: _C.primary),
+            child: CircularProgressIndicator(color: AppColors.primary),
           );
         }
         return RefreshIndicator(
-          color: _C.primary,
+          color: AppColors.primary,
           onRefresh: ctrl.onRefresh,
           child: CustomScrollView(
             slivers: [
@@ -267,26 +229,21 @@ class HomeTeknisiView extends StatelessWidget {
 
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ---- SAPAAN ----
-                      _buildSapaan(ctrl),
-                      const SizedBox(height: 20),
-
                       // ---- STATISTIK TUGAS ----
                       _buildStatistik(ctrl),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 24),
 
                       const ModulMaintenanceSection(),
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 24),
 
                       // ---- TUGAS MENDESAK ----
                       _buildTugasMendesakHeader(context),
                       const SizedBox(height: 12),
                       _buildTugasMendesakList(ctrl),
-                      const SizedBox(height: 28),
                     ],
                   ),
                 ),
@@ -305,8 +262,8 @@ class HomeTeknisiView extends StatelessWidget {
   Widget _buildAppBar(HomeTeknisiController ctrl, BuildContext context) {
     return Obx(
       () => AppHomeAppBar(
-        title: 'Technician Portal',
-        subtitle: ctrl.currentTeknisi.value.name,
+        title: 'Halo, ${ctrl.currentTeknisi.value.name}',
+        subtitle: 'Teknisi JTK',
         avatarIcon: Icons.engineering_rounded,
         avatarText: ctrl.currentTeknisi.value.name.isEmpty
             ? null
@@ -318,34 +275,7 @@ class HomeTeknisiView extends StatelessWidget {
   }
 
   // ============================================================
-  // SAPAAN
-  // ============================================================
-  Widget _buildSapaan(HomeTeknisiController ctrl) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Obx(
-          () => Text(
-            'Hallo, ${ctrl.currentTeknisi.value.name}',
-            style: const TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              color: _C.textPrimary,
-              height: 1.1,
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          ctrl.sapaan,
-          style: const TextStyle(fontSize: 13, color: _C.textSecondary),
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // STATISTIK TUGAS Ã¢â‚¬â€ kartu gabungan sesuai Figma
+  // STATISTIK TUGAS
   // ============================================================
   Widget _buildStatistik(HomeTeknisiController ctrl) {
     return Obx(() {
@@ -354,9 +284,9 @@ class HomeTeknisiView extends StatelessWidget {
 
       return Container(
         decoration: BoxDecoration(
-          color: _C.cardBg,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _C.divider, width: 1),
+          border: Border.all(color: AppColors.border, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -367,7 +297,7 @@ class HomeTeknisiView extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Kolom kiri Ã¢â‚¬â€ total tugas
+            // Kolom kiri — total tugas
             Expanded(
               flex: 4,
               child: Padding(
@@ -379,7 +309,7 @@ class HomeTeknisiView extends StatelessWidget {
                       children: const [
                         Icon(
                           Icons.assignment_rounded,
-                          color: _C.primary,
+                          color: AppColors.primary,
                           size: 18,
                         ),
                         SizedBox(width: 6),
@@ -388,7 +318,7 @@ class HomeTeknisiView extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: _C.textSecondary,
+                            color: AppColors.muted,
                             letterSpacing: 0.8,
                           ),
                         ),
@@ -398,9 +328,9 @@ class HomeTeknisiView extends StatelessWidget {
                     Text(
                       '${stat.totalTugas}',
                       style: const TextStyle(
-                        fontSize: 52,
+                        fontSize: 48,
                         fontWeight: FontWeight.w800,
-                        color: _C.textPrimary,
+                        color: AppColors.title,
                         height: 1.0,
                       ),
                     ),
@@ -409,7 +339,7 @@ class HomeTeknisiView extends StatelessWidget {
               ),
             ),
 
-            // Kolom kanan Ã¢â‚¬â€ SELESAI & PENDING
+            // Kolom kanan — SELESAI & PENDING
             Expanded(
               flex: 5,
               child: Column(
@@ -419,10 +349,10 @@ class HomeTeknisiView extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
-                      vertical: 18,
+                      vertical: 16,
                     ),
                     decoration: const BoxDecoration(
-                      color: _C.selesaiBg,
+                      color: AppColors.navy,
                       borderRadius: BorderRadius.only(
                         topRight: Radius.circular(16),
                       ),
@@ -446,7 +376,7 @@ class HomeTeknisiView extends StatelessWidget {
                             Text(
                               '${stat.tugasSelesai}',
                               style: const TextStyle(
-                                fontSize: 32,
+                                fontSize: 28,
                                 fontWeight: FontWeight.w800,
                                 color: Colors.white,
                                 height: 1.0,
@@ -476,10 +406,10 @@ class HomeTeknisiView extends StatelessWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
-                      vertical: 18,
+                      vertical: 16,
                     ),
                     decoration: const BoxDecoration(
-                      color: _C.pendingBg,
+                      color: AppColors.blueSoft,
                       borderRadius: BorderRadius.only(
                         bottomRight: Radius.circular(16),
                       ),
@@ -492,7 +422,7 @@ class HomeTeknisiView extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
-                            color: _C.textSecondary,
+                            color: AppColors.body,
                             letterSpacing: 0.8,
                           ),
                         ),
@@ -503,9 +433,9 @@ class HomeTeknisiView extends StatelessWidget {
                             Text(
                               '${stat.tugasPending}',
                               style: const TextStyle(
-                                fontSize: 32,
+                                fontSize: 28,
                                 fontWeight: FontWeight.w800,
-                                color: _C.textPrimary,
+                                color: AppColors.title,
                                 height: 1.0,
                               ),
                             ),
@@ -513,12 +443,12 @@ class HomeTeknisiView extends StatelessWidget {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: _C.primary.withOpacity(0.1),
+                                color: AppColors.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Icon(
                                 Icons.access_time_rounded,
-                                color: _C.primary,
+                                color: AppColors.primary,
                                 size: 18,
                               ),
                             ),
@@ -539,22 +469,18 @@ class HomeTeknisiView extends StatelessWidget {
   // ============================================================
   // TUGAS MENDESAK HEADER
   // ============================================================
-  // ============================================================
-  // TUGAS MENDESAK HEADER
-  // ============================================================
   Widget _buildTugasMendesakHeader(BuildContext context) {
     return Row(
       children: [
         const Text(
           'Tugas Mendesak',
           style: TextStyle(
-            fontSize: 17,
+            fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: _C.textPrimary,
+            color: AppColors.title,
           ),
         ),
         const Spacer(),
-        // MENGGANTI ICON STATIS MENJADI TOMBOL ANALISA
         GestureDetector(
           onTap: () => Navigator.push(
             context,
@@ -565,22 +491,21 @@ class HomeTeknisiView extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFEBEE),
+              color: AppColors.redSoft,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: const [
                 Icon(
-                  Icons
-                      .analytics_rounded, // Icon yang lebih relevan untuk analisa
-                  color: Color(0xFFD32F2F),
-                  size: 16,
+                  Icons.analytics_rounded,
+                  color: AppColors.danger,
+                  size: 14,
                 ),
                 SizedBox(width: 4),
                 Text(
                   "Analisa",
                   style: TextStyle(
-                    color: Color(0xFFD32F2F),
+                    color: AppColors.danger,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
@@ -608,7 +533,7 @@ class HomeTeknisiView extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: list.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
+        separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           return _TugasCard(
             tugas: list[index],
@@ -678,38 +603,36 @@ class _TugasCard extends StatelessWidget {
     required this.onSelesai,
   });
 
-  // Warna garis prioritas di sisi kiri card
   Color get _barColor {
     switch (tugas.prioritas) {
       case PrioritasTugas.high:
-        return _C.highPriorityBar;
+        return AppColors.danger;
       case PrioritasTugas.medium:
-        return _C.medPriorityBar;
+        return AppColors.primary;
       case PrioritasTugas.low:
-        return _C.lowPriorityBar;
+        return AppColors.muted;
     }
   }
 
-  // Warna & teks badge prioritas
   Color get _badgeBg {
     switch (tugas.prioritas) {
       case PrioritasTugas.high:
-        return _C.highPriorityBadge;
+        return AppColors.redSoft;
       case PrioritasTugas.medium:
-        return _C.medPriorityBadge;
+        return AppColors.blueSoft;
       case PrioritasTugas.low:
-        return _C.lowPriorityBadge;
+        return AppColors.greySoft;
     }
   }
 
   Color get _badgeText {
     switch (tugas.prioritas) {
       case PrioritasTugas.high:
-        return _C.highPriorityText;
+        return AppColors.danger;
       case PrioritasTugas.medium:
-        return _C.medPriorityText;
+        return AppColors.primary;
       case PrioritasTugas.low:
-        return _C.lowPriorityText;
+        return AppColors.body;
     }
   }
 
@@ -719,9 +642,9 @@ class _TugasCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: _C.cardBg,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _C.divider, width: 1),
+          border: Border.all(color: AppColors.border, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -734,7 +657,6 @@ class _TugasCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // ---- Garis prioritas kiri ----
               Container(
                 width: 4,
                 decoration: BoxDecoration(
@@ -745,8 +667,6 @@ class _TugasCard extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // ---- Ikon kategori ----
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 14, 0, 14),
                 child: Container(
@@ -763,15 +683,12 @@ class _TugasCard extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // ---- Konten utama ----
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Judul + offline badge
                       Row(
                         children: [
                           Expanded(
@@ -780,13 +697,12 @@ class _TugasCard extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
-                                color: _C.textPrimary,
+                                color: AppColors.title,
                               ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          // Badge offline (syncStatus: local)
                           if (!tugas.isSynced) ...[
                             const SizedBox(width: 6),
                             Container(
@@ -795,14 +711,14 @@ class _TugasCard extends StatelessWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: _C.offlineBadge,
+                                color: AppColors.orangeSoft,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: const Text(
                                 'Offline',
                                 style: TextStyle(
                                   fontSize: 9,
-                                  color: _C.offlineText,
+                                  color: AppColors.warning,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
@@ -811,14 +727,12 @@ class _TugasCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 4),
-
-                      // Lokasi
                       Row(
                         children: [
                           const Icon(
                             Icons.location_on_outlined,
                             size: 12,
-                            color: _C.textLight,
+                            color: AppColors.muted,
                           ),
                           const SizedBox(width: 3),
                           Expanded(
@@ -826,7 +740,7 @@ class _TugasCard extends StatelessWidget {
                               tugas.lokasi,
                               style: const TextStyle(
                                 fontSize: 12,
-                                color: _C.textSecondary,
+                                color: AppColors.body,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -835,11 +749,8 @@ class _TugasCard extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 10),
-
-                      // Badge prioritas + estimasi jam
                       Row(
                         children: [
-                          // Badge prioritas
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -859,26 +770,22 @@ class _TugasCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-
-                          // Estimasi jam
                           if (tugas.estimasiSelesai != null) ...[
                             const Icon(
                               Icons.access_time_rounded,
                               size: 12,
-                              color: _C.textLight,
+                              color: AppColors.muted,
                             ),
                             const SizedBox(width: 3),
                             Text(
                               tugas.jamEstimasi,
                               style: const TextStyle(
                                 fontSize: 11,
-                                color: _C.textSecondary,
+                                color: AppColors.body,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
-
-                          const Spacer(),
                         ],
                       ),
                     ],
@@ -886,43 +793,6 @@ class _TugasCard extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// WIDGET: Action Chip (tombol kecil di card)
-// ============================================================
-class _ActionChip extends StatelessWidget {
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionChip({
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
           ),
         ),
       ),
@@ -940,9 +810,9 @@ class _EmptyMendesak extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 36),
       decoration: BoxDecoration(
-        color: _C.cardBg,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _C.divider, width: 1),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -950,7 +820,7 @@ class _EmptyMendesak extends StatelessWidget {
           Icon(
             Icons.check_circle_outline_rounded,
             size: 44,
-            color: Color(0xFF81C784),
+            color: AppColors.success,
           ),
           SizedBox(height: 10),
           Text(
@@ -958,13 +828,13 @@ class _EmptyMendesak extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: _C.textSecondary,
+              color: AppColors.body,
             ),
           ),
           SizedBox(height: 4),
           Text(
             'Semua tugas high priority sudah diselesaikan!',
-            style: TextStyle(fontSize: 12, color: _C.textLight),
+            style: TextStyle(fontSize: 12, color: AppColors.muted),
           ),
         ],
       ),
