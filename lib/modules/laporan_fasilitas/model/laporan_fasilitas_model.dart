@@ -31,6 +31,7 @@ class LaporanFasilitasModel {
   final String lokasi;
   final List<String> foto_urls;
   final String pelapor_id;
+  final String pelapor_nama; // <-- PROPERTI BARU
   String? teknisi_id;
   StatusLaporan status;
   int vote_score;
@@ -51,6 +52,7 @@ class LaporanFasilitasModel {
     required this.lokasi,
     required this.foto_urls,
     required this.pelapor_id,
+    this.pelapor_nama = '', // <-- DEFAULT VALUE
     this.teknisi_id,
     Object status = StatusLaporan.pending,
     this.vote_score = 0,
@@ -80,6 +82,8 @@ class LaporanFasilitasModel {
       lokasi: (json['lokasi'] ?? json['lokasiLabKelas'] ?? '').toString(),
       foto_urls: List<String>.from(json['foto_urls'] ?? json['fotoUrls'] ?? []),
       pelapor_id: (json['pelapor_id'] ?? json['pelaporId'] ?? '').toString(),
+      // Mengambil pelapor_nama dari JSON, jika tidak ada (null), akan otomatis fallback ke pelapor_id
+      pelapor_nama: (json['pelapor_nama'] ?? json['pelaporNama'] ?? json['pelapor_id'] ?? json['pelaporId'] ?? '').toString(),
       teknisi_id: json['teknisi_id']?.toString(),
       status: json['status'] ?? 'pending',
       vote_score: (json['vote_score'] ?? 0) as int,
@@ -105,6 +109,7 @@ class LaporanFasilitasModel {
     String? lokasi,
     List<String>? fotoUrls,
     String? pelaporId,
+    String? pelaporNama, // <-- TAMBAHAN DI COPYWITH
     String? teknisiId,
     Object? status,
     int? voteScore,
@@ -124,6 +129,7 @@ class LaporanFasilitasModel {
       lokasi: lokasi ?? this.lokasi,
       foto_urls: fotoUrls ?? foto_urls,
       pelapor_id: pelaporId ?? pelapor_id,
+      pelapor_nama: pelaporNama ?? pelapor_nama, // <-- TAMBAHAN
       teknisi_id: teknisiId ?? teknisi_id,
       status: status ?? this.status,
       vote_score: voteScore ?? vote_score,
@@ -147,6 +153,7 @@ class LaporanFasilitasModel {
     'lokasi': lokasi,
     'foto_urls': foto_urls,
     'pelapor_id': pelapor_id,
+    'pelapor_nama': pelapor_nama, // <-- TAMBAHAN DI TOJSON
     'teknisi_id': teknisi_id,
     'status': status.value,
     'vote_score': vote_score,

@@ -1,121 +1,215 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/interaksi_laporan_controller.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/lapor_fasilitas_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_empty_state.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_header_section.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_list_section.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_sort_bar.dart';
-import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
+import 'package:flutter/foundation.dart';
+import 'package:mongo_dart/mongo_dart.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 
-class LaporanFasilitasMahasiswaView extends StatelessWidget {
-  const LaporanFasilitasMahasiswaView({super.key, this.role = 'mahasiswa'});
+class LaporanFasilitasService {
+  static const String collectionName = 'laporan_fasilitas';
 
-  final String role;
+  @visibleForTesting
+  static Future<List<Map<String, dynamic>>> Function(
+    String collection,
+    SelectorBuilder filter,
+  )?
+  fetchOverride;
 
-  String get _title {
-    if (role == 'teknisi' || role == 'petugas') return 'Tanggapan Laporan';
-    if (role == 'tu') return 'Cetak Laporan TU';
-    return 'Laporan Fasilitas';
+  @visibleForTesting
+  static Future<void> Function(String collection, Map<String, dynamic> data)?
+  insertOverride;
+
+  @visibleForTesting
+  static Future<void> Function(
+    String collection,
+    SelectorBuilder filter,
+    Map<String, dynamic> data,
+  )?
+  updateOverride;
+
+  @visibleForTesting
+  static Future<void> Function(String collection, String id)? deleteOverride;
+
+  Future<LaporanFasilitasModel> create(LaporanFasilitasModel laporan) async {
+    final data = laporan.toJson();
+    final override = insertOverride;
+    if (override != null) {
+      await override(collectionName, data);
+      return laporan;
+    }
+
+    final mongo = MonggoDBServices();
+    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum insert
+    await mongo.insertData(collectionName, data);
+    return laporan;
   }
 
-  String get _subtitle {
-    if (role == 'mahasiswa') return 'Mahasiswa JTK';
-    if (role == 'teknisi' || role == 'petugas') return 'Petugas JTK';
-    if (role == 'tu') return 'TU JTK';
-    return 'JTK';
+  Future<List<LaporanFasilitasModel>> getAll() async {
+    final rows = await _fetchByFilter(where.exists('_id'));
+    return rows.map(LaporanFasilitasModel.fromJson).toList();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(
-      InteraksiLaporanController(role: role),
-      tag: 'laporan-$role',
+  Future<List<LaporanFasilitasModel>> getForRole(String role) async {
+    final normalized = role.toLowerCase();
+    final all = await getAll();
+
+    if (normalized == 'tu') {
+      return all.where((laporan) => laporan.diajukanKeTu).toList()
+        ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+    }
+
+    if (normalized == 'teknisi' || normalized == 'petugas') {
+      return all
+          .where(
+            (laporan) =>
+                laporan.status == StatusLaporan.pending ||
+                laporan.status == StatusLaporan.in_progress ||
+                laporan.status == StatusLaporan.escalated_to_upt,
+          )
+          .toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+
+    return all..sort((a, b) => b.vote_score.compareTo(a.vote_score));
+  }
+
+  Future<LaporanFasilitasModel?> getById(String id) async {
+    final rows = await _fetchByFilter(where.eq('_id', id));
+    if (rows.isEmpty) return null;
+    return LaporanFasilitasModel.fromJson(rows.first);
+  }
+
+  Future<LaporanFasilitasModel> update(LaporanFasilitasModel laporan) async {
+    final override = updateOverride;
+    final data = laporan.toJson();
+    if (override != null) {
+      await override(collectionName, where.eq('_id', laporan.id), data);
+      return laporan;
+    }
+
+    final mongo = MonggoDBServices();
+    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum update
+    await mongo.updateOneByFilter(
+      collectionName,
+      where.eq('_id', laporan.id),
+      data,
     );
+    return laporan;
+  }
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(color: AppColors.primary),
-          );
+  Future<void> tanggapiPetugas({
+    required String laporanId,
+    required String teknisiId,
+    required String catatan,
+    bool ajukanKeTu = false,
+    String? kebutuhanTu,
+  }) async {
+    final data = {
+      'teknisi_id': teknisiId,
+      'catatan_petugas': catatan,
+      'status': ajukanKeTu
+          ? StatusLaporan.escalated_to_upt.value
+          : StatusLaporan.in_progress.value,
+      'kebutuhan_tu': ajukanKeTu ? kebutuhanTu : null,
+      'updatedAt': DateTime.now().toIso8601String(),
+    };
+    await _updateById(laporanId, data);
+  }
+
+  Future<void> tandaiDicetak({
+    required String laporanId,
+    required String printedBy,
+  }) async {
+    await _updateById(laporanId, {
+      'status': StatusLaporan.resolved.value,
+      'printedAt': DateTime.now().toIso8601String(),
+      'printedBy': printedBy,
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<void> delete(String id) async {
+    final override = deleteOverride;
+    if (override != null) {
+      await override(collectionName, id);
+      return;
+    }
+
+    final mongo = MonggoDBServices();
+    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum delete
+    await mongo.deleteData(collectionName, id);
+  }
+
+  Future<void> _updateById(String id, Map<String, dynamic> data) async {
+    final override = updateOverride;
+    if (override != null) {
+      await override(collectionName, where.eq('_id', id), data);
+      return;
+    }
+    
+    final mongo = MonggoDBServices();
+    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum update parsial
+    await mongo.updateOneByFilter(
+      collectionName,
+      where.eq('_id', id),
+      data,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchByFilter(
+    SelectorBuilder filter,
+  ) async {
+    final override = fetchOverride;
+    List<Map<String, dynamic>> rawRows;
+    final mongo = MonggoDBServices();
+    
+    // Pastikan koneksi aman sebelum menarik data
+    await mongo.ensureConnected(); 
+    
+    if (override != null) {
+      rawRows = await override(collectionName, filter);
+    } else {
+      rawRows = await mongo.fetch(collectionName, filter);
+    }
+
+    if (rawRows.isEmpty) return rawRows;
+
+    // --- PROSES MENGAMBIL NAMA USER DARI KOLEKSI 'users' ---
+    final enrichedRows = <Map<String, dynamic>>[];
+    try {
+      final userIds = rawRows
+          .map((r) => r['pelapor_id']?.toString())
+          .where((id) => id != null && id.isNotEmpty)
+          .toSet()
+          .toList();
+
+      Map<String, String> userMap = {};
+
+      if (userIds.isNotEmpty) {
+        final usersData = await mongo.fetch('users', where.oneFrom('_id', userIds));
+        
+        for (var u in usersData) {
+          final uId = u['_id']?.toString();
+          final uName = u['name']?.toString();
+          if (uId != null && uName != null) {
+            userMap[uId] = uName;
+          }
         }
+      }
 
-        return RefreshIndicator(
-          color: AppColors.primary,
-          onRefresh: controller.refreshData,
-          child: CustomScrollView(
-            slivers: [
-              Obx(
-                () => AppHomeAppBar(
-                  title: 'Halo, ${controller.currentUserName}',
-                  subtitle: _subtitle,
-                  avatarIcon: Icons.person_rounded,
-                  unreadCount: controller.unreadNotifCount.value,
-                  onNotificationTap: controller.onNotificationTapped,
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: LaporanFasilitasHeaderSection(
-                  title: _title,
-                  description:
-                      'Laporan ditampilkan dari vote tertinggi agar prioritas paling penting muncul lebih dulu.',
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
-              Obx(
-                () => SliverToBoxAdapter(
-                  child: LaporanFasilitasSortBar(
-                    selectedIndex: controller.sortMode.value.index,
-                    onChanged: (index) => controller.setSortMode(
-                      index == 0
-                          ? LaporanSortMode.populer
-                          : LaporanSortMode.terbaru,
-                    ),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 12)),
-              if (controller.listLaporan.isEmpty)
-                const SliverToBoxAdapter(child: LaporanFasilitasEmptyState())
-              else
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                  sliver: LaporanFasilitasListSection(
-                    controller: controller,
-                    role: role,
-                  ),
-                ),
-            ],
-          ),
-        );
-      }),
-      floatingActionButton: role == 'mahasiswa'
-          ? SizedBox(
-              width: 56,
-              height: 56,
-              child: FloatingActionButton(
-                onPressed: () async {
-                  final changed = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const LaporFasilitasView(),
-                    ),
-                  );
-                  if (changed == true) {
-                    controller.refreshData();
-                  }
-                },
-                backgroundColor: const Color(0xFF1E78E6),
-                shape: const CircleBorder(),
-                elevation: 4,
-                child: const Icon(Icons.add, color: Colors.white, size: 28),
-              ),
-            )
-          : null,
-    );
+      for (var row in rawRows) {
+        final newRow = Map<String, dynamic>.from(row);
+        final pid = newRow['pelapor_id']?.toString();
+        
+        if (pid != null && userMap.containsKey(pid)) {
+          newRow['pelapor_nama'] = userMap[pid]; 
+        }
+        
+        enrichedRows.add(newRow);
+      }
+      return enrichedRows;
+      
+    } catch (e) {
+      debugPrint('Gagal melakukan join data user: $e');
+      return rawRows; 
+    }
   }
 }
