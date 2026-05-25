@@ -1,6 +1,7 @@
 // lib/modules/laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart
+// VERSI LENGKAP — semua patch sudah diterapkan ke file asli.
 
-import 'dart:io'; // Tambahkan import dart:io untuk mendukung render path file lokal jika ada
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/interaksi_laporan_controller.dart';
@@ -106,8 +107,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                   final changed = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const LaporFasilitasView(),
-                    ),
+                        builder: (_) => const LaporFasilitasView()),
                   );
                   if (changed == true) controller.fetchLaporan();
                 },
@@ -123,13 +123,12 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
 
   Widget _buildStatusChip(StatusLaporan status, bool printed) {
     final color = printed ? Colors.teal : const Color(0xFF1E78E6);
-    final bg = printed ? const Color(0xFFE0F2F1) : const Color(0xFFE3F2FD);
+    final bg =
+        printed ? const Color(0xFFE0F2F1) : const Color(0xFFE3F2FD);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-      ),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -138,10 +137,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
           Text(
             printed ? 'Selesai' : status.label,
             style: TextStyle(
-              fontSize: 11,
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
+                fontSize: 11, color: color, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -153,11 +149,93 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
       height: 160,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
-      ),
+          color: Colors.grey[200], borderRadius: BorderRadius.circular(12)),
       child: const Center(
-        child: Icon(Icons.broken_image_outlined, color: Colors.grey, size: 40),
+          child: Icon(Icons.broken_image_outlined,
+              color: Colors.grey, size: 40)),
+    );
+  }
+}
+
+// ============================================================
+// WIDGET: Sort Bar khusus teknisi
+// ============================================================
+class _TeknisiSortBar extends StatefulWidget {
+  final InteraksiLaporanController controller;
+  const _TeknisiSortBar({required this.controller});
+
+  @override
+  State<_TeknisiSortBar> createState() => _TeknisiSortBarState();
+}
+
+class _TeknisiSortBarState extends State<_TeknisiSortBar> {
+  bool _isTopUpvote = true;
+
+  void _toggle(bool topUpvote) {
+    if (_isTopUpvote == topUpvote) return;
+    setState(() => _isTopUpvote = topUpvote);
+    widget.controller.sortLaporan(byUpvote: topUpvote);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _chip(
+          label: 'Top Upvote',
+          icon: Icons.arrow_upward_rounded,
+          active: _isTopUpvote,
+          onTap: () => _toggle(true),
+        ),
+        const SizedBox(width: 8),
+        _chip(
+          label: 'Terbaru',
+          icon: Icons.schedule_rounded,
+          active: !_isTopUpvote,
+          onTap: () => _toggle(false),
+        ),
+      ],
+    );
+  }
+
+  Widget _chip({
+    required String label,
+    required IconData icon,
+    required bool active,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: active ? const Color(0xFF1A3A6B) : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: active
+                ? const Color(0xFF1A3A6B)
+                : const Color(0xFFDDE3EF),
+            width: 1.2,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon,
+                size: 13,
+                color: active ? Colors.white : const Color(0xFF6B7280)),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                color: active ? Colors.white : const Color(0xFF6B7280),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

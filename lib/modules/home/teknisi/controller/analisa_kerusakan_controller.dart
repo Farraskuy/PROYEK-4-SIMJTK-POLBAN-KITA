@@ -2,45 +2,53 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
+
 import '../model/analisa_kerusakan_model.dart';
- 
+// TODO: Pastikan Anda membuat service ini
+import '../service/analisa_kerusakan_service.dart';
 
 class AnalisaKerusakanController extends GetxController {
-  //  State 
-  final RxList<AnalisaKerusakanModel> analisaList =
-      <AnalisaKerusakanModel>[].obs;
-  final RxList<LaporanSingkat> laporanAktif = <LaporanSingkat>[].obs;
+  // ─── SERVICES ──────────────────────────────────────────────
+  final AnalisaKerusakanService _analisaService = AnalisaKerusakanService();
+  final LaporanFasilitasService _laporanService = LaporanFasilitasService();
+
+  // ─── STATE OBSERVABLES ─────────────────────────────────────
+  final RxList<AnalisaKerusakanModel> analisaList = <AnalisaKerusakanModel>[].obs;
+  // Ganti LaporanSingkat dengan LaporanFasilitasModel dari DB
+  final RxList<LaporanFasilitasModel> laporanAktif = <LaporanFasilitasModel>[].obs;
+  
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
   final RxString filterKategori = 'semua'.obs;
 
-  //  Form state (sesuai Formulir POLBAN) 
-  final Rx<LaporanSingkat?> selectedLaporan = Rx<LaporanSingkat?>(null);
+  // Form state
+  final Rx<LaporanFasilitasModel?> selectedLaporan = Rx<LaporanFasilitasModel?>(null);
 
-  // Identitas alat
-  final Rx<DasarPemeriksaan> dasarPemeriksaan =
-      DasarPemeriksaan.keluhanPemakai.obs;
+  final Rx<DasarPemeriksaan> dasarPemeriksaan = DasarPemeriksaan.keluhanPemakai.obs;
   final RxString namaAlat = ''.obs;
   final RxString kodeAlat = ''.obs;
   final RxString noInventaris = ''.obs;
-  // lokasi otomatis dari laporan
   final RxString noKerusakan = ''.obs;
 
-  // Isi formulir
   final RxString analisaMasalah = ''.obs;
   final RxString rekomendasiPerbaikan = ''.obs;
   final RxString rekomendasiTempatPerbaikan = ''.obs;
 
-  // Metadata tambahan
-  final Rx<KategoriKerusakan> kategoriKerusakan =
-      KategoriKerusakan.hardware.obs;
+  final Rx<KategoriKerusakan> kategoriKerusakan = KategoriKerusakan.hardware.obs;
   final Rx<TingkatKerusakan> tingkatKerusakan = TingkatKerusakan.sedang.obs;
   final RxInt estimasiHari = 0.obs;
   final RxDouble estimasiBiaya = 0.0.obs;
 
   final RxBool isSubmitting = false.obs;
 
-  //  TextEditingControllers 
+  // Session Teknisi
+  final RxString currentTeknisiId = '-'.obs;
+  final RxString currentTeknisiName = 'Teknisi'.obs;
+
+  // ─── TEXT CONTROLLERS ──────────────────────────────────────
   late final TextEditingController namaAlatCtrl;
   late final TextEditingController kodeAlatCtrl;
   late final TextEditingController noInventarisCtrl;
@@ -51,13 +59,14 @@ class AnalisaKerusakanController extends GetxController {
   late final TextEditingController estimasiHariCtrl;
   late final TextEditingController estimasiBiayaCtrl;
 
-  // Info teknisi yang login
-  final String teknisiId = 'user-tks001';
-  final String teknisiName = 'Teknisi';
-
   @override
   void onInit() {
     super.onInit();
+    _initControllers();
+    loadData();
+  }
+
+  void _initControllers() {
     namaAlatCtrl = TextEditingController();
     kodeAlatCtrl = TextEditingController();
     noInventarisCtrl = TextEditingController();
@@ -67,7 +76,6 @@ class AnalisaKerusakanController extends GetxController {
     rekomendasiTempatCtrl = TextEditingController();
     estimasiHariCtrl = TextEditingController();
     estimasiBiayaCtrl = TextEditingController();
-    loadData();
   }
 
   @override
@@ -84,25 +92,48 @@ class AnalisaKerusakanController extends GetxController {
     super.onClose();
   }
 
-  //  Load 
-
+  // ─── LOAD DATA (CONCURRENT FETCHING) ───────────────────────
   Future<void> loadData() async {
     isLoading.value = true;
     errorMessage.value = '';
-    await Future.delayed(const Duration(milliseconds: 400));
+
     try {
-      // TODO: ganti dengan API call ke MongoDB saat backend siap
-      laporanAktif.assignAll(dummyLaporanAktif);
-      analisaList.assignAll(dummyAnalisaList);
+      // 1. Ambil sesi autentikasi secara dinamis
+      final session = await AuthService().loadSavedSession();
+      currentTeknisiId.value = session?.id ?? session?.nomorInduk ?? '-';
+      currentTeknisiName.value = session?.name ?? 'Teknisi';
+
+      if (currentTeknisiId.value == '-') {
+        throw Exception('Sesi pengguna tidak valid atau belum login.');
+      }
+
+      // 2. Load data secara bersamaan (Concurrent) untuk efisiensi waktu
+      final results = await Future.wait([
+        _laporanService.getAll(), // Ambil laporan (sesuaikan jika ada getByTeknisi)
+        _analisaService.getAll(), // Ambil riwayat analisa
+      ]);
+
+      final List<LaporanFasilitasModel> allLaporan = results[0] as List<LaporanFasilitasModel>;
+      final List<AnalisaKerusakanModel> allAnalisa = results[1] as List<AnalisaKerusakanModel>;
+
+      // Filter laporan yang dikerjakan teknisi ini dan belum berstatus resolved
+      final laporanUntukTeknisi = allLaporan.where((l) => 
+        l.teknisi_id == currentTeknisiId.value && 
+        l.status != StatusLaporan.resolved
+      ).toList();
+
+      laporanAktif.assignAll(laporanUntukTeknisi);
+      analisaList.assignAll(allAnalisa.where((a) => a.teknisiId == currentTeknisiId.value));
+
     } catch (e) {
-      errorMessage.value = 'Gagal memuat data: $e';
+      errorMessage.value = 'Gagal memuat data dari database: $e';
+      Get.snackbar('Kesalahan Koneksi', errorMessage.value, snackPosition: SnackPosition.BOTTOM);
     } finally {
       isLoading.value = false;
     }
   }
 
-  //  Getters / Filter 
-
+  // ─── GETTERS & FILTERS ─────────────────────────────────────
   List<AnalisaKerusakanModel> get filteredAnalisa {
     if (filterKategori.value == 'semua') return analisaList;
     return analisaList
@@ -110,7 +141,7 @@ class AnalisaKerusakanController extends GetxController {
         .toList();
   }
 
-  List<LaporanSingkat> get laporanBelumDianalisa {
+  List<LaporanFasilitasModel> get laporanBelumDianalisa {
     final sudahDianalisa = analisaList.map((a) => a.laporanId).toSet();
     return laporanAktif.where((l) => !sudahDianalisa.contains(l.id)).toList();
   }
@@ -118,11 +149,9 @@ class AnalisaKerusakanController extends GetxController {
   bool laporanSudahDianalisa(String laporanId) =>
       analisaList.any((a) => a.laporanId == laporanId);
 
-  // Lokasi diambil langsung dari laporan yang dipilih
   String get lokasiDariLaporan => selectedLaporan.value?.lokasi ?? '';
 
-  //  Form 
-
+  // ─── FORM METHODS ──────────────────────────────────────────
   void resetForm() {
     selectedLaporan.value = null;
     dasarPemeriksaan.value = DasarPemeriksaan.keluhanPemakai;
@@ -140,70 +169,40 @@ class AnalisaKerusakanController extends GetxController {
     isSubmitting.value = false;
   }
 
-  void setLaporan(LaporanSingkat laporan) {
+  void setLaporan(LaporanFasilitasModel laporan) {
     selectedLaporan.value = laporan;
   }
 
-  void setDasarPemeriksaan(DasarPemeriksaan d) {
-    dasarPemeriksaan.value = d;
-  }
+  void setDasarPemeriksaan(DasarPemeriksaan d) => dasarPemeriksaan.value = d;
+  void setKategoriKerusakan(KategoriKerusakan k) => kategoriKerusakan.value = k;
+  void setTingkatKerusakan(TingkatKerusakan t) => tingkatKerusakan.value = t;
 
-  void setKategoriKerusakan(KategoriKerusakan k) {
-    kategoriKerusakan.value = k;
-  }
-
-  void setTingkatKerusakan(TingkatKerusakan t) {
-    tingkatKerusakan.value = t;
-  }
-
-  //  Submit 
-
+  // ─── SUBMIT KE DATABASE ────────────────────────────────────
   Future<bool> submitAnalisa() async {
-    if (selectedLaporan.value == null) {
-      _showError('Pilih laporan terlebih dahulu');
-      return false;
-    }
-    if (namaAlatCtrl.text.trim().isEmpty) {
-      _showError('Isi nama alat');
-      return false;
-    }
-    if (kodeAlatCtrl.text.trim().isEmpty) {
-      _showError('Isi kode alat');
-      return false;
-    }
-    if (noInventarisCtrl.text.trim().isEmpty) {
-      _showError('Isi nomor inventaris');
-      return false;
-    }
-    if (noKerusakanCtrl.text.trim().isEmpty) {
-      _showError('Isi nomor kerusakan');
-      return false;
-    }
-    if (analisaMasalahCtrl.text.trim().isEmpty) {
-      _showError('Isi analisa masalah');
-      return false;
-    }
-    if (rekomendasiPerbaikanCtrl.text.trim().isEmpty) {
-      _showError('Isi rekomendasi perbaikan');
-      return false;
-    }
-    if (rekomendasiTempatCtrl.text.trim().isEmpty) {
-      _showError('Isi rekomendasi tempat perbaikan');
-      return false;
-    }
+    if (selectedLaporan.value == null) return _failValidation('Pilih laporan terlebih dahulu');
+    if (namaAlatCtrl.text.trim().isEmpty) return _failValidation('Isi nama alat');
+    if (kodeAlatCtrl.text.trim().isEmpty) return _failValidation('Isi kode alat');
+    if (noInventarisCtrl.text.trim().isEmpty) return _failValidation('Isi nomor inventaris');
+    if (noKerusakanCtrl.text.trim().isEmpty) return _failValidation('Isi nomor kerusakan');
+    if (analisaMasalahCtrl.text.trim().isEmpty) return _failValidation('Isi analisa masalah');
+    if (rekomendasiPerbaikanCtrl.text.trim().isEmpty) return _failValidation('Isi rekomendasi perbaikan');
+    if (rekomendasiTempatCtrl.text.trim().isEmpty) return _failValidation('Isi rekomendasi tempat perbaikan');
 
     isSubmitting.value = true;
 
     try {
-      await Future.delayed(const Duration(milliseconds: 800));
+      // Parsing angka yang aman dari format Rupiah
+      final estimasiBiayaParsed = double.tryParse(
+        estimasiBiayaCtrl.text.replaceAll(RegExp(r'[^0-9]'), '')
+      ) ?? 0.0;
 
       final newAnalisa = AnalisaKerusakanModel(
-        id: 'analisa-${DateTime.now().millisecondsSinceEpoch}',
+        id: '', // Kosongkan, biarkan MongoDB yang men-generate _id
         laporanId: selectedLaporan.value!.id,
-        teknisiId: teknisiId,
-        teknisiName: teknisiName,
+        teknisiId: currentTeknisiId.value,
+        teknisiName: currentTeknisiName.value,
         judulLaporan: selectedLaporan.value!.judul,
-        kategoriLaporan: selectedLaporan.value!.kategori,
+        kategoriLaporan: selectedLaporan.value!.status.value,
         dasarPemeriksaan: dasarPemeriksaan.value,
         namaAlat: namaAlatCtrl.text.trim(),
         kodeAlat: kodeAlatCtrl.text.trim(),
@@ -215,50 +214,51 @@ class AnalisaKerusakanController extends GetxController {
         rekomendasiTempatPerbaikan: rekomendasiTempatCtrl.text.trim(),
         kategoriKerusakan: kategoriKerusakan.value,
         tingkatKerusakan: tingkatKerusakan.value,
-        estimasiWaktuPerbaikanHari: int.tryParse(estimasiHariCtrl.text),
-        estimasiBiaya: double.tryParse(
-          estimasiBiayaCtrl.text.replaceAll('.', '').replaceAll(',', '.'),
-        ),
-        syncStatus: 'local',
+        estimasiWaktuPerbaikanHari: int.tryParse(estimasiHariCtrl.text) ?? 0,
+        estimasiBiaya: estimasiBiayaParsed,
+        syncStatus: 'synced', // Berubah dari local karena sudah live
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
-      // TODO: simpan ke MongoDB via service
-      analisaList.insert(0, newAnalisa);
+      // 3. Simpan via Service ke MongoDB
+      await _analisaService.create(newAnalisa);
+      
+      // Refresh data lokal agar tersinkronisasi murni dengan DB
+      await loadData();
 
       Get.snackbar(
         'Berhasil',
-        'Formulir analisa kerusakan berhasil disimpan',
+        'Formulir analisa kerusakan berhasil disimpan ke server',
         backgroundColor: Colors.green.shade100,
         colorText: Colors.green.shade900,
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
-        duration: const Duration(seconds: 3),
       );
+      
       resetForm();
       return true;
     } catch (e) {
-      _showError('Gagal menyimpan: $e');
+      Get.snackbar('Gagal', 'Kesalahan sistem: $e', snackPosition: SnackPosition.BOTTOM);
       return false;
     } finally {
       isSubmitting.value = false;
     }
   }
 
-  void _showError(String msg) {
+  bool _failValidation(String msg) {
     Get.snackbar(
-      'Perhatian',
+      'Validasi Gagal',
       msg,
       backgroundColor: Colors.orange.shade100,
       colorText: Colors.orange.shade900,
       snackPosition: SnackPosition.BOTTOM,
       margin: const EdgeInsets.all(16),
     );
+    return false;
   }
 
-  //  Helpers 
-
+  // ─── HELPERS ───────────────────────────────────────────────
   String formatRupiah(double? val) {
     if (val == null) return '-';
     final s = val.toStringAsFixed(0);

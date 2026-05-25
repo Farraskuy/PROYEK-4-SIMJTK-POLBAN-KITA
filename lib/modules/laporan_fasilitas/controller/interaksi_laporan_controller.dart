@@ -1,9 +1,11 @@
 // lib/modules/laporan_fasilitas/controller/interaksi_laporan_controller.dart
 
+import 'package:flutter/material.dart'; // Tambahkan untuk akses Color
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/laporan_fasilitas_model.dart';
 import '../service/laporan_fasilitas_service.dart';
+import '../service/detail_laporan_fasilitas_service.dart'; // Pastikan path ini benar
 
 enum LaporanSortMode { populer, terbaru }
 
@@ -12,6 +14,7 @@ class InteraksiLaporanController extends GetxController {
 
   final String role;
   final LaporanFasilitasService _service = LaporanFasilitasService();
+  final DetailLaporanFasilitasService _detailService = DetailLaporanFasilitasService();
 
   final listLaporan = <LaporanFasilitasModel>[].obs;
   final isLoading = false.obs;
@@ -41,7 +44,11 @@ class InteraksiLaporanController extends GetxController {
     try {
       final data = await _service.getForRole(role);
       listLaporan.assignAll(data);
-      _applySort();
+      
+      // Auto-sort untuk teknisi: default Top Upvote
+      if (isPetugas) {
+        sortLaporan(byUpvote: true);
+      }
     } catch (e) {
       Get.snackbar('Error', 'Gagal memuat data: $e');
     } finally {
@@ -49,28 +56,55 @@ class InteraksiLaporanController extends GetxController {
     }
   }
 
-  Future<void> refreshData() => fetchLaporan();
-
-  void onNotificationTapped() {
-    unreadNotifCount.value = 0;
-  }
-
-  void setSortMode(LaporanSortMode mode) {
-    if (sortMode.value == mode) return;
-    sortMode.value = mode;
-    _applySort();
+  /// Sort list laporan:
+  /// - byUpvote = true  → urut vote_score tertinggi
+  /// - byUpvote = false → urut createdAt terbaru
+  void sortLaporan({required bool byUpvote}) {
+    sortMode.value = byUpvote ? LaporanSortMode.populer : LaporanSortMode.terbaru;
+    if (byUpvote) {
+      listLaporan.sort((a, b) => b.vote_score.compareTo(a.vote_score));
+    } else {
+      listLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+    listLaporan.refresh();
   }
 
   void _applySort() {
-    switch (sortMode.value) {
-      case LaporanSortMode.populer:
-        listLaporan.sort((a, b) => b.vote_score.compareTo(a.vote_score));
-        break;
-      case LaporanSortMode.terbaru:
-        listLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        break;
+    if (sortMode.value == LaporanSortMode.populer) {
+      listLaporan.sort((a, b) => b.vote_score.compareTo(a.vote_score));
+    } else {
+      listLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     }
     listLaporan.refresh();
+  }
+
+  /// Teknisi mengambil laporan: update teknisi_id + status = in_progress di DB
+  Future<void> ambilLaporan(LaporanFasilitasModel laporan) async {
+    try {
+      final session = await AuthService().loadSavedSession();
+      final teknisiId = session?.id ?? session?.nomorInduk;
+
+      if (teknisiId == null) {
+        Get.snackbar('Error', 'Session tidak ditemukan',
+            snackPosition: SnackPosition.BOTTOM);
+        return;
+      }
+
+      await _detailService.delegasikanLaporan(laporan.id, teknisiId);
+
+      Get.snackbar(
+        'Berhasil',
+        '"${laporan.judul}" sedang dikerjakan',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: const Color(0xFFE8F5E9),
+        colorText: const Color(0xFF2E7D32),
+      );
+
+      await fetchLaporan();
+    } catch (e) {
+      Get.snackbar('Gagal', 'Tidak dapat mengambil laporan: $e',
+          snackPosition: SnackPosition.BOTTOM);
+    }
   }
 
   void upvoteLaporan(String userId, int index) async {
