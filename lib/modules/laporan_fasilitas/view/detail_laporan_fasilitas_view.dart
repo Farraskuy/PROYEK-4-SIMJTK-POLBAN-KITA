@@ -98,7 +98,7 @@ class _DetailLaporanFasilitasViewState
                       ? Image.network(
                           laporan.foto_urls.first,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _heroDark(),
+                          errorBuilder: (_, _, _) => _heroDark(),
                         )
                       : _heroDark(),
                   // gradient gelap di bawah supaya badge terbaca
@@ -177,9 +177,7 @@ class _DetailLaporanFasilitasViewState
                           Expanded(
                             child: _metaItem(
                               label: 'TANGGAL LAPORAN',
-                              value: laporan.createdAt != null
-                                  ? _formatDate(laporan.createdAt!)
-                                  : '-',
+                              value: _formatDate(laporan.createdAt!),
                             ),
                           ),
                         ],
@@ -268,7 +266,7 @@ class _DetailLaporanFasilitasViewState
                                   laporan.foto_urls[idx],
                                   width: 100,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Container(
+                                  errorBuilder: (_, _, _) => Container(
                                     width: 100,
                                     color: Colors.grey.shade200,
                                     child: const Icon(
@@ -453,9 +451,7 @@ class _DetailLaporanFasilitasViewState
       _TlStep(
         title: 'Laporan Dibuat',
         desc: 'Laporan berhasil diterima oleh sistem.',
-        time: laporan.createdAt != null
-            ? _formatDatetime(laporan.createdAt!)
-            : '',
+        time: _formatDatetime(laporan.createdAt!),
         state: _TlState.done,
       ),
       _TlStep(

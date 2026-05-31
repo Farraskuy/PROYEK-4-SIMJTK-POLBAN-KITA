@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 
-class LaporanFasilitasSortBar extends StatelessWidget {
+class AspirasiSortBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onChanged;
 
-  const LaporanFasilitasSortBar({
+  const AspirasiSortBar({
     super.key,
     required this.selectedIndex,
     required this.onChanged,
@@ -20,13 +20,13 @@ class LaporanFasilitasSortBar extends StatelessWidget {
         child: Row(
           children: [
             _SortChip(
-              label: 'Terpopuler',
+              label: 'Terbaru',
               selected: selectedIndex == 0,
               onTap: () => onChanged(0),
             ),
             const SizedBox(width: 8),
             _SortChip(
-              label: 'Terbaru',
+              label: 'Terpopuler',
               selected: selectedIndex == 1,
               onTap: () => onChanged(1),
             ),

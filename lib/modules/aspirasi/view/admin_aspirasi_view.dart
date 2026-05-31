@@ -1,15 +1,13 @@
-// ============================================================
-// FILE: modules/aspirasi/view/admin_aspirasi_view.dart
-// ============================================================
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../aspirasi/controller/aspirasi_controller.dart';
 import '../../aspirasi/model/aspirasi_model.dart';
-// Import untuk komponen Navbar dan View lainnya
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/widgets/aspirasi_card.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/widgets/aspirasi_sort_bar.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/detail_aspirasi_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/view/admin_add_user_view.dart';
-// PENTING: Sesuaikan path import controller Admin Anda di bawah ini jika error
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/admin_laporan_fasilitas_view.dart';
 import '../../home/admin/controller/home_controller.dart'; 
 
 class _C {
@@ -72,21 +70,16 @@ class AdminAspirasiView extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            color: _C.white,
-            child: TabBar(
-              controller: ctrl.tabController,
-              labelColor: _C.primary,
-              unselectedLabelColor: _C.textSecondary,
-              labelStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-              ),
-              indicatorColor: _C.primary,
-              indicatorWeight: 2.5,
-              tabs: TabAspirasi.values.map((t) => Tab(text: t.label)).toList(),
+          const SizedBox(height: 12),
+          Obx(
+            () => AspirasiSortBar(
+              selectedIndex: ctrl.activeTab.value.index,
+              onChanged: (index) {
+                ctrl.tabController.animateTo(index);
+              },
             ),
           ),
+          const SizedBox(height: 12),
           Expanded(
             child: Obx(() {
               if (ctrl.isLoading.value) {
@@ -108,13 +101,23 @@ class AdminAspirasiView extends StatelessWidget {
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: ctrl.displayedAspirasi.length,
-                  separatorBuilder: (_, __) => const Divider(height: 30, color: _C.divider),
+                  separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final item = ctrl.displayedAspirasi[index];
-                    return _AdminAspirasiCard(
+                    return AspirasiCard(
                       aspirasi: item,
-                      onTanggapi: () {
-                         Get.snackbar('Fitur', 'Fitur tanggapan segera hadir!');
+                      isUpvoted: ctrl.isUpvoted(item),
+                      isDownvoted: ctrl.isDownvoted(item),
+                      showVoteButtons: false,
+                      showVoteColumn: true,
+                      showActions: false,
+                      onUpvote: () {},
+                      onDownvote: () {},
+                      onTap: () {
+                        Get.to(() => DetailAspirasiView(
+                              aspirasi: item,
+                              role: 'tu',
+                            ));
                       },
                     );
                   },
@@ -148,10 +151,10 @@ class AdminAspirasiView extends StatelessWidget {
           adminCtrl.selectedNavIndex.value = index;
 
           if (index == 0) {
-            // Jika kembali ke Home, cukup tutup halaman ini agar tidak menumpuk layar
             Get.back();
+          } else if (index == 1) {
+            Get.off(() => const AdminLaporanFasilitasView());
           } else if (index == 3) {
-            // Jika ke User, ganti halaman saat ini ke halaman User
             Get.off(() => const AdminAddUserView());
           }
         },
@@ -159,97 +162,4 @@ class AdminAspirasiView extends StatelessWidget {
     );
   }
 }
-
-// Widget Card versi ringkas untuk Admin
-class _AdminAspirasiCard extends StatelessWidget {
-  final AspirasiModel aspirasi;
-  final VoidCallback onTanggapi;
-
-  const _AdminAspirasiCard({required this.aspirasi, required this.onTanggapi});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: _C.avatarBg,
-              child: Text(
-                aspirasi.initials,
-                style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    aspirasi.pelaporName ?? 'Anonim',
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: _C.textPrimary),
-                  ),
-                  Text(
-                    '${aspirasi.pelaporProdi ?? ''} · ${aspirasi.waktuRelatif}',
-                    style: const TextStyle(fontSize: 11, color: _C.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-            _StatusBadge(status: aspirasi.status),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Text(
-          aspirasi.topik,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: _C.textPrimary),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          aspirasi.isiSaran,
-          style: const TextStyle(fontSize: 13, color: _C.textSecondary, height: 1.5),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Icon(Icons.keyboard_arrow_up_rounded, size: 18, color: _C.upvoteActive),
-            Text(' ${aspirasi.upvoteCount}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            const SizedBox(width: 16),
-            Icon(Icons.keyboard_arrow_down_rounded, size: 18, color: _C.downvoteActive),
-            Text(' ${aspirasi.downvoteCount}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-            const Spacer(),
-          ],
-        )
-      ],
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  final StatusAspirasi status;
-  const _StatusBadge({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    if (status == StatusAspirasi.open) return const SizedBox.shrink();
-    
-    final bool isSelesai = status == StatusAspirasi.responded;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: isSelesai ? _C.badgeSelesaiBg : _C.badgeProsesBg,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        status.label,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          color: isSelesai ? _C.badgeSelesai : _C.badgeProses,
-        ),
-      ),
-    );
-  }
-}
+

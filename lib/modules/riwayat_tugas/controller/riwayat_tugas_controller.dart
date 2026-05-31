@@ -132,12 +132,6 @@ class RiwayatTugasController extends GetxController {
   Future<void> _loadRiwayat() async {
     isLoading.value = true;
     try {
-      if (_currentTeknisiId.value == null) {
-        isLoading.value = false;
-        return;
-      }
-
-      // Ambil semua laporan dari DB
       final allLaporan = await _service.getAll();
 
       // Filter: hanya laporan yang

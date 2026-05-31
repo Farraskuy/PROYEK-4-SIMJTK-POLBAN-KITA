@@ -30,8 +30,9 @@ class LaporanFasilitasListSection extends StatelessWidget {
               child: LaporanFasilitasCard(
                 laporan: laporan,
                 currentUserId: controller.currentUserId,
-                showVoteColumn: controller.isMahasiswa,
-                showActions: controller.isMahasiswa,
+                showVoteColumn: true,
+                showActions: false,
+                showVoteButtons: controller.isMahasiswa,
                 onTap: () async {
                   final changed = await Navigator.push(
                     context,

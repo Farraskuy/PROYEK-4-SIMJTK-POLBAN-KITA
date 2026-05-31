@@ -484,8 +484,11 @@ class _PendingTaskCard extends StatelessWidget {
   String _formatDate(dynamic date) {
     if (date == null) return '-';
     DateTime dt;
-    if (date is DateTime) dt = date;
-    else dt = DateTime.tryParse(date.toString()) ?? DateTime.now();
+    if (date is DateTime) {
+      dt = date;
+    } else {
+      dt = DateTime.tryParse(date.toString()) ?? DateTime.now();
+    }
     
     return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
   }

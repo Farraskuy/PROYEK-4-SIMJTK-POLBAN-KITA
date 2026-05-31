@@ -20,8 +20,8 @@ class _FakeWebViewPlatform extends WebViewPlatform {
 }
 
 class _FakePlatformWebViewController extends PlatformWebViewController {
-  _FakePlatformWebViewController(PlatformWebViewControllerCreationParams params)
-      : super.implementation(params);
+  _FakePlatformWebViewController(super.params)
+      : super.implementation();
 }
 
 void main() {

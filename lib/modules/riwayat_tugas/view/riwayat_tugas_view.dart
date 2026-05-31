@@ -68,7 +68,7 @@ class RiwayatTugasView extends StatelessWidget {
                 child: ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
                   itemCount: ctrl.riwayatTampil.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final item = ctrl.riwayatTampil[index];
                     return _RiwayatCard(

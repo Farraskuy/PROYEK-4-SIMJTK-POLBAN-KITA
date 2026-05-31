@@ -9,171 +9,246 @@ class AspirasiCard extends StatelessWidget {
     required this.isUpvoted,
     required this.isDownvoted,
     this.showActions = false,
+    this.showVoteButtons = true,
+    this.showVoteColumn = true,
     this.onEdit,
     this.onDelete,
     required this.onUpvote,
     required this.onDownvote,
+    required this.onTap,
   });
 
   final AspirasiModel aspirasi;
   final bool isUpvoted;
   final bool isDownvoted;
   final bool showActions;
+  final bool showVoteButtons;
+  final bool showVoteColumn;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback onUpvote;
   final VoidCallback onDownvote;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final overallVote = aspirasi.upvoteCount - aspirasi.downvoteCount;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 5),
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: AppColors.primary,
-                child: Text(
-                        aspirasi.initials,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
+              // Kolom Vote Kiri (100% Identik dengan Laporan Fasilitas)
+              if (showVoteColumn) ...[
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, right: 12),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: showVoteButtons ? onUpvote : null,
+                        child: Icon(
+                          Icons.keyboard_arrow_up_rounded,
+                          color: isUpvoted ? AppColors.primary : Colors.grey,
+                          size: 22,
                         ),
                       ),
-              ),
-              const SizedBox(width: 10),
+                      Text(
+                        '$overallVote',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: AppColors.title,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: showVoteButtons ? onDownvote : null,
+                        child: Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: isDownvoted ? AppColors.danger : Colors.grey,
+                          size: 22,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text((aspirasi.pelaporName ?? 'Mahasiswa JTK'),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.title,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '${aspirasi.pelaporProdi ?? ''} · ${aspirasi.waktuRelatif}',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.body,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  _AspirasiStatusBadge(status: aspirasi.status),
-                  if (showActions) ...[
-                    const SizedBox(height: 6),
+                    // 1. Status Chip di bagian paling atas (Sama persis seperti LaporanFasilitasCard)
+                    _AspirasiStatusBadge(status: aspirasi.status),
+                    const SizedBox(height: 10),
+
+                    // 2. Baris data pelapor (Sama persis seperti LaporanFasilitasCard)
                     Row(
-                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        IconButton(
-                          onPressed: onEdit,
-                          constraints: const BoxConstraints(),
-                          padding: EdgeInsets.zero,
-                          icon: const Icon(
-                            Icons.edit_outlined,
-                            size: 18,
-                            color: AppColors.primary,
+                        Expanded(
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 14,
+                                backgroundColor: AppColors.primary.withOpacity(0.1),
+                                child: Text(
+                                  aspirasi.initials.toUpperCase(),
+                                  style: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Poppins',
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      aspirasi.pelaporName ?? 'Mahasiswa JTK',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.title,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      '${aspirasi.pelaporProdi ?? 'D4 Teknik Informatika'} • ${aspirasi.waktuRelatif}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.body,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          tooltip: 'Edit',
                         ),
-                        const SizedBox(width: 6),
-                        IconButton(
-                          onPressed: onDelete,
-                          constraints: const BoxConstraints(),
-                          padding: EdgeInsets.zero,
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            size: 18,
-                            color: AppColors.danger,
+                        if (showActions && (onEdit != null || onDelete != null))
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (onEdit != null)
+                                IconButton(
+                                  onPressed: onEdit,
+                                  constraints: const BoxConstraints(),
+                                  padding: EdgeInsets.zero,
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    size: 20,
+                                    color: AppColors.primary,
+                                  ),
+                                  tooltip: 'Edit',
+                                ),
+                              const SizedBox(width: 6),
+                              if (onDelete != null)
+                                IconButton(
+                                  onPressed: onDelete,
+                                  constraints: const BoxConstraints(),
+                                  padding: EdgeInsets.zero,
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    size: 20,
+                                    color: AppColors.danger,
+                                  ),
+                                  tooltip: 'Hapus',
+                                ),
+                            ],
                           ),
-                          tooltip: 'Hapus',
-                        ),
                       ],
                     ),
-                    
+                    const SizedBox(height: 12),
+
+                    // 3. Judul / Topik
+                    Text(
+                      aspirasi.topik,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.title,
+                        height: 1.25,
+                        fontFamily: 'Poppins',
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+
+                    // 4. Deskripsi / Isi
+                    Text(
+                      aspirasi.isiSaran,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.body,
+                        height: 1.55,
+                        fontFamily: 'Poppins',
+                      ),
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+
+                    if (aspirasi.tanggapanJurusan != null) ...[
+                      const SizedBox(height: 12),
+                      _AspirasiTanggapanBox(tanggapan: aspirasi.tanggapanJurusan!),
+                    ],
+
+                    if (showVoteButtons) ...[
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _VoteButton(
+                              label: 'Up vote',
+                              icon: Icons.keyboard_arrow_up_rounded,
+                              count: aspirasi.upvoteCount,
+                              isActive: isUpvoted,
+                              activeColor: AppColors.primary,
+                              onTap: onUpvote,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _VoteButton(
+                              label: 'Down Vote',
+                              icon: Icons.keyboard_arrow_down_rounded,
+                              count: aspirasi.downvoteCount,
+                              isActive: isDownvoted,
+                              activeColor: AppColors.danger,
+                              onTap: onDownvote,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            aspirasi.topik,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: AppColors.title,
-              height: 1.25,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            aspirasi.isiSaran,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.body,
-              height: 1.55,
-            ),
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (aspirasi.tanggapanJurusan != null) ...[
-            const SizedBox(height: 12),
-            _AspirasiTanggapanBox(tanggapan: aspirasi.tanggapanJurusan!),
-          ],
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Expanded(
-                child: _VoteButton(
-                  label: 'Up vote',
-                  icon: Icons.keyboard_arrow_up_rounded,
-                  count: aspirasi.upvoteCount,
-                  isActive: isUpvoted,
-                  activeColor: AppColors.primary,
-                  onTap: onUpvote,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _VoteButton(
-                  label: 'Down Vote',
-                  icon: Icons.keyboard_arrow_down_rounded,
-                  count: aspirasi.downvoteCount,
-                  isActive: isDownvoted,
-                  activeColor: AppColors.danger,
-                  onTap: onDownvote,
                 ),
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -186,59 +261,50 @@ class _AspirasiStatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color bg;
+    Color fg;
+    String label;
+    IconData icon;
+
     switch (status) {
       case StatusAspirasi.open:
-        return const SizedBox.shrink();
+        bg = AppColors.blueSoft;
+        fg = AppColors.primary;
+        label = 'Terbuka';
+        icon = Icons.info_outline_rounded;
+        break;
       case StatusAspirasi.inReview:
-        return const _Badge(
-          label: 'Diproses',
-          icon: Icons.hourglass_top_rounded,
-          backgroundColor: AppColors.blueSoft,
-          foregroundColor: AppColors.primary,
-        );
+        bg = AppColors.orangeSoft;
+        fg = AppColors.warning;
+        label = 'Diproses';
+        icon = Icons.hourglass_top_rounded;
+        break;
       case StatusAspirasi.responded:
-        return const _Badge(
-          label: 'Selesai',
-          icon: Icons.check_circle_rounded,
-          backgroundColor: AppColors.greenSoft,
-          foregroundColor: AppColors.success,
-        );
+        bg = AppColors.greenSoft;
+        fg = AppColors.success;
+        label = 'Selesai';
+        icon = Icons.check_circle_rounded;
+        break;
     }
-  }
-}
 
-class _Badge extends StatelessWidget {
-  const _Badge({
-    required this.label,
-    required this.icon,
-    required this.backgroundColor,
-    required this.foregroundColor,
-  });
-
-  final String label;
-  final IconData icon;
-  final Color backgroundColor;
-  final Color foregroundColor;
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(20),
+        color: bg,
+        borderRadius: BorderRadius.circular(4), // 4px border radius for chip consistency
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: foregroundColor),
+          Icon(icon, size: 10, color: fg),
           const SizedBox(width: 4),
           Text(
-            label,
+            label.toUpperCase(),
             style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: foregroundColor,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: fg,
+              fontFamily: 'Poppins',
             ),
           ),
         ],
@@ -276,6 +342,7 @@ class _AspirasiTanggapanBox extends StatelessWidget {
                   fontWeight: FontWeight.w800,
                   color: AppColors.primary,
                   letterSpacing: 0.8,
+                  fontFamily: 'Poppins',
                 ),
               ),
             ],
@@ -288,6 +355,7 @@ class _AspirasiTanggapanBox extends StatelessWidget {
               color: AppColors.body,
               height: 1.5,
               fontStyle: FontStyle.italic,
+              fontFamily: 'Poppins',
             ),
           ),
         ],
@@ -315,7 +383,12 @@ class _VoteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isActive ? activeColor : AppColors.muted;
+    final isUpvote = label.toLowerCase().contains('up');
+    final color = isUpvote ? AppColors.primary : AppColors.danger;
+    final bgColor = isActive ? color : color.withOpacity(0.06);
+    final borderColor = isActive ? color : color.withOpacity(0.3);
+    final textColor = isActive ? Colors.white : color;
+    final iconColor = isActive ? Colors.white : color;
 
     return Material(
       color: Colors.transparent,
@@ -325,22 +398,23 @@ class _VoteButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: isActive ? color.withValues(alpha: 0.08) : AppColors.surface,
+            color: bgColor,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isActive ? color : AppColors.border),
+            border: Border.all(color: borderColor),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 18, color: color),
+              Icon(icon, size: 18, color: iconColor),
               const SizedBox(width: 4),
               Text(
                 '$label ${count.toString()}',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
-                  color: color,
+                  color: textColor,
+                  fontFamily: 'Poppins',
                 ),
               ),
             ],

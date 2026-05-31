@@ -108,7 +108,7 @@ class AppButton extends StatelessWidget {
                         label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.manrope(
+                        style: GoogleFonts.poppins(
                           color: colors.foreground,
                           fontSize: metrics.fontSize,
                           fontWeight: FontWeight.w800,

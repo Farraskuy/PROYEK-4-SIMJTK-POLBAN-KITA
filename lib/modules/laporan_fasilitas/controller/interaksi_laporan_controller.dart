@@ -1,13 +1,13 @@
 // lib/modules/laporan_fasilitas/controller/interaksi_laporan_controller.dart
 
-import 'package:flutter/material.dart'; // Tambahkan untuk akses Color
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/laporan_fasilitas_model.dart';
 import '../service/laporan_fasilitas_service.dart';
-import '../service/detail_laporan_fasilitas_service.dart'; // Pastikan path ini benar
+import '../service/detail_laporan_fasilitas_service.dart';
 
-enum LaporanSortMode { populer, terbaru }
+enum LaporanSortMode { populer, terbaru, selesai }
 
 class InteraksiLaporanController extends GetxController {
   InteraksiLaporanController({this.role = 'mahasiswa'});
@@ -16,6 +16,7 @@ class InteraksiLaporanController extends GetxController {
   final LaporanFasilitasService _service = LaporanFasilitasService();
   final DetailLaporanFasilitasService _detailService = DetailLaporanFasilitasService();
 
+  final _allLaporan = <LaporanFasilitasModel>[].obs;
   final listLaporan = <LaporanFasilitasModel>[].obs;
   final isLoading = false.obs;
   final unreadNotifCount = 3.obs;
@@ -43,12 +44,8 @@ class InteraksiLaporanController extends GetxController {
     isLoading.value = true;
     try {
       final data = await _service.getForRole(role);
-      listLaporan.assignAll(data);
-      
-      // Auto-sort untuk teknisi: default Top Upvote
-      if (isPetugas) {
-        sortLaporan(byUpvote: true);
-      }
+      _allLaporan.assignAll(data);
+      _applySort();
     } catch (e) {
       Get.snackbar('Error', 'Gagal memuat data: $e');
     } finally {
@@ -56,29 +53,34 @@ class InteraksiLaporanController extends GetxController {
     }
   }
 
-  /// Sort list laporan:
-  /// - byUpvote = true  → urut vote_score tertinggi
-  /// - byUpvote = false → urut createdAt terbaru
-  void sortLaporan({required bool byUpvote}) {
-    sortMode.value = byUpvote ? LaporanSortMode.populer : LaporanSortMode.terbaru;
-    if (byUpvote) {
-      listLaporan.sort((a, b) => b.vote_score.compareTo(a.vote_score));
-    } else {
-      listLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    }
-    listLaporan.refresh();
+  void sortLaporan(LaporanSortMode mode) {
+    sortMode.value = mode;
+    _applySort();
   }
 
   void _applySort() {
-    if (sortMode.value == LaporanSortMode.populer) {
-      listLaporan.sort((a, b) => b.vote_score.compareTo(a.vote_score));
-    } else {
-      listLaporan.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    switch (sortMode.value) {
+      case LaporanSortMode.populer:
+        final sorted = List<LaporanFasilitasModel>.from(_allLaporan)
+          ..sort((a, b) => b.vote_score.compareTo(a.vote_score));
+        listLaporan.assignAll(sorted);
+        break;
+      case LaporanSortMode.terbaru:
+        final sorted = List<LaporanFasilitasModel>.from(_allLaporan)
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        listLaporan.assignAll(sorted);
+        break;
+      case LaporanSortMode.selesai:
+        final filtered = _allLaporan
+            .where((l) => l.status == StatusLaporan.resolved)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        listLaporan.assignAll(filtered);
+        break;
     }
     listLaporan.refresh();
   }
 
-  /// Teknisi mengambil laporan: update teknisi_id + status = in_progress di DB
   Future<void> ambilLaporan(LaporanFasilitasModel laporan) async {
     try {
       final session = await AuthService().loadSavedSession();
@@ -109,6 +111,8 @@ class InteraksiLaporanController extends GetxController {
 
   void upvoteLaporan(String userId, int index) async {
     final laporan = listLaporan[index];
+    final realIndex = _allLaporan.indexWhere((l) => l.id == laporan.id);
+    if (realIndex == -1) return;
 
     if (laporan.upvoter_ids.contains(userId)) {
       laporan.upvoter_ids.remove(userId);
@@ -117,11 +121,13 @@ class InteraksiLaporanController extends GetxController {
       laporan.downvoter_ids.remove(userId);
     }
 
-    _updateVoteAndSync(laporan, index);
+    _updateVoteAndSync(laporan, realIndex);
   }
 
   void downvoteLaporan(String userId, int index) async {
     final laporan = listLaporan[index];
+    final realIndex = _allLaporan.indexWhere((l) => l.id == laporan.id);
+    if (realIndex == -1) return;
 
     if (laporan.downvoter_ids.contains(userId)) {
       laporan.downvoter_ids.remove(userId);
@@ -130,15 +136,15 @@ class InteraksiLaporanController extends GetxController {
       laporan.upvoter_ids.remove(userId);
     }
 
-    _updateVoteAndSync(laporan, index);
+    _updateVoteAndSync(laporan, realIndex);
   }
 
-  void _updateVoteAndSync(LaporanFasilitasModel laporan, int index) async {
+  void _updateVoteAndSync(LaporanFasilitasModel laporan, int realIndex) async {
     laporan.vote_score =
         laporan.upvoter_ids.length - laporan.downvoter_ids.length;
     laporan.updatedAt = DateTime.now();
 
-    listLaporan[index] = laporan;
+    _allLaporan[realIndex] = laporan;
     _applySort();
 
     await _service.update(laporan);
@@ -147,7 +153,7 @@ class InteraksiLaporanController extends GetxController {
   Future<void> deleteLaporan(String laporanId) async {
     try {
       await _service.delete(laporanId);
-      listLaporan.removeWhere((l) => l.id == laporanId);
+      _allLaporan.removeWhere((l) => l.id == laporanId);
       _applySort();
       Get.snackbar('Sukses', 'Laporan berhasil dihapus');
     } catch (e) {

@@ -1,11 +1,6 @@
-// lib/modules/laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart
-// VERSI LENGKAP — semua patch sudah diterapkan ke file asli.
-
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/interaksi_laporan_controller.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/lapor_fasilitas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_empty_state.dart';
 // import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_header_section.dart';
@@ -70,10 +65,8 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                 () => SliverToBoxAdapter(
                   child: LaporanFasilitasSortBar(
                     selectedIndex: controller.sortMode.value.index,
-                    onChanged: (index) => controller.sortMode(
-                      index == 0
-                          ? LaporanSortMode.populer
-                          : LaporanSortMode.terbaru,
+                    onChanged: (index) => controller.sortLaporan(
+                      LaporanSortMode.values[index],
                     ),
                   ),
                 ),
@@ -120,41 +113,6 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
           : null,
     );
   }
-
-  Widget _buildStatusChip(StatusLaporan status, bool printed) {
-    final color = printed ? Colors.teal : const Color(0xFF1E78E6);
-    final bg =
-        printed ? const Color(0xFFE0F2F1) : const Color(0xFFE3F2FD);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration:
-          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.check, size: 12, color: color),
-          const SizedBox(width: 4),
-          Text(
-            printed ? 'Selesai' : status.label,
-            style: TextStyle(
-                fontSize: 11, color: color, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImagePlaceholder() {
-    return Container(
-      height: 160,
-      width: double.infinity,
-      decoration: BoxDecoration(
-          color: Colors.grey[200], borderRadius: BorderRadius.circular(12)),
-      child: const Center(
-          child: Icon(Icons.broken_image_outlined,
-              color: Colors.grey, size: 40)),
-    );
-  }
 }
 
 // ============================================================
@@ -174,7 +132,7 @@ class _TeknisiSortBarState extends State<_TeknisiSortBar> {
   void _toggle(bool topUpvote) {
     if (_isTopUpvote == topUpvote) return;
     setState(() => _isTopUpvote = topUpvote);
-    widget.controller.sortLaporan(byUpvote: topUpvote);
+    widget.controller.sortLaporan(topUpvote ? LaporanSortMode.populer : LaporanSortMode.terbaru);
   }
 
   @override

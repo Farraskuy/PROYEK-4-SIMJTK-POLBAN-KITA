@@ -22,29 +22,31 @@ class LaporanFasilitasVoteColumn extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 4),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           GestureDetector(
             onTap: onUpvote,
             child: Icon(
               Icons.keyboard_arrow_up_rounded,
-              color: isUpvoted ? Colors.orange : Colors.grey,
-              size: 22,
+              color: isUpvoted ? AppColors.primary : Colors.grey.shade400,
+              size: 24,
             ),
           ),
           Text(
             '$voteScore',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 15,
+              fontSize: 14,
               color: AppColors.title,
+              fontFamily: 'Poppins',
             ),
           ),
           GestureDetector(
             onTap: onDownvote,
             child: Icon(
               Icons.keyboard_arrow_down_rounded,
-              color: isDownvoted ? Colors.blue : Colors.grey,
-              size: 22,
+              color: isDownvoted ? AppColors.danger : Colors.grey.shade400,
+              size: 24,
             ),
           ),
         ],

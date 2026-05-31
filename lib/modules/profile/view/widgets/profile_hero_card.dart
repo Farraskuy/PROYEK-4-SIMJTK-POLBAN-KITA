@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 
 class ProfileHeroCardData {
   const ProfileHeroCardData({

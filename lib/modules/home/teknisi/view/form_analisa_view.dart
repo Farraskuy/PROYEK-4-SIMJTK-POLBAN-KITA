@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controller/analisa_kerusakan_controller.dart';
 import '../model/analisa_kerusakan_model.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 
 class FormAnalisaView extends StatelessWidget {
   const FormAnalisaView({super.key});
