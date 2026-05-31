@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../controller/admin_laporan_controller.dart';
 import '../../home/admin/controller/home_controller.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
+import 'detail_laporan_fasilitas_view.dart';
 
 class AdminLaporanFasilitasView extends StatelessWidget {
   const AdminLaporanFasilitasView({super.key});
@@ -33,7 +34,10 @@ class AdminLaporanFasilitasView extends StatelessWidget {
                     backgroundColor: Colors.blue.withOpacity(0.1),
                   ),
                   onTap: () {
-                    // Navigasi ke detail laporan
+                    Get.to(() => DetailLaporanFasilitasView(
+                          laporanId: item.id,
+                          role: 'admin',
+                        ));
                   },
                 );
               },
