@@ -33,6 +33,29 @@ class AdminAddUserController extends GetxController {
     AccessControlService.roleAdmin,
   ];
 
+  UserModel? userToEdit;
+  final RxBool isEditMode = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    if (Get.arguments is UserModel) {
+      userToEdit = Get.arguments as UserModel;
+      isEditMode.value = true;
+      _populateForm();
+    }
+  }
+
+  void _populateForm() {
+    if (userToEdit == null) return;
+    nameController.text = userToEdit!.name;
+    nomorIndukController.text = userToEdit!.nomorInduk;
+    emailController.text = userToEdit!.email;
+    programStudyController.text = userToEdit!.programStudy;
+    selectedRole.value = AccessControlService.normalizeRole(userToEdit!.role);
+    isActive.value = userToEdit!.isActive;
+  }
+
   @override
   void onClose() {
     nameController.dispose();
@@ -78,44 +101,58 @@ class AdminAddUserController extends GetxController {
 
     isSaving.value = true;
     try {
-      final existingUsers = await _userService.getAll();
-      final alreadyExists = existingUsers.any(
-        (user) => user.nomorInduk == nomorInduk || user.id == nomorInduk,
-      );
+      if (!isEditMode.value) {
+        final existingUsers = await _userService.getAll();
+        final alreadyExists = existingUsers.any(
+          (user) => user.nomorInduk == nomorInduk || user.id == nomorInduk,
+        );
 
-      if (alreadyExists) {
-        errorMessage.value = 'Nomor induk sudah terdaftar.';
-        return;
+        if (alreadyExists) {
+          errorMessage.value = 'Nomor induk sudah terdaftar.';
+          isSaving.value = false;
+          return;
+        }
       }
 
       final now = DateTime.now().toIso8601String();
-      final passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
+      
+      String finalPasswordHash;
+      if (isEditMode.value && password.isEmpty) {
+        finalPasswordHash = userToEdit!.passwordHash;
+      } else {
+        finalPasswordHash = BCrypt.hashpw(password, BCrypt.gensalt());
+      }
 
-      await _userService.create(
-        UserModel(
-          id: nomorInduk,
-          name: name,
-          nomorInduk: nomorInduk,
-          passwordHash: passwordHash,
-          role: selectedRole.value,
-          isActive: isActive.value,
-          createdAt: now,
-          email: email,
-          programStudy: programStudy,
-          source: 'admin',
-        ),
+      final userModel = UserModel(
+        id: isEditMode.value ? userToEdit!.id : nomorInduk,
+        name: name,
+        nomorInduk: nomorInduk,
+        passwordHash: finalPasswordHash,
+        role: selectedRole.value,
+        isActive: isActive.value,
+        createdAt: isEditMode.value ? userToEdit!.createdAt : now,
+        email: email,
+        programStudy: programStudy,
+        source: 'admin',
       );
 
-      _clearForm();
+      if (isEditMode.value) {
+        await _userService.update(userModel);
+      } else {
+        await _userService.create(userModel);
+        _clearForm();
+      }
+
+      Get.back(result: true); // Kembali ke halaman list dengan result true (refresh)
       Get.snackbar(
-        'User Ditambahkan',
-        'Akun $name berhasil dibuat.',
+        isEditMode.value ? 'User Diperbarui' : 'User Ditambahkan',
+        isEditMode.value ? 'Data $name berhasil diperbarui.' : 'Akun $name berhasil dibuat.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: const Color(0xFFE8F5E9),
         colorText: const Color(0xFF1B5E20),
       );
     } catch (e) {
-      errorMessage.value = 'Gagal menambahkan user. $e';
+      errorMessage.value = 'Gagal menyimpan user. $e';
     } finally {
       isSaving.value = false;
     }
@@ -133,7 +170,8 @@ class AdminAddUserController extends GetxController {
     if (email.isNotEmpty && !GetUtils.isEmail(email)) {
       return 'Format email tidak valid.';
     }
-    if (password.length < 6) return 'Password minimal 6 karakter.';
+    if (!isEditMode.value && password.length < 6) return 'Password minimal 6 karakter.';
+    if (isEditMode.value && password.isNotEmpty && password.length < 6) return 'Password minimal 6 karakter.';
     if (password != confirmPassword) return 'Konfirmasi password tidak sama.';
     return null;
   }

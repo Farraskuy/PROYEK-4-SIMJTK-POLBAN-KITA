@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../model/home_model.dart';
 import '../../../aspirasi/view/admin_aspirasi_view.dart';
 import '../../../laporan_fasilitas/view/admin_laporan_fasilitas_view.dart';
+import '../../../user/view/admin_user_view.dart';
  
 // // Import file view/screen admin yang sudah ada
 // import '../../../laporan_fasilitas/view/admin_laporan_fasilitas_screen.dart';
@@ -78,6 +79,9 @@ class AdminDashboardController extends GetxController {
     } else if (index == 2) {
       // Navigasi ke Halaman Aspirasi Admin
       Get.to(() => const AdminAspirasiView());
+    } else if (index == 3) {
+      // Navigasi ke Halaman User
+      Get.to(() => const AdminUserView());
     }
   }
 

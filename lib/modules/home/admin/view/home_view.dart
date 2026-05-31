@@ -529,12 +529,6 @@ class AdminDashboardView extends StatelessWidget {
         items: items,
         selectedIndex: ctrl.selectedNavIndex.value,
         onTap: (index) {
-          if (index == 3) {
-            Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (_) => const AdminAddUserView()));
-            return;
-          }
           ctrl.onNavTapped(index);
         },
       ),
