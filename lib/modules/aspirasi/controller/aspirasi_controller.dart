@@ -310,12 +310,18 @@ class AspirasiController extends GetxController
     isSubmitting.value = false;
   }
 
-  void deleteAspirasi(String aspirasiId) {
-    _allAspirasi.removeWhere((item) => item.id == aspirasiId);
-    _applyFilter();
-    if (_editingAspirasi.value?.id == aspirasiId) {
-      _editingAspirasi.value = null;
-      _resetForm();
+  Future<void> deleteAspirasi(String aspirasiId) async {
+    try {
+      await _service.deleteAspirasi(aspirasiId);
+      _allAspirasi.removeWhere((item) => item.id == aspirasiId);
+      _applyFilter();
+      if (_editingAspirasi.value?.id == aspirasiId) {
+        _editingAspirasi.value = null;
+        _resetForm();
+      }
+      Get.snackbar('Sukses', 'Aspirasi berhasil dihapus');
+    } catch (e) {
+      Get.snackbar('Gagal', 'Gagal menghapus aspirasi: $e');
     }
   }
 
@@ -374,7 +380,11 @@ class AspirasiController extends GetxController
 
       // 2. Jika berhasil, perbarui state lokal UI
       _allAspirasi[idx] = updatedAspirasi;
-      _applyFilter();
+      final dispIdx = displayedAspirasi.indexWhere((a) => a.id == aspirasiId);
+      if (dispIdx != -1) {
+        displayedAspirasi[dispIdx] = updatedAspirasi;
+      }
+      displayedAspirasi.refresh();
     } catch (e) {
       Get.snackbar(
         'Gagal',
@@ -429,7 +439,11 @@ class AspirasiController extends GetxController
 
       // 2. Jika berhasil, perbarui state lokal UI
       _allAspirasi[idx] = updatedAspirasi;
-      _applyFilter();
+      final dispIdx = displayedAspirasi.indexWhere((a) => a.id == aspirasiId);
+      if (dispIdx != -1) {
+        displayedAspirasi[dispIdx] = updatedAspirasi;
+      }
+      displayedAspirasi.refresh();
     } catch (e) {
       Get.snackbar(
         'Gagal',

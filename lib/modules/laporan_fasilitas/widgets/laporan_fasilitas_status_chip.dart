@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 
 class LaporanFasilitasStatusChip extends StatelessWidget {
   final StatusLaporan status;
@@ -13,10 +14,59 @@ class LaporanFasilitasStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = printed ? Colors.teal : const Color(0xFF1E78E6);
-    final bg = printed ? const Color(0xFFE0F2F1) : const Color(0xFFE3F2FD);
+    Color bg;
+    Color fg;
+    String label;
+    IconData icon;
+
+    if (printed) {
+      bg = AppColors.greenSoft;
+      fg = AppColors.success;
+      label = 'Selesai';
+      icon = Icons.check_circle_rounded;
+    } else {
+      switch (status) {
+        case StatusLaporan.pending:
+          bg = AppColors.blueSoft;
+          fg = AppColors.primary;
+          label = 'Menunggu Petugas';
+          icon = Icons.info_outline_rounded;
+          break;
+        case StatusLaporan.in_progress:
+          bg = AppColors.orangeSoft;
+          fg = AppColors.warning;
+          label = 'Ditangani Petugas';
+          icon = Icons.hourglass_top_rounded;
+          break;
+        case StatusLaporan.resolved:
+          bg = AppColors.greenSoft;
+          fg = AppColors.success;
+          label = 'Selesai';
+          icon = Icons.check_circle_rounded;
+          break;
+        case StatusLaporan.escalated_to_upt:
+          bg = AppColors.orangeSoft;
+          fg = AppColors.warning;
+          label = 'Diajukan ke TU';
+          icon = Icons.hourglass_top_rounded;
+          break;
+        case StatusLaporan.waiting_disposal:
+          bg = AppColors.orangeSoft;
+          fg = AppColors.warning;
+          label = 'Menunggu Cetak TU';
+          icon = Icons.hourglass_top_rounded;
+          break;
+        case StatusLaporan.cancelled:
+          bg = AppColors.redSoft;
+          fg = AppColors.danger;
+          label = 'Dibatalkan';
+          icon = Icons.cancel_outlined;
+          break;
+      }
+    }
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(20),
@@ -24,14 +74,15 @@ class LaporanFasilitasStatusChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.check, size: 12, color: color),
+          Icon(icon, size: 10, color: fg),
           const SizedBox(width: 4),
           Text(
-            printed ? 'Selesai' : status.label,
+            label.toUpperCase(),
             style: TextStyle(
-              fontSize: 11,
-              color: color,
+              fontSize: 10,
               fontWeight: FontWeight.bold,
+              color: fg,
+              fontFamily: 'Poppins',
             ),
           ),
         ],

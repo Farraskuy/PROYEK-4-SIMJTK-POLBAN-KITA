@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import '../controller/admin_laporan_controller.dart';
 import '../../home/admin/controller/home_controller.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
-import 'detail_laporan_fasilitas_view.dart';
 
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_card.dart';
@@ -60,7 +59,6 @@ class AdminLaporanFasilitasView extends StatelessWidget {
                   showVoteButtons: false,
                   onTap: () {
                     Get.to(() => DetailLaporanFasilitasView(
-<<<<<<< HEAD
                       laporanId: item.id,
                       role: 'admin',
                     ));

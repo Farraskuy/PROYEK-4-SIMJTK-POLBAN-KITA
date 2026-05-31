@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/model/aspirasi_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_vote_column.dart';
 
 class AspirasiCard extends StatelessWidget {
   const AspirasiCard({
@@ -58,38 +59,14 @@ class AspirasiCard extends StatelessWidget {
             children: [
               // Kolom Vote Kiri (100% Identik dengan Laporan Fasilitas)
               if (showVoteColumn) ...[
-                Padding(
-                  padding: const EdgeInsets.only(top: 4, right: 12),
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: showVoteButtons ? onUpvote : null,
-                        child: Icon(
-                          Icons.keyboard_arrow_up_rounded,
-                          color: isUpvoted ? AppColors.primary : Colors.grey,
-                          size: 22,
-                        ),
-                      ),
-                      Text(
-                        '$overallVote',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: AppColors.title,
-                          fontFamily: 'Poppins',
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: showVoteButtons ? onDownvote : null,
-                        child: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: isDownvoted ? AppColors.danger : Colors.grey,
-                          size: 22,
-                        ),
-                      ),
-                    ],
-                  ),
+                LaporanFasilitasVoteColumn(
+                  voteScore: overallVote,
+                  isUpvoted: isUpvoted,
+                  isDownvoted: isDownvoted,
+                  onUpvote: showVoteButtons ? onUpvote : () {},
+                  onDownvote: showVoteButtons ? onDownvote : () {},
                 ),
+                const SizedBox(width: 12),
               ],
               Expanded(
                 child: Column(
@@ -291,7 +268,7 @@ class _AspirasiStatusBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(4), // 4px border radius for chip consistency
+        borderRadius: BorderRadius.circular(20), // 20px border radius for chip consistency
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

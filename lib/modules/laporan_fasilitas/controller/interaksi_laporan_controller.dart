@@ -145,7 +145,11 @@ class InteraksiLaporanController extends GetxController {
     laporan.updatedAt = DateTime.now();
 
     _allLaporan[realIndex] = laporan;
-    _applySort();
+    final dispIdx = listLaporan.indexWhere((l) => l.id == laporan.id);
+    if (dispIdx != -1) {
+      listLaporan[dispIdx] = laporan;
+    }
+    listLaporan.refresh();
 
     await _service.update(laporan);
   }

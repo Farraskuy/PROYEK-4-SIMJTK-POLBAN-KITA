@@ -131,18 +131,7 @@ class _AspirasiListPage extends StatelessWidget {
                 aspirasi: item,
                 isUpvoted: ctrl.isUpvoted(item),
                 isDownvoted: ctrl.isDownvoted(item),
-                showActions: canManage,
-                onEdit: canManage
-                    ? () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => AspirasiEditView(aspirasi: item),
-                          ),
-                        );
-                      }
-                    : null,
-                onDelete: canManage ? () => ctrl.deleteAspirasi(item.id) : null,
+                showActions: false,
                 onUpvote: () => ctrl.onUpvote(item.id),
                 onDownvote: () => ctrl.onDownvote(item.id),
                 onTap: () {

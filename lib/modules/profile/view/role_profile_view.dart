@@ -9,11 +9,14 @@ import 'package:proyek_4_poki_polban_kita/shared/widgets/mahasiswa_bottom_nav_ba
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 
 import 'package:get/get.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/app_button.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_card.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/widgets/aspirasi_card.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/detail_aspirasi_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/service/aspirasi_service.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/aspirasi_form_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/lapor_fasilitas_controller.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/lapor_fasilitas_view.dart';
 
 class RoleProfileView extends StatefulWidget {
   const RoleProfileView({super.key, required this.role});
@@ -108,24 +111,34 @@ class _RoleProfileViewState extends State<RoleProfileView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (isMahasiswa) ...[
-                            AppButton(
-                              label: 'Lihat Laporan Saya',
-                              leadingIcon: Icons.assignment_outlined,
-                              variant: AppButtonVariant.navy,
-                              size: AppButtonSize.large,
-                              onPressed: () {
-                                Get.to(() => MahasiswaOwnReportsView(ownLaporan: data.ownLaporan));
-                              },
-                            ),
-                            const SizedBox(height: 14),
-                            AppButton(
-                              label: 'Lihat Aspirasi Saya',
-                              leadingIcon: Icons.chat_bubble_outline_rounded,
-                              variant: AppButtonVariant.navy,
-                              size: AppButtonSize.large,
-                              onPressed: () {
-                                Get.to(() => MahasiswaOwnAspirationsView(ownAspirasi: data.ownAspirasi));
-                              },
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _OwnHistoryCardButton(
+                                    title: 'Laporan Saya',
+                                    subtitle: 'Keluhan fasilitas',
+                                    count: data.ownLaporan.length,
+                                    icon: Icons.assignment_outlined,
+                                    color: AppColors.primary,
+                                    onTap: () {
+                                      Get.to(() => MahasiswaOwnReportsView(ownLaporan: data.ownLaporan));
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: _OwnHistoryCardButton(
+                                    title: 'Aspirasi Saya',
+                                    subtitle: 'Saran & masukan',
+                                    count: data.ownAspirasi.length,
+                                    icon: Icons.chat_bubble_outline_rounded,
+                                    color: AppColors.secondary,
+                                    onTap: () {
+                                      Get.to(() => MahasiswaOwnAspirationsView(ownAspirasi: data.ownAspirasi));
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 20),
                           ],
@@ -157,11 +170,11 @@ class _RoleProfileViewState extends State<RoleProfileView> {
       if (user.nomorInduk.isNotEmpty) userIds.add(user.nomorInduk);
     }
 
-    final aspirasiList = List<AspirasiModel>.from({});
-    //     AspirasiModel.dummyList()
-    //         .where((item) => userIds.contains(item.pelaporId))
-    //         .toList()
-    //       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final aspirasiListRaw = await AspirasiService().fetchAllAspirasi();
+    final aspirasiList = aspirasiListRaw
+        .where((item) => item.pelaporId != null && userIds.contains(item.pelaporId))
+        .toList()
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     final laporanList = await LaporanFasilitasService().getAll();
     final ownLaporan =
@@ -521,36 +534,174 @@ class _SignOutTile extends StatelessWidget {
 }
 
 
-String _formatDate(DateTime date) {
-  final now = DateTime.now();
-  final sameDay =
-      now.year == date.year && now.month == date.month && now.day == date.day;
-  if (sameDay) return 'Hari Ini';
+class _OwnHistoryCardButton extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final int count;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
 
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'Mei',
-    'Jun',
-    'Jul',
-    'Agu',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Des',
-  ];
-  return '${date.day} ${months[date.month - 1]} ${date.year}';
+  const _OwnHistoryCardButton({
+    required this.title,
+    required this.subtitle,
+    required this.count,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        icon,
+                        color: color,
+                        size: 20,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '$count',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.title,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.body,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class MahasiswaOwnReportsView extends StatelessWidget {
+
+class MahasiswaOwnReportsView extends StatefulWidget {
   final List<LaporanFasilitasModel> ownLaporan;
 
   const MahasiswaOwnReportsView({super.key, required this.ownLaporan});
 
   @override
+  State<MahasiswaOwnReportsView> createState() => _MahasiswaOwnReportsViewState();
+}
+
+class _MahasiswaOwnReportsViewState extends State<MahasiswaOwnReportsView> {
+  late List<LaporanFasilitasModel> _listLaporan;
+  String _currentFilter = 'Terbaru'; // 'Terbaru' or 'Selesai'
+
+  @override
+  void initState() {
+    super.initState();
+    _listLaporan = List.from(widget.ownLaporan);
+  }
+
+  List<LaporanFasilitasModel> get _filteredLaporan {
+    var list = List<LaporanFasilitasModel>.from(_listLaporan);
+    if (_currentFilter == 'Terbaru') {
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    } else if (_currentFilter == 'Selesai') {
+      list = list.where((l) => l.status == StatusLaporan.resolved || l.sudahDicetak).toList();
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+    return list;
+  }
+
+  Widget _localSortChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : AppColors.surface,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: selected ? Colors.white : AppColors.title,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final filtered = _filteredLaporan;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
@@ -559,12 +710,40 @@ class MahasiswaOwnReportsView extends StatelessWidget {
             title: 'Laporan Saya',
             subtitle: 'Riwayat keluhan Anda',
           ),
-          if (ownLaporan.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Row(
+                children: [
+                  _localSortChip(
+                    label: 'Terbaru',
+                    selected: _currentFilter == 'Terbaru',
+                    onTap: () {
+                      setState(() {
+                        _currentFilter = 'Terbaru';
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _localSortChip(
+                    label: 'Selesai',
+                    selected: _currentFilter == 'Selesai',
+                    onTap: () {
+                      setState(() {
+                        _currentFilter = 'Selesai';
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (filtered.isEmpty)
             const SliverFillRemaining(
               child: Center(
                 child: Text(
-                  'Belum ada laporan fasilitas yang Anda buat.',
-                  style: TextStyle(color: AppColors.body),
+                  'Belum ada laporan fasilitas.',
+                  style: TextStyle(color: AppColors.body, fontFamily: 'Poppins'),
                 ),
               ),
             )
@@ -574,29 +753,79 @@ class MahasiswaOwnReportsView extends StatelessWidget {
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final laporan = ownLaporan[index];
+                    final laporan = filtered[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: LaporanFasilitasCard(
                         laporan: laporan,
-                        currentUserId: laporan.pelapor_id ?? '',
+                        currentUserId: laporan.pelapor_id,
                         showVoteColumn: false,
                         showActions: true,
                         showVoteButtons: false,
-                        onTap: () {
-                          Get.to(() => DetailLaporanFasilitasView(
+                        onTap: () async {
+                          final changed = await Get.to(() => DetailLaporanFasilitasView(
                                 laporanId: laporan.id,
                                 role: 'mahasiswa',
                               ));
+                          if (changed == true) {
+                            final fresh = await LaporanFasilitasService().getAll();
+                            final user = AuthService().currentUser;
+                            if (user != null) {
+                              setState(() {
+                                _listLaporan = fresh
+                                    .where((item) => item.pelapor_id == user.id || item.pelapor_id == user.nomorInduk)
+                                    .toList();
+                              });
+                            }
+                          }
                         },
-                        onEdit: () {},
-                        onDelete: () {},
+                        onEdit: () {
+                          final currentUser = AuthService().currentUser;
+                          if (currentUser == null) return;
+                          if (laporan.pelapor_id != currentUser.id && 
+                              laporan.pelapor_id != currentUser.nomorInduk) {
+                            Get.snackbar('Gagal', 'Anda hanya bisa mengubah laporan Anda sendiri');
+                            return;
+                          }
+                          final laporCtrl = Get.put(LaporFasilitasController());
+                          laporCtrl.setupEditPage(laporan);
+                          Get.to(() => const LaporFasilitasView());
+                        },
+                        onDelete: () {
+                          final currentUser = AuthService().currentUser;
+                          if (currentUser == null) return;
+                          if (laporan.pelapor_id != currentUser.id && 
+                              laporan.pelapor_id != currentUser.nomorInduk) {
+                            Get.snackbar('Gagal', 'Anda hanya bisa menghapus laporan Anda sendiri');
+                            return;
+                          }
+                          Get.defaultDialog(
+                            title: 'Hapus Laporan',
+                            middleText: 'Apakah Anda yakin ingin menghapus laporan ini?',
+                            textConfirm: 'Hapus',
+                            textCancel: 'Batal',
+                            confirmTextColor: Colors.white,
+                            buttonColor: AppColors.danger,
+                            onConfirm: () async {
+                              try {
+                                await LaporanFasilitasService().delete(laporan.id);
+                                Get.back();
+                                Get.snackbar('Sukses', 'Laporan berhasil dihapus');
+                                setState(() {
+                                  _listLaporan.removeWhere((item) => item.id == laporan.id);
+                                });
+                              } catch (e) {
+                                Get.snackbar('Gagal', 'Gagal menghapus laporan: $e');
+                              }
+                            }
+                          );
+                        },
                         onUpvote: () {},
                         onDownvote: () {},
                       ),
                     );
                   },
-                  childCount: ownLaporan.length,
+                  childCount: filtered.length,
                 ),
               ),
             ),
@@ -606,13 +835,70 @@ class MahasiswaOwnReportsView extends StatelessWidget {
   }
 }
 
-class MahasiswaOwnAspirationsView extends StatelessWidget {
+class MahasiswaOwnAspirationsView extends StatefulWidget {
   final List<AspirasiModel> ownAspirasi;
 
   const MahasiswaOwnAspirationsView({super.key, required this.ownAspirasi});
 
   @override
+  State<MahasiswaOwnAspirationsView> createState() => _MahasiswaOwnAspirationsViewState();
+}
+
+class _MahasiswaOwnAspirationsViewState extends State<MahasiswaOwnAspirationsView> {
+  late List<AspirasiModel> _listAspirasi;
+  String _currentFilter = 'Terbaru'; // 'Terbaru' or 'Selesai'
+
+  @override
+  void initState() {
+    super.initState();
+    _listAspirasi = List.from(widget.ownAspirasi);
+  }
+
+  List<AspirasiModel> get _filteredAspirasi {
+    var list = List<AspirasiModel>.from(_listAspirasi);
+    if (_currentFilter == 'Terbaru') {
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    } else if (_currentFilter == 'Selesai') {
+      list = list.where((a) => a.status == StatusAspirasi.responded).toList();
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+    return list;
+  }
+
+  Widget _localSortChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : AppColors.surface,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: selected ? Colors.white : AppColors.title,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final filtered = _filteredAspirasi;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
@@ -621,12 +907,40 @@ class MahasiswaOwnAspirationsView extends StatelessWidget {
             title: 'Aspirasi Saya',
             subtitle: 'Riwayat saran Anda',
           ),
-          if (ownAspirasi.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Row(
+                children: [
+                  _localSortChip(
+                    label: 'Terbaru',
+                    selected: _currentFilter == 'Terbaru',
+                    onTap: () {
+                      setState(() {
+                        _currentFilter = 'Terbaru';
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _localSortChip(
+                    label: 'Selesai',
+                    selected: _currentFilter == 'Selesai',
+                    onTap: () {
+                      setState(() {
+                        _currentFilter = 'Selesai';
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (filtered.isEmpty)
             const SliverFillRemaining(
               child: Center(
                 child: Text(
-                  'Belum ada aspirasi yang Anda buat.',
-                  style: TextStyle(color: AppColors.body),
+                  'Belum ada aspirasi.',
+                  style: TextStyle(color: AppColors.body, fontFamily: 'Poppins'),
                 ),
               ),
             )
@@ -636,7 +950,7 @@ class MahasiswaOwnAspirationsView extends StatelessWidget {
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                    final aspirasi = ownAspirasi[index];
+                    final aspirasi = filtered[index];
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: AspirasiCard(
@@ -647,6 +961,45 @@ class MahasiswaOwnAspirationsView extends StatelessWidget {
                         showVoteButtons: false,
                         onUpvote: () {},
                         onDownvote: () {},
+                        onEdit: () {
+                          final currentUser = AuthService().currentUser;
+                          if (currentUser == null) return;
+                          if (aspirasi.pelaporId != currentUser.id && 
+                              aspirasi.pelaporId != currentUser.nomorInduk) {
+                            Get.snackbar('Gagal', 'Anda hanya bisa mengubah aspirasi Anda sendiri');
+                            return;
+                          }
+                          Get.to(() => AspirasiEditView(aspirasi: aspirasi));
+                        },
+                        onDelete: () {
+                          final currentUser = AuthService().currentUser;
+                          if (currentUser == null) return;
+                          if (aspirasi.pelaporId != currentUser.id && 
+                              aspirasi.pelaporId != currentUser.nomorInduk) {
+                            Get.snackbar('Gagal', 'Anda hanya bisa menghapus aspirasi Anda sendiri');
+                            return;
+                          }
+                          Get.defaultDialog(
+                            title: 'Hapus Aspirasi',
+                            middleText: 'Apakah Anda yakin ingin menghapus aspirasi ini?',
+                            textConfirm: 'Hapus',
+                            textCancel: 'Batal',
+                            confirmTextColor: Colors.white,
+                            buttonColor: AppColors.danger,
+                            onConfirm: () async {
+                              try {
+                                await AspirasiService().deleteAspirasi(aspirasi.id);
+                                Get.back();
+                                Get.snackbar('Sukses', 'Aspirasi berhasil dihapus');
+                                setState(() {
+                                  _listAspirasi.removeWhere((item) => item.id == aspirasi.id);
+                                });
+                              } catch (e) {
+                                Get.snackbar('Gagal', 'Gagal menghapus aspirasi: $e');
+                              }
+                            }
+                          );
+                        },
                         onTap: () {
                           Get.to(() => DetailAspirasiView(
                                 aspirasi: aspirasi,
@@ -656,7 +1009,7 @@ class MahasiswaOwnAspirationsView extends StatelessWidget {
                       ),
                     );
                   },
-                  childCount: ownAspirasi.length,
+                  childCount: filtered.length,
                 ),
               ),
             ),
