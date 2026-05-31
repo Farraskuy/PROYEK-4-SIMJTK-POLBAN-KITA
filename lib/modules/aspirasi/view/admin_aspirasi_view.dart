@@ -143,17 +143,9 @@ class AdminAspirasiView extends StatelessWidget {
         items: items,
         selectedIndex: adminCtrl.selectedNavIndex.value,
         onTap: (index) {
-          if (index == adminCtrl.selectedNavIndex.value) return; // Abaikan jika tab yang sama diklik
-
-          adminCtrl.selectedNavIndex.value = index;
-
-          if (index == 0) {
-            // Jika kembali ke Home, cukup tutup halaman ini agar tidak menumpuk layar
-            Get.back();
-          } else if (index == 3) {
-            // Jika ke User, ganti halaman saat ini ke halaman User
-            Get.off(() => const AdminAddUserView());
-          }
+          if (index == 2) return; // Abaikan jika tab yang sama diklik
+          adminCtrl.onNavTapped(index);
+          if (index == 0) Get.back();
         },
       ),
     );

@@ -17,10 +17,10 @@ class AdminAddUserView extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          const AppSliverDetailAppBar(
-            title: 'Tambah User',
+          Obx(() => AppSliverDetailAppBar(
+            title: ctrl.isEditMode.value ? 'Edit User' : 'Tambah User',
             subtitle: 'Kelola akun SIMJTK',
-          ),
+          )),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 28),
@@ -77,14 +77,15 @@ class _UserFormCard extends StatelessWidget {
             required: true,
           ),
           const SizedBox(height: 14),
-          AppTextField(
+          Obx(() => AppTextField(
             label: 'NIM / NIP / NIDN',
             controller: ctrl.nomorIndukController,
             hintText: 'Contoh: 231511001',
             prefixIcon: Icons.credit_card_rounded,
             keyboardType: TextInputType.text,
             required: true,
-          ),
+            enabled: !ctrl.isEditMode.value,
+          )),
           const SizedBox(height: 14),
           AppTextField(
             label: 'Email',
@@ -129,10 +130,10 @@ class _UserFormCard extends StatelessWidget {
             () => AppTextField(
               label: 'Password',
               controller: ctrl.passwordController,
-              hintText: 'Minimal 6 karakter',
+              hintText: ctrl.isEditMode.value ? 'Biarkan kosong jika tidak diubah' : 'Minimal 6 karakter',
               prefixIcon: Icons.lock_outline_rounded,
               obscureText: !ctrl.isPasswordVisible.value,
-              required: true,
+              required: !ctrl.isEditMode.value,
               suffixIcon: IconButton(
                 onPressed: ctrl.togglePasswordVisibility,
                 icon: Icon(
@@ -152,7 +153,7 @@ class _UserFormCard extends StatelessWidget {
               hintText: 'Ulangi password',
               prefixIcon: Icons.lock_reset_rounded,
               obscureText: !ctrl.isConfirmPasswordVisible.value,
-              required: true,
+              required: !ctrl.isEditMode.value,
               suffixIcon: IconButton(
                 onPressed: ctrl.toggleConfirmPasswordVisibility,
                 icon: Icon(
@@ -195,7 +196,7 @@ class _UserFormCard extends StatelessWidget {
           const SizedBox(height: 8),
           Obx(
             () => AppButton(
-              label: 'Simpan User',
+              label: ctrl.isEditMode.value ? 'Simpan Perubahan' : 'Simpan User',
               leadingIcon: Icons.save_rounded,
               variant: AppButtonVariant.navy,
               isLoading: ctrl.isSaving.value,
