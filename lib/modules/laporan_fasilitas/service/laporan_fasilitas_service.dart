@@ -113,9 +113,6 @@ class LaporanFasilitasService {
   ) async {
     final mongo = MonggoDBServices();
     
-    // Pastikan koneksi aman sebelum menarik data
-    await mongo.ensureConnected(); 
-    
     final rawRows = await mongo.fetch(collectionName, filter);
 
     if (rawRows.isEmpty) return rawRows;
