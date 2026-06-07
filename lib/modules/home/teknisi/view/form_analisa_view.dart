@@ -5,6 +5,8 @@ import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/t
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_report_image.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/vision_view.dart';
 
 class FormAnalisaView extends StatefulWidget {
   const FormAnalisaView({super.key, required this.laporan});
@@ -117,6 +119,83 @@ class _FormAnalisaViewState extends State<FormAnalisaView> {
                     );
                   }).toList(),
                 ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            _Section(
+              title: 'Foto Bukti',
+              icon: Icons.photo_camera_outlined,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: () async {
+                      final path = await Navigator.push<String?>(
+                        context,
+                        MaterialPageRoute(builder: (_) => const VisionView()),
+                      );
+                      if (path != null) controller.addPhoto(path);
+                    },
+                    icon: const Icon(Icons.camera_alt_outlined),
+                    label: const Text('Ambil Foto Perbaikan'),
+                  ),
+                  Obx(() {
+                    if (controller.fotoPaths.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.only(top: 10),
+                        child: Text(
+                          'Belum ada foto bukti.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.muted,
+                          ),
+                        ),
+                      );
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 12),
+                      child: SizedBox(
+                        height: 92,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: controller.fotoPaths.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 8),
+                          itemBuilder: (_, index) {
+                            final path = controller.fotoPaths[index];
+                            return Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: AppReportImage(
+                                    source: path,
+                                    width: 92,
+                                    height: 92,
+                                  ),
+                                ),
+                                Positioned(
+                                  right: 3,
+                                  top: 3,
+                                  child: InkWell(
+                                    onTap: () => controller.removePhoto(path),
+                                    child: const CircleAvatar(
+                                      radius: 11,
+                                      backgroundColor: AppColors.danger,
+                                      child: Icon(
+                                        Icons.close,
+                                        size: 13,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  }),
+                ],
               ),
             ),
             const SizedBox(height: 12),

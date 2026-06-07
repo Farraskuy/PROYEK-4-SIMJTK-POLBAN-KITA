@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../aspirasi/controller/aspirasi_controller.dart';
-import '../../aspirasi/model/aspirasi_model.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/controller/aspirasi_controller.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/detail_aspirasi_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/widgets/aspirasi_card.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/widgets/aspirasi_sort_bar.dart';
-import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/detail_aspirasi_view.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
-import 'package:proyek_4_poki_polban_kita/modules/user/view/admin_add_user_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/admin_laporan_fasilitas_view.dart';
-import '../../home/admin/controller/home_controller.dart'; 
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 
 class AdminAspirasiView extends StatelessWidget {
@@ -16,88 +11,94 @@ class AdminAspirasiView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ctrl = Get.put(AspirasiController());
-    final adminCtrl = Get.find<AdminDashboardController>();
-
-    // Memastikan indeks navbar otomatis berpindah ke 'Aspirasi' (indeks ke-2) saat halaman ini dibuka
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      adminCtrl.selectedNavIndex.value = 2;
-    });
+    final controller = Get.put(AspirasiController());
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.surface,
-        elevation: 0,
-        title: const Text(
-          'Daftar Aspirasi',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: AppColors.title,
-            fontFamily: 'Poppins',
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.title),
-          onPressed: () {
-            adminCtrl.selectedNavIndex.value = 0; // Kembalikan indikator ke Home
-            Get.back();
-          },
-        ),
-      ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 12),
-          Obx(
-            () => AspirasiSortBar(
-              selectedIndex: ctrl.activeTab.value.index,
-              onChanged: (index) {
-                ctrl.tabController.animateTo(index);
-              },
+          const _Header(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: Obx(
+              () => TextField(
+                controller: controller.adminSearchController,
+                decoration: InputDecoration(
+                  hintText: 'Cari topik, isi aspirasi, atau pelapor...',
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: controller.adminSearchQuery.value.isEmpty
+                      ? null
+                      : IconButton(
+                          onPressed: controller.clearAdminSearch,
+                          icon: const Icon(Icons.close_rounded),
+                        ),
+                  filled: true,
+                  fillColor: AppColors.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: AppColors.border),
+                  ),
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 12),
+          Obx(
+            () => AspirasiSortBar(
+              selectedIndex: controller.activeTab.value.index,
+              onChanged: controller.tabController.animateTo,
+            ),
+          ),
+          const SizedBox(height: 8),
           Expanded(
             child: Obx(() {
-              if (ctrl.isLoading.value) {
-                return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-              }
-
-              if (ctrl.displayedAspirasi.isEmpty) {
+              if (controller.isLoading.value) {
                 return const Center(
-                  child: Text(
-                    'Belum ada aspirasi.',
-                    style: TextStyle(color: AppColors.body, fontFamily: 'Poppins'),
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                );
+              }
+              if (controller.displayedAspirasi.isEmpty) {
+                return RefreshIndicator(
+                  onRefresh: controller.onRefresh,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 120),
+                      Icon(
+                        Icons.campaign_outlined,
+                        size: 48,
+                        color: AppColors.muted,
+                      ),
+                      SizedBox(height: 12),
+                      Center(
+                        child: Text(
+                          'Tidak ada aspirasi yang sesuai.',
+                          style: TextStyle(color: AppColors.body),
+                        ),
+                      ),
+                    ],
                   ),
                 );
               }
-
               return RefreshIndicator(
-                color: AppColors.primary,
-                onRefresh: ctrl.onRefresh,
+                onRefresh: controller.onRefresh,
                 child: ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: ctrl.displayedAspirasi.length,
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                  itemCount: controller.displayedAspirasi.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final item = ctrl.displayedAspirasi[index];
+                  itemBuilder: (_, index) {
+                    final item = controller.displayedAspirasi[index];
                     return AspirasiCard(
                       aspirasi: item,
-                      isUpvoted: ctrl.isUpvoted(item),
-                      isDownvoted: ctrl.isDownvoted(item),
+                      isUpvoted: false,
+                      isDownvoted: false,
                       showVoteButtons: false,
-                      showVoteColumn: true,
+                      showVoteColumn: false,
                       showActions: false,
-                      onUpvote: () {},
-                      onDownvote: () {},
-                      onTap: () {
-                        Get.to(() => DetailAspirasiView(
-                              aspirasi: item,
-                              role: 'tu',
-                            ));
-                      },
+                      onUpvote: _noop,
+                      onDownvote: _noop,
+                      onTap: () => Get.to(
+                        () => DetailAspirasiView(aspirasi: item, role: 'admin'),
+                      ),
                     );
                   },
                 ),
@@ -105,6 +106,73 @@ class AdminAspirasiView extends StatelessWidget {
             }),
           ),
         ],
+      ),
+    );
+  }
+
+  static void _noop() {}
+}
+
+class _Header extends StatelessWidget {
+  const _Header();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: AppColors.surface,
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: const SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: AppColors.primary,
+                  child: Icon(
+                    Icons.admin_panel_settings_outlined,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Portal Admin / TU',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.title,
+                      ),
+                    ),
+                    Text(
+                      'SIMJTK',
+                      style: TextStyle(fontSize: 12, color: AppColors.body),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Aspirasi Mahasiswa',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                color: AppColors.title,
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Tinjau dan berikan tanggapan resmi kepada mahasiswa.',
+              style: TextStyle(fontSize: 13, color: AppColors.body),
+            ),
+          ],
+        ),
       ),
     );
   }

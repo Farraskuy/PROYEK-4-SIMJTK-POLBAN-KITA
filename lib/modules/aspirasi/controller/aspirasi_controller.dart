@@ -52,6 +52,8 @@ class AspirasiController extends GetxController
 
   /// Controller teks area aspirasi
   final isiSaranController = TextEditingController();
+  final adminSearchController = TextEditingController();
+  final RxString adminSearchQuery = ''.obs;
 
   /// Status submitting form
   final RxBool isSubmitting = false.obs;
@@ -88,6 +90,10 @@ class AspirasiController extends GetxController
     isiSaranController.addListener(() {
       if (isiSaranController.text.isNotEmpty) errorIsiSaran.value = '';
     });
+    adminSearchController.addListener(() {
+      adminSearchQuery.value = adminSearchController.text;
+      _applyFilter();
+    });
   }
 
   Future<void> _initCurrentUser() async {
@@ -109,6 +115,7 @@ class AspirasiController extends GetxController
     tabController.removeListener(_onTabChanged);
     tabController.dispose();
     isiSaranController.dispose();
+    adminSearchController.dispose();
     super.onClose();
   }
 
@@ -147,21 +154,20 @@ class AspirasiController extends GetxController
   }
 
   void _applyFilter() {
+    List<AspirasiModel> result;
     switch (activeTab.value) {
       case TabAspirasi.terbaru:
-        final sorted = List<AspirasiModel>.from(_allAspirasi)
+        result = List<AspirasiModel>.from(_allAspirasi)
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        displayedAspirasi.assignAll(sorted);
         break;
 
       case TabAspirasi.terpopuler:
-        final sorted = List<AspirasiModel>.from(_allAspirasi)
+        result = List<AspirasiModel>.from(_allAspirasi)
           ..sort((a, b) => b.upvoteCount.compareTo(a.upvoteCount));
-        displayedAspirasi.assignAll(sorted);
         break;
 
       case TabAspirasi.selesai:
-        final filtered =
+        result =
             _allAspirasi
                 .where(
                   (a) =>
@@ -170,10 +176,20 @@ class AspirasiController extends GetxController
                 )
                 .toList()
               ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        displayedAspirasi.assignAll(filtered);
         break;
     }
+    final query = adminSearchQuery.value.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      result = result.where((aspirasi) {
+        return aspirasi.topik.toLowerCase().contains(query) ||
+            aspirasi.isiSaran.toLowerCase().contains(query) ||
+            (aspirasi.pelaporName ?? '').toLowerCase().contains(query);
+      }).toList();
+    }
+    displayedAspirasi.assignAll(result);
   }
+
+  void clearAdminSearch() => adminSearchController.clear();
 
   bool _validateForm() {
     if (isiSaranController.text.trim().length < minIsiSaranLength) {
@@ -483,7 +499,8 @@ class AspirasiController extends GetxController
   }
 
   bool isUpvoted(AspirasiModel a) => a.upvoterIds.contains(currentUserId.value);
-  bool isDownvoted(AspirasiModel a) => a.downvoterIds.contains(currentUserId.value);
+  bool isDownvoted(AspirasiModel a) =>
+      a.downvoterIds.contains(currentUserId.value);
 
   /// Refresh data (pull-to-refresh)
   Future<void> onRefresh() async => await _loadAspirasi();

@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_status_chip.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_vote_column.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_report_image.dart';
 
 class LaporanFasilitasCard extends StatelessWidget {
   final LaporanFasilitasModel laporan;
@@ -202,15 +201,13 @@ class LaporanFasilitasCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    if (fotoLaporanPath != null) ...[
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: LaporanFasilitasImage(
-                          imagePath: fotoLaporanPath,
-                        ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: LaporanFasilitasImage(
+                        imagePath: fotoLaporanPath,
                       ),
-                      const SizedBox(height: 12),
-                    ],
+                    ),
+                    const SizedBox(height: 12),
                     if (laporan.catatanPetugas?.isNotEmpty == true) ...[
                       Text(
                         'Petugas: ${laporan.catatanPetugas}',
@@ -270,43 +267,13 @@ class LaporanFasilitasCard extends StatelessWidget {
 }
 
 class LaporanFasilitasImage extends StatelessWidget {
-  final String imagePath;
+  final String? imagePath;
 
   const LaporanFasilitasImage({super.key, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
-    return imagePath.startsWith('http')
-        ? Image.network(
-            imagePath,
-            height: 160,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => const _ImagePlaceholder(),
-          )
-        : Image.file(
-            File(imagePath),
-            height: 160,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => const _ImagePlaceholder(),
-          );
-  }
-}
-
-class _ImagePlaceholder extends StatelessWidget {
-  const _ImagePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 160,
-      width: double.infinity,
-      color: AppColors.field,
-      child: const Center(
-        child: Icon(Icons.broken_image_outlined, color: AppColors.muted, size: 40),
-      ),
-    );
+    return AppReportImage(source: imagePath, height: 160);
   }
 }
 

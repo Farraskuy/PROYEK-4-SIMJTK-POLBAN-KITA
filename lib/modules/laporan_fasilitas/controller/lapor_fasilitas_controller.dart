@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/cloudinary_service.dart';
 import '../model/laporan_fasilitas_model.dart';
 import '../service/laporan_fasilitas_service.dart';
 
@@ -21,6 +22,7 @@ class LaporFasilitasController extends GetxController {
   LaporanFasilitasModel? _laporanLama;
 
   final LaporanFasilitasService _service = LaporanFasilitasService();
+  final CloudinaryService _cloudinaryService = CloudinaryService();
 
   String get pageTitle =>
       isEditMode.value ? 'Edit Laporan' : 'Lapor Kerusakan Fasilitas';
@@ -66,6 +68,10 @@ class LaporFasilitasController extends GetxController {
       final pelaporId =
           currentUser?.id ?? currentUser?.nomorInduk ?? 'anonymous';
       final old = _laporanLama;
+      final fotoUrls = await _cloudinaryService.uploadImages(
+        selectedFotoPaths,
+        folder: 'simjtk/laporan_fasilitas',
+      );
 
       final laporanData = LaporanFasilitasModel(
         id: isEditMode.value
@@ -76,7 +82,7 @@ class LaporFasilitasController extends GetxController {
             : judulController.text.trim(),
         deskripsi: deskripsiController.text.trim(),
         lokasi: lokasiController.text.trim(),
-        foto_urls: List.from(selectedFotoPaths),
+        foto_urls: fotoUrls,
         pelapor_id: old?.pelapor_id ?? pelaporId,
         teknisi_id: old?.teknisi_id,
         status: old?.status ?? StatusLaporan.pending,

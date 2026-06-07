@@ -17,6 +17,7 @@ class TanggapanTugasController extends GetxController {
   final noInventarisController = TextEditingController();
   final tanggapanController = TextEditingController();
   final perbaikanController = TextEditingController();
+  final fotoPaths = <String>[].obs;
   final tingkatKerusakan = TingkatKerusakan.sedang.obs;
   final isLoading = true.obs;
   final isSaving = false.obs;
@@ -61,6 +62,12 @@ class TanggapanTugasController extends GetxController {
           draft['analisa_masalah']?.toString() ?? '';
       perbaikanController.text =
           draft['rekomendasi_perbaikan']?.toString() ?? '';
+      fotoPaths.assignAll(
+        (draft['foto_analisa_urls'] as List?)
+                ?.map((item) => item.toString())
+                .toList() ??
+            const <String>[],
+      );
       tingkatKerusakan.value = TingkatKerusakan.values.firstWhere(
         (item) => item.value == draft['tingkat_kerusakan'],
         orElse: () => TingkatKerusakan.sedang,
@@ -94,8 +101,20 @@ class TanggapanTugasController extends GetxController {
       'analisa_masalah': tanggapanController.text.trim(),
       'rekomendasi_perbaikan': perbaikanController.text.trim(),
       'tingkat_kerusakan': tingkatKerusakan.value.value,
+      'foto_analisa_urls': fotoPaths.toList(),
       'form_status': completed ? 'selesai' : 'draft',
     };
+  }
+
+  void addPhoto(String path) {
+    if (path.isEmpty || fotoPaths.contains(path)) return;
+    fotoPaths.add(path);
+    _scheduleAutosave();
+  }
+
+  void removePhoto(String path) {
+    fotoPaths.remove(path);
+    _scheduleAutosave();
   }
 
   void _scheduleAutosave() {

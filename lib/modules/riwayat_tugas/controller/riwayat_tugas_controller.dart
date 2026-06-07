@@ -13,6 +13,7 @@ import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/lapora
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/tanggapan_tugas_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
 
 // ============================================================
 // ENUM FILTER
@@ -247,14 +248,11 @@ class RiwayatTugasController extends GetxController {
   Future<void> onRefresh() async => await _loadRiwayat();
 
   void onItemTapped(RiwayatLaporanModel item) {
-    Get.snackbar(
-      item.laporan.id,
-      item.laporan.judul,
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-      backgroundColor: const Color(0xFFE8F5E9),
-      colorText: const Color(0xFF2E7D32),
-      duration: const Duration(seconds: 2),
+    Get.to(
+      () => DetailLaporanFasilitasView(
+        laporanId: item.laporan.id,
+        role: 'teknisi',
+      ),
     );
   }
 

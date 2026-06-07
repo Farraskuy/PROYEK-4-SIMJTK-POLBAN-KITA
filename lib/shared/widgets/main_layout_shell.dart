@@ -6,7 +6,6 @@ import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/admin_l
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/aspirasi_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/admin_aspirasi_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/mahasiswa_fasilitas_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/user/view/admin_user_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/riwayat_tugas/view/riwayat_tugas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/profile/view/role_profile_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/teknisi_laporan_fasilitas_view.dart';
@@ -15,6 +14,8 @@ import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/teknisi/controller/home_controller.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/teknisi_laporan_fasilitas_controller.dart';
 import 'package:proyek_4_poki_polban_kita/modules/riwayat_tugas/controller/riwayat_tugas_controller.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/admin_laporan_controller.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/controller/aspirasi_controller.dart';
 
 enum HomeDestination {
   mahasiswa,
@@ -117,7 +118,6 @@ class _MainLayoutShellState extends State<MainLayoutShell> {
           AdminDashboardView(),
           AdminLaporanFasilitasView(),
           AdminAspirasiView(),
-          AdminUserView(),
         ];
       case UserRole.mahasiswa:
         return const [
@@ -143,7 +143,6 @@ class _MainLayoutShellState extends State<MainLayoutShell> {
           BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.apartment_rounded), label: 'Layanan'),
           BottomNavigationBarItem(icon: Icon(Icons.campaign_rounded), label: 'Aspirasi'),
-          BottomNavigationBarItem(icon: Icon(Icons.group_rounded), label: 'User'),
         ];
       case UserRole.mahasiswa:
         return const [
@@ -163,6 +162,14 @@ class _MainLayoutShellState extends State<MainLayoutShell> {
   }
 
   Future<void> _refreshSelectedPage(int index) async {
+    if (widget.userRole == UserRole.admin) {
+      if (index == 1 && Get.isRegistered<AdminLaporanController>()) {
+        await Get.find<AdminLaporanController>().fetchLaporan();
+      } else if (index == 2 && Get.isRegistered<AspirasiController>()) {
+        await Get.find<AspirasiController>().onRefresh();
+      }
+      return;
+    }
     if (widget.userRole != UserRole.teknisi) return;
 
     switch (index) {

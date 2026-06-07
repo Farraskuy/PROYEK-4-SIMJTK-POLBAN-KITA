@@ -2,10 +2,12 @@ import 'package:hive/hive.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Box;
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/cloudinary_service.dart';
 
 class TanggapanTugasService {
   static const _boxName = 'draft_tanggapan_tugas';
   static const _collection = 'analisa_kerusakan';
+  final CloudinaryService _cloudinaryService = CloudinaryService();
 
   Future<Box<dynamic>> _box() => Hive.openBox<dynamic>(_boxName);
 
@@ -32,7 +34,13 @@ class TanggapanTugasService {
     Map<String, dynamic> data, {
     required bool pendingSync,
   }) async {
-    await (await _box()).put(laporanId, {
+    final box = await _box();
+    final existing = box.get(laporanId);
+    final existingMap = existing is Map
+        ? Map<String, dynamic>.from(existing)
+        : <String, dynamic>{};
+    await box.put(laporanId, {
+      ...existingMap,
       ...data,
       'pending_sync': pendingSync,
       'saved_at': DateTime.now().toIso8601String(),
@@ -49,8 +57,36 @@ class TanggapanTugasService {
 
     final filter = where.eq('laporan_id', laporanId);
     final existing = await mongo.fetch(_collection, filter);
+    final photoPaths = (data['foto_analisa_urls'] as List?)
+            ?.map((item) => item.toString())
+            .toList() ??
+        const <String>[];
+    final localDraft = await getDraft(laporanId);
+    final uploadedPhotoMap = Map<String, String>.from(
+      localDraft?['uploaded_photo_map'] as Map? ?? const {},
+    );
+    final photoUrls = <String>[];
+    for (final path in photoPaths) {
+      if (path.startsWith('http://') || path.startsWith('https://')) {
+        photoUrls.add(path);
+        continue;
+      }
+      final cachedUrl = uploadedPhotoMap[path];
+      if (cachedUrl != null) {
+        photoUrls.add(cachedUrl);
+        continue;
+      }
+      final url = await _cloudinaryService.uploadImage(
+        path,
+        folder: 'simjtk/tanggapan_petugas',
+      );
+      uploadedPhotoMap[path] = url;
+      photoUrls.add(url);
+    }
     final syncedData = {
       ...data,
+      'foto_analisa_urls': photoUrls,
+      'uploaded_photo_map': uploadedPhotoMap,
       'laporan_id': laporanId,
       'sync_status': 'synced',
       'updated_at': DateTime.now(),
@@ -97,6 +133,22 @@ class TanggapanTugasService {
       } catch (_) {
         // Tetap berada di antrean lokal dan dicoba lagi pada siklus berikutnya.
       }
+    }
+  }
+
+  Future<Map<String, dynamic>?> getTanggapan(String laporanId) async {
+    final local = await getDraft(laporanId);
+    try {
+      final mongo = MonggoDBServices();
+      await mongo.ensureConnected();
+      final rows = await mongo.fetch(
+        _collection,
+        where.eq('laporan_id', laporanId),
+      );
+      if (rows.isEmpty) return local;
+      return {...rows.first, ...?local};
+    } catch (_) {
+      return local;
     }
   }
 }

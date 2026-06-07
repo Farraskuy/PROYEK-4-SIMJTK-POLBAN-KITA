@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_status_chip.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_report_image.dart';
 
 class TeknisiLaporanFasilitasCard extends StatelessWidget {
   const TeknisiLaporanFasilitasCard({
@@ -139,13 +138,11 @@ class TeknisiLaporanFasilitasCard extends StatelessWidget {
                   ),
                 ],
               ),
-              if (imagePath != null) ...[
-                const SizedBox(height: 12),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: _ReportImage(path: imagePath),
-                ),
-              ],
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: AppReportImage(source: imagePath, height: 160),
+              ),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
@@ -233,51 +230,6 @@ class _VoteScore extends StatelessWidget {
             style: TextStyle(fontSize: 9, color: AppColors.body),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ReportImage extends StatelessWidget {
-  const _ReportImage({required this.path});
-
-  final String path;
-
-  @override
-  Widget build(BuildContext context) {
-    if (path.startsWith('http')) {
-      return Image.network(
-        path,
-        height: 160,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => const _ImagePlaceholder(),
-      );
-    }
-
-    return Image.file(
-      File(path),
-      height: 160,
-      width: double.infinity,
-      fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => const _ImagePlaceholder(),
-    );
-  }
-}
-
-class _ImagePlaceholder extends StatelessWidget {
-  const _ImagePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 160,
-      color: AppColors.field,
-      alignment: Alignment.center,
-      child: const Icon(
-        Icons.broken_image_outlined,
-        size: 40,
-        color: AppColors.muted,
       ),
     );
   }

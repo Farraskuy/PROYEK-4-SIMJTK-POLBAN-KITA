@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/teknisi/view/form_analisa_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_report_image.dart';
 import '../controller/detail_laporan_fasilitas_controller.dart';
 import '../model/laporan_fasilitas_model.dart';
 
@@ -100,19 +101,18 @@ class _DetailLaporanFasilitasViewState
                         ],
                       ),
                       const SizedBox(height: 14),
-                      if (laporan.foto_urls.isNotEmpty) ...[
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            laporan.foto_urls.first,
-                            height: 190,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => _heroDark(),
-                          ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: AppReportImage(
+                          source: laporan.foto_urls.isEmpty
+                              ? null
+                              : laporan.foto_urls.first,
+                          height: 190,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
                         ),
-                        const SizedBox(height: 14),
-                      ],
+                      ),
+                      const SizedBox(height: 14),
                       // Lokasi sebagai sub-label kecil
                       Text(
                         laporan.lokasi.toUpperCase(),
@@ -159,7 +159,7 @@ class _DetailLaporanFasilitasViewState
                           Expanded(
                             child: _metaItem(
                               label: 'TANGGAL LAPORAN',
-                              value: _formatDate(laporan.createdAt!),
+                              value: _formatDate(laporan.createdAt),
                             ),
                           ),
                         ],
@@ -208,6 +208,9 @@ class _DetailLaporanFasilitasViewState
                     ),
                   ),
 
+                if (_controller.tanggapan != null)
+                  _buildTanggapanDetail(_controller.tanggapan!),
+
                 // ── Kebutuhan TU ──
                 if (laporan.kebutuhanTu?.isNotEmpty == true)
                   _card(
@@ -244,17 +247,11 @@ class _DetailLaporanFasilitasViewState
                               padding: const EdgeInsets.only(right: 8),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  laporan.foto_urls[idx],
+                                child: AppReportImage(
+                                  source: laporan.foto_urls[idx],
                                   width: 100,
+                                  height: 100,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) => Container(
-                                    width: 100,
-                                    color: Colors.grey.shade200,
-                                    child: const Icon(
-                                      Icons.image_not_supported_outlined,
-                                    ),
-                                  ),
                                 ),
                               ),
                             ),
@@ -426,6 +423,102 @@ class _DetailLaporanFasilitasViewState
     ),
   );
 
+  Widget _buildTanggapanDetail(Map<String, dynamic> data) {
+    final photos = (data['foto_analisa_urls'] as List?)
+            ?.map((item) => item.toString())
+            .where((item) => item.isNotEmpty)
+            .toList() ??
+        const <String>[];
+
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.engineering_outlined,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 8),
+              _sectionLabel('Detail Tanggapan Petugas'),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _detailValue('Petugas', data['teknisi_name']),
+          _detailValue('Kode Petugas', data['teknisi_id']),
+          _detailValue('Kode Alat', data['kode_alat']),
+          _detailValue('No. Inventaris', data['no_inventaris']),
+          _detailValue('Tingkat Kerusakan', data['tingkat_kerusakan']),
+          _detailValue('Diagnosis / Tanggapan', data['analisa_masalah']),
+          _detailValue(
+            'Tindakan Perbaikan',
+            data['rekomendasi_perbaikan'],
+          ),
+          if (photos.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const Text(
+              'Foto Bukti Perbaikan',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppColors.title,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 110,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: photos.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (_, index) => ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: AppReportImage(
+                    source: photos[index],
+                    width: 110,
+                    height: 110,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _detailValue(String label, Object? rawValue) {
+    final value = rawValue?.toString().trim() ?? '';
+    if (value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: AppColors.muted,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            value.replaceAll('_', ' '),
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.title,
+              height: 1.45,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── Timeline ──────────────────────────────────────────────────────
   Widget _buildTimeline(LaporanFasilitasModel laporan) {
     final statusLabel = laporan.status.label.toLowerCase();
@@ -433,7 +526,7 @@ class _DetailLaporanFasilitasViewState
       _TlStep(
         title: 'Laporan Dibuat',
         desc: 'Laporan berhasil diterima oleh sistem.',
-        time: _formatDatetime(laporan.createdAt!),
+        time: _formatDatetime(laporan.createdAt),
         state: _TlState.done,
       ),
       _TlStep(
