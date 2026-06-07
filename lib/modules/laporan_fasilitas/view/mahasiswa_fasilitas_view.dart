@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/interaksi_laporan_controller.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/lapor_fasilitas_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/tambah_laporan_fasilitas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_empty_state.dart';
-// import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_header_section.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_list_section.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_sort_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_page_header.dart';
 
-class LaporanFasilitasMahasiswaView extends StatelessWidget {
-  const LaporanFasilitasMahasiswaView({super.key, this.role = 'mahasiswa'});
+class MahasiswaLaporanFasilitasView extends StatelessWidget {
+  const MahasiswaLaporanFasilitasView({super.key, this.role = 'mahasiswa'});
 
   final String role;
 
@@ -91,7 +90,7 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
                   final changed = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (_) => const LaporFasilitasView()),
+                        builder: (_) => const TambahLaporanFasilitasView()),
                   );
                   if (changed == true) controller.fetchLaporan();
                 },

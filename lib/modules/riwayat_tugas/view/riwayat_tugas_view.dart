@@ -29,8 +29,6 @@ class _C {
   static const chipInactiveFg = Color(0xFF6B7280);
   static const chipInactiveBorder = Color(0xFFDDE3EF);
   static const selesaiBg = Color(0xFF1A3A6B);
-  static const navActive = Color(0xFF1A3A6B);
-  static const navInactive = Color(0xFF9CA3AF);
 }
 
 // ============================================================
@@ -82,7 +80,6 @@ class RiwayatTugasView extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavBar(ctrl),
     );
   }
 
@@ -101,27 +98,37 @@ class RiwayatTugasView extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back_rounded,
-                        color: _C.textPrimary, size: 24),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Technician Portal',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: _C.primary,
+                  const CircleAvatar(
+                    radius: 22,
+                    backgroundColor: _C.primary,
+                    child: Icon(
+                      Icons.engineering_rounded,
+                      color: Colors.white,
+                      size: 22,
                     ),
                   ),
-                  const Spacer(),
-                  const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: _C.primary,
-                    child: Icon(Icons.person, color: Colors.white, size: 18),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Portal Teknisi',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: _C.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          'Teknisi JTK',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: _C.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -263,81 +270,6 @@ class RiwayatTugasView extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // BOTTOM NAV BAR
-  // ============================================================
-  Widget _buildBottomNavBar(RiwayatTugasController ctrl) {
-    const navItems = [
-      {'label': 'BERANDA', 'icon': Icons.dashboard_rounded},
-      {'label': 'TUGAS', 'icon': Icons.assignment_rounded},
-      {'label': 'RIWAYAT', 'icon': Icons.history_rounded},
-      {'label': 'PROFIL', 'icon': Icons.person_rounded},
-    ];
-
-    return Obx(() => Container(
-          decoration: BoxDecoration(
-            color: _C.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 12,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: SizedBox(
-              height: 62,
-              child: Row(
-                children: List.generate(navItems.length, (i) {
-                  final active = ctrl.selectedNavIndex.value == i;
-                  final icon = navItems[i]['icon'] as IconData;
-                  final label = navItems[i]['label'] as String;
-
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => ctrl.onNavTapped(i),
-                      behavior: HitTestBehavior.opaque,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (active)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: _C.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Icon(icon,
-                                  size: 20, color: _C.navActive),
-                            )
-                          else
-                            Icon(icon, size: 22, color: _C.navInactive),
-                          const SizedBox(height: 3),
-                          Text(
-                            label,
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: active
-                                  ? FontWeight.w700
-                                  : FontWeight.w400,
-                              color: active
-                                  ? _C.navActive
-                                  : _C.navInactive,
-                              letterSpacing: 0.3,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            ),
-          ),
-        ));
-  }
 }
 
 // ============================================================
@@ -391,8 +323,8 @@ class _FilterChip extends StatelessWidget {
                     horizontal: 6, vertical: 1),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? Colors.white.withOpacity(0.25)
-                      : _C.primary.withOpacity(0.08),
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : _C.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -435,7 +367,7 @@ class _RiwayatCard extends StatelessWidget {
           border: Border.all(color: _C.divider, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

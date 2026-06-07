@@ -1,4 +1,4 @@
-// lib/modules/laporan_fasilitas/view/lapor_fasilitas_view.dart
+// lib/modules/laporan_fasilitas/view/tambah_laporan_fasilitas_view.dart
 
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -25,16 +25,18 @@ class _AppColors {
 }
 
 // ============================================================
-// LAPOR FASILITAS VIEW
+// TAMBAH LAPORAN FASILITAS VIEW
 // ============================================================
-class LaporFasilitasView extends StatefulWidget {
-  const LaporFasilitasView({super.key});
+class TambahLaporanFasilitasView extends StatefulWidget {
+  const TambahLaporanFasilitasView({super.key});
 
   @override
-  State<LaporFasilitasView> createState() => _LaporFasilitasViewState();
+  State<TambahLaporanFasilitasView> createState() =>
+      _TambahLaporanFasilitasViewState();
 }
 
-class _LaporFasilitasViewState extends State<LaporFasilitasView> {
+class _TambahLaporanFasilitasViewState
+    extends State<TambahLaporanFasilitasView> {
   // Ambil atau daftarkan instance controller menggunakan GetX lifecycle aman
   final LaporFasilitasController controller =
       Get.isRegistered<LaporFasilitasController>()

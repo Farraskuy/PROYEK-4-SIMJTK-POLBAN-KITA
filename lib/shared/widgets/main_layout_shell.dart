@@ -1,34 +1,96 @@
 import 'package:flutter/material.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/admin/view/home_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/dosen/view/home_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/view/home_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/teknisi/view/home_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/admin_laporan_fasilitas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/aspirasi_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/admin_aspirasi_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/mahasiswa_fasilitas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/view/admin_user_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/riwayat_tugas/view/riwayat_tugas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/profile/view/role_profile_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/teknisi_laporan_fasilitas_view.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/role_service.dart';
+import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/modules/home/teknisi/controller/home_controller.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/teknisi_laporan_fasilitas_controller.dart';
+import 'package:proyek_4_poki_polban_kita/modules/riwayat_tugas/controller/riwayat_tugas_controller.dart';
 
-// 1. Definisikan Enum Role agar kode aman dari typo (Prinsip KISS)
-enum UserRole { 
-  admin, 
-  dosen, 
-  mahasiswa, 
+enum HomeDestination {
+  mahasiswa,
+  dosen,
+  teknisi,
+  admin,
+  unknown,
+}
+
+class RoleNavigationService {
+  const RoleNavigationService._();
+
+  static HomeDestination resolveDestination(String? role) {
+    final normalizedRole = AccessControlService.normalizeRole(role);
+    switch (normalizedRole) {
+      case AccessControlService.roleMahasiswa:
+        return HomeDestination.mahasiswa;
+      case AccessControlService.roleDosen:
+        return HomeDestination.dosen;
+      case AccessControlService.roleTeknisi:
+        return HomeDestination.teknisi;
+      case AccessControlService.roleAdmin:
+        return HomeDestination.admin;
+      default:
+        return HomeDestination.unknown;
+    }
+  }
+
+  static Widget buildHomeByRole(String? role) {
+    final destination = resolveDestination(role);
+    if (destination == HomeDestination.unknown) {
+      return UnknownRoleView(role: role);
+    }
+
+    final userRole = UserRole.fromString(role);
+    if (userRole == null) {
+      return UnknownRoleView(role: role);
+    }
+
+    return MainLayoutShell(userRole: userRole);
+  }
+}
+
+class UnknownRoleView extends StatelessWidget {
+  const UnknownRoleView({super.key, this.role});
+
+  final String? role;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            'Role "${role ?? '-'}" belum didukung pada aplikasi ini.',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum UserRole {
+  admin,
+  mahasiswa,
   teknisi;
 
   static UserRole? fromString(String? role) {
-    if (role == null) return null;
-    switch (role.trim().toLowerCase()) {
+    switch (AccessControlService.normalizeRole(role)) {
       case 'admin':
         return UserRole.admin;
-      case 'dosen':
-        return UserRole.dosen;
       case 'mahasiswa':
         return UserRole.mahasiswa;
       case 'teknisi':
-      case 'staff':
         return UserRole.teknisi;
       default:
         return null;
@@ -37,7 +99,7 @@ enum UserRole {
 }
 
 class MainLayoutShell extends StatefulWidget {
-  final UserRole userRole; // Role ini didapat setelah user login
+  final UserRole userRole;
 
   const MainLayoutShell({super.key, required this.userRole});
 
@@ -48,7 +110,6 @@ class MainLayoutShell extends StatefulWidget {
 class _MainLayoutShellState extends State<MainLayoutShell> {
   int _currentIndex = 0;
 
-  // 2. Fungsi untuk mengambil daftar halaman berdasarkan Role (Prinsip SRP)
   List<Widget> _getPagesForRole() {
     switch (widget.userRole) {
       case UserRole.admin:
@@ -58,29 +119,23 @@ class _MainLayoutShellState extends State<MainLayoutShell> {
           AdminAspirasiView(),
           AdminUserView(),
         ];
-      case UserRole.dosen:
-        return const [
-          HomeDosenView(),
-          RoleProfileView(role: 'dosen'),
-        ];
       case UserRole.mahasiswa:
         return const [
           HomeView(),
-          LaporanFasilitasMahasiswaView(),
+          MahasiswaLaporanFasilitasView(),
           AspirasiView(),
           RoleProfileView(role: 'mahasiswa'),
         ];
       case UserRole.teknisi:
         return const [
           HomeTeknisiView(),
-          LaporanFasilitasMahasiswaView(role: 'teknisi'),
+          TeknisiLaporanFasilitasView(),
           RiwayatTugasView(),
           RoleProfileView(role: 'teknisi'),
         ];
     }
   }
 
-  // 3. Fungsi untuk mengambil menu BottomNavBar berdasarkan Role (Prinsip DRY)
   List<BottomNavigationBarItem> _getNavBarItemsForRole() {
     switch (widget.userRole) {
       case UserRole.admin:
@@ -89,11 +144,6 @@ class _MainLayoutShellState extends State<MainLayoutShell> {
           BottomNavigationBarItem(icon: Icon(Icons.apartment_rounded), label: 'Layanan'),
           BottomNavigationBarItem(icon: Icon(Icons.campaign_rounded), label: 'Aspirasi'),
           BottomNavigationBarItem(icon: Icon(Icons.group_rounded), label: 'User'),
-        ];
-      case UserRole.dosen:
-        return const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profil'),
         ];
       case UserRole.mahasiswa:
         return const [
@@ -112,6 +162,28 @@ class _MainLayoutShellState extends State<MainLayoutShell> {
     }
   }
 
+  Future<void> _refreshSelectedPage(int index) async {
+    if (widget.userRole != UserRole.teknisi) return;
+
+    switch (index) {
+      case 0:
+        if (Get.isRegistered<HomeTeknisiController>()) {
+          await Get.find<HomeTeknisiController>().onRefresh();
+        }
+        break;
+      case 1:
+        if (Get.isRegistered<TeknisiLaporanFasilitasController>()) {
+          await Get.find<TeknisiLaporanFasilitasController>().fetchTugas();
+        }
+        break;
+      case 2:
+        if (Get.isRegistered<RiwayatTugasController>()) {
+          await Get.find<RiwayatTugasController>().onRefresh();
+        }
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Ambil data dinamis sesuai role saat ini
@@ -119,22 +191,21 @@ class _MainLayoutShellState extends State<MainLayoutShell> {
     final navBarItems = _getNavBarItemsForRole();
 
     return Scaffold(
-      // SLOT UTAMA: Halaman berganti sesuai index, dan daftarnya sudah disaring oleh role
       body: IndexedStack(
         index: _currentIndex,
         children: pages,
       ),
 
-      // BottomBar dinamis yang jumlah tombol dan ikonnya otomatis berubah
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed, // Menjaga layout tetap rapi jika menu > 3
+        type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF1E3A5F),
         unselectedItemColor: Colors.grey,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
           });
+          _refreshSelectedPage(index);
         },
         items: navBarItems,
       ),

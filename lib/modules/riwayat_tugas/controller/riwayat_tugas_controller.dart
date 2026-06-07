@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/tanggapan_tugas_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 
 // ============================================================
@@ -80,16 +81,17 @@ class RiwayatTugasController extends GetxController {
   final Rx<FilterRiwayat> activeFilter = FilterRiwayat.semua.obs;
   final RxString searchQuery = ''.obs;
   final RxBool isLoading = false.obs;
-  final RxInt selectedNavIndex = 2.obs;
 
   // ID teknisi yang sedang login
   final RxString _currentTeknisiId = '-'.obs;
-  String get currentTeknisiId => _currentTeknisiId.value ?? '-';
+  String get currentTeknisiId => _currentTeknisiId.value;
 
   // --------------------------------------------------------
   // SERVICES
   // --------------------------------------------------------
   final LaporanFasilitasService _service = LaporanFasilitasService();
+  final TanggapanTugasService _draftService = TanggapanTugasService();
+  final Set<String> _identityAliases = <String>{};
 
   // --------------------------------------------------------
   // GETTERS
@@ -124,8 +126,22 @@ class RiwayatTugasController extends GetxController {
   // --------------------------------------------------------
   Future<void> _initAndLoad() async {
     // Ambil session user yang login
-    final session = await AuthService().loadSavedSession();
-    _currentTeknisiId.value = session?.id ?? session?.nomorInduk ?? '-';
+    final session =
+        AuthService().currentUser ?? await AuthService().loadSavedSession();
+    final nomorInduk = session?.nomorInduk.trim() ?? '';
+    final userId = session?.id.trim() ?? '';
+    _currentTeknisiId.value = nomorInduk.isNotEmpty
+        ? nomorInduk
+        : userId.isNotEmpty
+        ? userId
+        : '-';
+    _identityAliases
+      ..clear()
+      ..addAll(
+        [nomorInduk, userId]
+            .where((value) => value.isNotEmpty)
+            .map((value) => value.toLowerCase()),
+      );
     await _loadRiwayat();
   }
 
@@ -133,15 +149,43 @@ class RiwayatTugasController extends GetxController {
     isLoading.value = true;
     try {
       final allLaporan = await _service.getAll();
+      final drafts = await _draftService.getAllDrafts();
 
-      // Filter: hanya laporan yang
-      //   1. teknisi_id == currentTeknisiId (dikerjakan oleh teknisi ini)
-      //   2. status == resolved (selesai)
       final riwayat = allLaporan
-          .where((l) =>
-              l.teknisi_id == _currentTeknisiId.value &&
-              l.status == StatusLaporan.resolved)
-          .map((l) => RiwayatLaporanModel(l))
+          .where((laporan) {
+            final draft = drafts[laporan.id];
+            final savedIdentity =
+                (draft?['teknisi_id'] ??
+                        draft?['teknisi_user_id'] ??
+                        laporan.teknisi_id)
+                    ?.toString()
+                    .trim()
+                    .toLowerCase();
+            final belongsToCurrentUser =
+                savedIdentity != null &&
+                _identityAliases.contains(savedIdentity);
+            final isCompleted =
+                laporan.status == StatusLaporan.resolved ||
+                draft?['form_status'] == 'selesai';
+            return belongsToCurrentUser && isCompleted;
+          })
+          .map((laporan) {
+            final draft = drafts[laporan.id];
+            final savedAt = DateTime.tryParse(
+              draft?['saved_at']?.toString() ?? '',
+            );
+            return RiwayatLaporanModel(
+              laporan.copyWith(
+                status: StatusLaporan.resolved,
+                teknisiId:
+                    draft?['teknisi_id']?.toString() ?? laporan.teknisi_id,
+                catatanPetugas:
+                    draft?['analisa_masalah']?.toString() ??
+                    laporan.catatanPetugas,
+                updatedAt: savedAt ?? laporan.updatedAt,
+              ),
+            );
+          })
           .toList()
         ..sort((a, b) =>
             b.laporan.updatedAt.compareTo(a.laporan.updatedAt));
@@ -212,11 +256,6 @@ class RiwayatTugasController extends GetxController {
       colorText: const Color(0xFF2E7D32),
       duration: const Duration(seconds: 2),
     );
-  }
-
-  void onNavTapped(int index) {
-    if (selectedNavIndex.value == index) return;
-    selectedNavIndex.value = index;
   }
 
   bool get isSearchActive => searchQuery.value.isNotEmpty;

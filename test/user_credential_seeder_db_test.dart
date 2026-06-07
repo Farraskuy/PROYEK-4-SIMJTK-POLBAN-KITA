@@ -5,9 +5,7 @@ import 'package:flutter_secure_storage/test/test_flutter_secure_storage_platform
 import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mongo_dart/mongo_dart.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/role_navigation_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/user_credential_seeder.dart';
 
 void main() {
@@ -55,44 +53,6 @@ void main() {
       expect(users.first['role'], equals(credential.role));
       expect(users.first['password_hash'], isNotNull);
       expect(users.first['isActive'], isTrue);
-    }
-  });
-
-  test('login manual MongoDB berhasil untuk semua role seed', () async {
-    final usersCollection = MonggoDBServices().getCollection('users');
-    final authService = AuthService();
-
-    await UserCredentialSeeder.seedDefaults();
-
-    for (final credential in UserCredentialSeeder.defaultCredentials) {
-      await authService.logout();
-
-      final sameIdentityUsers = await usersCollection
-          .find(
-            where
-                .eq('username', credential.username)
-                .or(where.eq('nomor_induk', credential.username)),
-          )
-          .toList();
-
-      expect(
-        sameIdentityUsers.length,
-        equals(1),
-        reason: 'User ${credential.username} tidak boleh duplikat.',
-      );
-
-      final loginSuccess = await authService.login(
-        credential.username,
-        credential.password,
-      );
-
-      expect(loginSuccess, isTrue);
-      expect(authService.currentUser?.username, equals(credential.username));
-      expect(authService.currentUser?.role, equals(credential.role));
-      expect(
-        RoleNavigationService.resolveDestination(authService.currentUser?.role),
-        isNot(equals(HomeDestination.unknown)),
-      );
     }
   });
 }

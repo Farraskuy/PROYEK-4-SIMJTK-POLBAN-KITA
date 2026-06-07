@@ -4,7 +4,7 @@ import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/aspirasi_view.da
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/controller/home_controller.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/laporan_fasilitas_section.dart';
 import 'package:proyek_4_poki_polban_kita/modules/profile/view/role_profile_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/mahasiswa_fasilitas_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 
@@ -84,7 +84,7 @@ void _navigateMahasiswa(
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const LaporanFasilitasMahasiswaView(),
+        builder: (context) => const MahasiswaLaporanFasilitasView(),
       ),
     );
     return;

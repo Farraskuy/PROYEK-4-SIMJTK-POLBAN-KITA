@@ -18,7 +18,7 @@ import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/detail_aspirasi_
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/service/aspirasi_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/aspirasi_form_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/lapor_fasilitas_controller.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/lapor_fasilitas_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/tambah_laporan_fasilitas_view.dart';
 
 class RoleProfileView extends StatefulWidget {
   const RoleProfileView({super.key, required this.role});
@@ -839,7 +839,7 @@ class _MahasiswaOwnReportsViewState extends State<MahasiswaOwnReportsView> {
                         }
                         final laporCtrl = Get.put(LaporFasilitasController());
                         laporCtrl.setupEditPage(laporan);
-                        Get.to(() => const LaporFasilitasView());
+                        Get.to(() => const TambahLaporanFasilitasView());
                       },
                       onDelete: () {
                         final currentUser = AuthService().currentUser;

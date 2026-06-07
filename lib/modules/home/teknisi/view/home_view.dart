@@ -8,18 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import '../controller/home_controller.dart';
-import '../model/home_model.dart';
-import '../view/analisa_kerusakan_view.dart';
 import '../view/usulan_pemeliharaan_view.dart';
 import '../view/penghapusan_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
-import '../../../laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
-import '../../../riwayat_tugas/view/riwayat_tugas_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/profile/view/role_profile_view.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/app_button.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_card.dart';
+import 'package:proyek_4_poki_polban_kita/modules/home/teknisi/view/form_analisa_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/teknisi_laporan_fasilitas_card.dart';
 
 // ============================================================
 // DESIGN TOKENS
@@ -113,12 +108,6 @@ class ModulMaintenanceSection extends StatelessWidget {
 
   static const _menus = [
     {
-      'label': 'Analisa\nKerusakan',
-      'icon': Icons.analytics_rounded,
-      'color': AppColors.danger,
-      'route': 'analisa',
-    },
-    {
       'label': 'Usulan\nPemeliharaan',
       'icon': Icons.build_circle_outlined,
       'color': AppColors.success,
@@ -134,12 +123,6 @@ class ModulMaintenanceSection extends StatelessWidget {
 
   void _navigate(BuildContext context, String route) {
     switch (route) {
-      case 'analisa':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const AnalisaKerusakanView()),
-        );
-        break;
       case 'pemeliharaan':
         Navigator.push(
           context,
@@ -161,7 +144,7 @@ class ModulMaintenanceSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Modul Maintenance',
+          'Akses Cepat',
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
@@ -170,36 +153,58 @@ class ModulMaintenanceSection extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         GridView.count(
-          crossAxisCount: 3,
+          crossAxisCount: 2,
+          childAspectRatio: 1.7,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           mainAxisSpacing: 8,
           crossAxisSpacing: 8,
           children: _menus.map((m) {
-            final color = (m['color'] is Color) ? m['color'] as Color : AppColors.warning;
-            final icon = (m['icon'] is IconData) ? m['icon'] as IconData : Icons.help_outline;
+            final color = (m['color'] is Color)
+                ? m['color'] as Color
+                : AppColors.warning;
+            final icon = (m['icon'] is IconData)
+                ? m['icon'] as IconData
+                : Icons.help_outline;
             return GestureDetector(
               onTap: () => _navigate(context, m['route'] as String),
               child: Container(
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: color.withOpacity(0.2)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 16,
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
                   children: [
-                    Icon(icon, color: color, size: 20),
-                    const SizedBox(height: 4),
-                    Text(
-                      m['label'] as String,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: color,
-                        fontWeight: FontWeight.w700,
-                        height: 1.1,
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      child: Icon(icon, color: color, size: 20),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        (m['label'] as String).replaceAll('\n', ' '),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.title,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                        ),
+                      ),
+                    ),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      size: 18,
+                      color: AppColors.muted,
                     ),
                   ],
                 ),
@@ -337,8 +342,11 @@ class HomeTeknisiView extends StatelessWidget {
                   children: [
                     Row(
                       children: const [
-                        Icon(Icons.assignment_rounded,
-                            color: _C.primary, size: 18),
+                        Icon(
+                          Icons.assignment_rounded,
+                          color: _C.primary,
+                          size: 18,
+                        ),
                         SizedBox(width: 6),
                         Text(
                           'TUGAS AKTIF',
@@ -372,11 +380,14 @@ class HomeTeknisiView extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 18),
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
                     decoration: const BoxDecoration(
                       color: AppColors.navy,
                       borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(16)),
+                        topRight: Radius.circular(16),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -424,11 +435,14 @@ class HomeTeknisiView extends StatelessWidget {
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 18),
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
                     decoration: const BoxDecoration(
                       color: AppColors.blueSoft,
                       borderRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(16)),
+                        bottomRight: Radius.circular(16),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -462,8 +476,11 @@ class HomeTeknisiView extends StatelessWidget {
                                 color: AppColors.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(Icons.access_time_rounded,
-                                  color: _C.primary, size: 18),
+                              child: const Icon(
+                                Icons.access_time_rounded,
+                                color: _C.primary,
+                                size: 18,
+                              ),
                             ),
                           ],
                         ),
@@ -503,8 +520,7 @@ class HomeTeknisiView extends StatelessWidget {
           ),
           child: Row(
             children: const [
-              Icon(Icons.arrow_upward_rounded,
-                  size: 11, color: _C.upvoteText),
+              Icon(Icons.arrow_upward_rounded, size: 11, color: _C.upvoteText),
               SizedBox(width: 3),
               Text(
                 'Top Upvote',
@@ -515,18 +531,6 @@ class HomeTeknisiView extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-        const Spacer(),
-        AppButton(
-          label: 'Analisa',
-          variant: AppButtonVariant.danger,
-          size: AppButtonSize.small,
-          leadingIcon: Icons.analytics_rounded,
-          fullWidth: false,
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AnalisaKerusakanView()),
           ),
         ),
       ],
@@ -554,76 +558,47 @@ class HomeTeknisiView extends StatelessWidget {
         separatorBuilder: (_, _) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
           final laporan = displayList[index];
-          return LaporanFasilitasCard(
+          return TeknisiLaporanFasilitasCard(
             laporan: laporan,
-            currentUserId: '',
-            showVoteColumn: true,
-            showActions: false,
-            showVoteButtons: false,
-            onTap: () => ctrl.onTugasTapped(laporan),
-            onEdit: () {},
-            onDelete: () {},
-            onUpvote: () {},
-            onDownvote: () {},
+            onTap: () => _openTanggapan(context, ctrl, laporan.id),
+            onRespond: () => _openForm(context, ctrl, laporan),
           );
         },
       );
     });
   }
 
-  // ============================================================
-  // BOTTOM NAV BAR
-  // ============================================================
-  void _navigateBottomBar(
-      BuildContext context, HomeTeknisiNavTarget? target) {
-    if (target == null) return;
-    if (target == HomeTeknisiNavTarget.tugas) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) =>
-              const LaporanFasilitasMahasiswaView(role: 'teknisi'),
-        ),
-      );
-      return;
-    }
-    if (target == HomeTeknisiNavTarget.riwayat) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const RiwayatTugasView()),
-      );
-      return;
-    }
-    if (target == HomeTeknisiNavTarget.profile) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const RoleProfileView(role: 'teknisi'),
-        ),
-      );
-    }
-  }
-
-  Widget _buildBottomNavBar(
-      BuildContext context, HomeTeknisiController ctrl) {
-    const items = [
-      AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
-      AppNavItem(label: 'Tugas', icon: Icons.assignment_rounded),
-      AppNavItem(label: 'Riwayat', icon: Icons.history_rounded),
-      AppNavItem(label: 'Profil', icon: Icons.person_rounded),
-    ];
-
-    return Obx(
-      () => AppBottomNavBar(
-        items: items,
-        selectedIndex: ctrl.selectedNavIndex.value,
-        onTap: (index) =>
-            _navigateBottomBar(context, ctrl.onNavTapped(index)),
+  Future<void> _openTanggapan(
+    BuildContext context,
+    HomeTeknisiController controller,
+    String laporanId,
+  ) async {
+    final changed = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            DetailLaporanFasilitasView(laporanId: laporanId, role: 'teknisi'),
       ),
     );
+    if (changed == true) {
+      await controller.onRefresh();
+    }
+  }
+
+  Future<void> _openForm(
+    BuildContext context,
+    HomeTeknisiController controller,
+    LaporanFasilitasModel laporan,
+  ) async {
+    final changed = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => FormAnalisaView(laporan: laporan)),
+    );
+    if (changed == true) {
+      await controller.onRefresh();
+    }
   }
 }
-
 
 // ============================================================
 // WIDGET: Empty State Tugas Mendesak
@@ -642,8 +617,11 @@ class _EmptyMendesak extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
-          Icon(Icons.check_circle_outline_rounded,
-              size: 44, color: Color(0xFF81C784)),
+          Icon(
+            Icons.check_circle_outline_rounded,
+            size: 44,
+            color: Color(0xFF81C784),
+          ),
           SizedBox(height: 10),
           Text(
             'Tidak ada laporan mendesak',
