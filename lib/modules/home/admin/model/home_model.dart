@@ -153,7 +153,6 @@ class AktivitasTerbaruModel {
   final DateTime timestamp;
 
   /// ID referensi entitas terkait (untuk deep-link)
-  /// Sesuai field targetId pada entitas Notifikasi di PDF
   final String? targetId;
 
   const AktivitasTerbaruModel({

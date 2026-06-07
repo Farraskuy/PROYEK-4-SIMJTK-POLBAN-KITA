@@ -19,7 +19,6 @@ class InteraksiLaporanController extends GetxController {
   final _allLaporan = <LaporanFasilitasModel>[].obs;
   final listLaporan = <LaporanFasilitasModel>[].obs;
   final isLoading = false.obs;
-  final unreadNotifCount = 3.obs;
   final sortMode = LaporanSortMode.populer.obs;
 
   String get currentUserId {

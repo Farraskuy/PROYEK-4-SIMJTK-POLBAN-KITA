@@ -106,37 +106,6 @@ class AdminAspirasiView extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavBar(adminCtrl), 
-    );
-  }
-
-  // ---- FUNGSI PEMBUATAN NAVBAR ----
-  Widget _buildBottomNavBar(AdminDashboardController adminCtrl) {
-    const items = [
-      AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
-      AppNavItem(label: 'Layanan', icon: Icons.apartment_rounded),
-      AppNavItem(label: 'Aspirasi', icon: Icons.campaign_rounded),
-      AppNavItem(label: 'User', icon: Icons.group_rounded),
-    ];
-
-    return Obx(
-      () => AppBottomNavBar(
-        items: items,
-        selectedIndex: adminCtrl.selectedNavIndex.value,
-        onTap: (index) {
-          if (index == adminCtrl.selectedNavIndex.value) return; // Abaikan jika tab yang sama diklik
-
-          adminCtrl.selectedNavIndex.value = index;
-
-          if (index == 0) {
-            Get.back();
-          } else if (index == 1) {
-            Get.off(() => const AdminLaporanFasilitasView());
-          } else if (index == 3) {
-            Get.off(() => const AdminAddUserView());
-          }
-        },
-      ),
     );
   }
 }

@@ -37,13 +37,6 @@ class AspirasiController extends GetxController
   /// Status loading
   final RxBool isLoading = false.obs;
 
-  /// Jumlah notifikasi belum dibaca
-  final RxInt unreadNotifCount = 3.obs;
-
-  void onNotificationTapped() {
-    unreadNotifCount.value = 0;
-  }
-
   /// Data user yang sedang login
   UserModel? get currentUser => AuthService().currentUser;
 
@@ -101,9 +94,13 @@ class AspirasiController extends GetxController
     final user = await AuthService().loadSavedSession();
     if (user != null) {
       // Simpan ID user untuk kebutuhan cek validasi vote
-      currentUserId.value = user.id ?? user.nomorInduk ?? 'anonymous';
-      currentUserName.value = user.name ?? 'Mahasiswa';
-      currentUserProdi.value = user.programStudy ?? '-';
+      currentUserId.value = user.id.isNotEmpty
+          ? user.id
+          : (user.nomorInduk.isNotEmpty ? user.nomorInduk : 'anonymous');
+      currentUserName.value = user.name.isNotEmpty ? user.name : 'Mahasiswa';
+      currentUserProdi.value = user.programStudy.isNotEmpty
+          ? user.programStudy
+          : '-';
     }
   }
 

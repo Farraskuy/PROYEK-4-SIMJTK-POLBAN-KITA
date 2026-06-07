@@ -4,7 +4,7 @@ import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/controller/home
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/section_header.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_card.dart';
-import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_empty_state.dart';
 
 class LaporanFasilitasSection extends StatelessWidget {
   final HomeController controller;
@@ -43,15 +43,7 @@ class _LaporanList extends StatelessWidget {
     return Obx(() {
       final list = controller.laporanTrendingList;
       if (list.isEmpty) {
-        return const Padding(
-          padding: EdgeInsets.all(32),
-          child: Center(
-            child: Text(
-              'Belum ada laporan fasilitas',
-              style: TextStyle(color: AppColors.body),
-            ),
-          ),
-        );
+        return const LaporanFasilitasEmptyState();
       }
 
       final visibleItems = list.length > 3 ? list.sublist(0, 3) : list;

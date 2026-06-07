@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/admin/view/home_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/dosen/view/home_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/view/home_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/teknisi/view/home_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/role_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/main_layout_shell.dart';
 
 enum HomeDestination {
   mahasiswa,
@@ -33,18 +30,17 @@ class RoleNavigationService {
   }
 
   static Widget buildHomeByRole(String? role) {
-    switch (resolveDestination(role)) {
-      case HomeDestination.mahasiswa:
-        return const HomeView();
-      case HomeDestination.dosen:
-        return const HomeDosenView();
-      case HomeDestination.teknisi:
-        return const HomeTeknisiView();
-      case HomeDestination.admin:
-        return const AdminDashboardView();
-      case HomeDestination.unknown:
-        return UnknownRoleView(role: role);
+    final dest = resolveDestination(role);
+    if (dest == HomeDestination.unknown) {
+      return UnknownRoleView(role: role);
     }
+    
+    final userRole = UserRole.fromString(role);
+    if (userRole == null) {
+      return UnknownRoleView(role: role);
+    }
+    
+    return MainLayoutShell(userRole: userRole);
   }
 }
 

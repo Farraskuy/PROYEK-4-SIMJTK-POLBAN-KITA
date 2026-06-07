@@ -72,26 +72,6 @@ class AdminLaporanFasilitasView extends StatelessWidget {
             ),
           ),
       ),
-      bottomNavigationBar: Obx(() => AppBottomNavBar(
-        items: const [
-          AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
-          AppNavItem(label: 'Layanan', icon: Icons.apartment_rounded),
-          AppNavItem(label: 'Aspirasi', icon: Icons.campaign_rounded),
-          AppNavItem(label: 'User', icon: Icons.group_rounded),
-        ],
-        selectedIndex: adminCtrl.selectedNavIndex.value,
-        onTap: (index) {
-          if (index == adminCtrl.selectedNavIndex.value) return;
-          adminCtrl.selectedNavIndex.value = index;
-          if (index == 0) {
-            Get.back();
-          } else if (index == 2) {
-            Get.off(() => const AdminAspirasiView());
-          } else if (index == 3) {
-            Get.off(() => const AdminAddUserView());
-          }
-        },
-      )),
     );
   }
 }

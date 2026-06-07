@@ -19,6 +19,7 @@ class MonggoDBServices {
 
   Db? _db;
   Future<void>? _connectInFlight;
+  Future<void>? _reconnectInFlight;
 
   bool get isConnected => _db?.state == State.open;
 
@@ -65,11 +66,13 @@ class MonggoDBServices {
       return;
     }
 
-    final String uri = dotenv.env['MONGODB_URI'] ?? '';
+    final String rawUri = dotenv.env['MONGODB_URI'] ?? '';
 
-    if (uri.isEmpty) {
+    if (rawUri.isEmpty) {
       throw Exception("MONGODB_URI is not set in .env file");
     }
+
+    final uri = _normalizeMongoUri(rawUri);
 
     try {
       if (_db != null) {
@@ -120,6 +123,18 @@ class MonggoDBServices {
     }
   }
 
+  String _normalizeMongoUri(String rawUri) {
+    final uri = Uri.parse(rawUri);
+    if (uri.scheme != 'mongodb+srv') {
+      return rawUri;
+    }
+
+    final queryParameters = Map<String, String>.from(uri.queryParameters);
+    queryParameters.putIfAbsent('tls', () => 'true');
+    queryParameters.putIfAbsent('safeAtlas', () => 'true');
+    return uri.replace(queryParameters: queryParameters).toString();
+  }
+
   Future<void> refreshConnection() async {
     await ensureConnected();
 
@@ -146,8 +161,23 @@ class MonggoDBServices {
   }
 
   Future<void> _reconnect() async {
-    await close(shouldLog: false);
-    await connect();
+    if (_reconnectInFlight != null) {
+      return _reconnectInFlight!;
+    }
+
+    final completer = Completer<void>();
+    _reconnectInFlight = completer.future;
+
+    try {
+      await close(shouldLog: false);
+      await connect();
+      completer.complete();
+    } catch (e, st) {
+      completer.completeError(e, st);
+      rethrow;
+    } finally {
+      _reconnectInFlight = null;
+    }
   }
 
   bool _isRecoverableConnectionError(Object error) {

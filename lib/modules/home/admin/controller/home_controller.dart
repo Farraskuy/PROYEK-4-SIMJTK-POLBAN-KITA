@@ -25,7 +25,6 @@ class AdminDashboardController extends GetxController {
       <TindakanCepatModel>[].obs;
   final RxInt selectedNavIndex = 0.obs;
   final RxBool isLoading = false.obs;
-  final RxInt unreadNotif = 5.obs;
 
   @override
   void onInit() {
@@ -105,8 +104,6 @@ class AdminDashboardController extends GetxController {
         break;
     }
   }
-
-  void onNotifikasiTapped() => unreadNotif.value = 0;
 
   void onTindakanCepatTapped(TindakanCepatType type) {
     if (type == TindakanCepatType.tugaskan) onTugaskan();

@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/aspirasi_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/controller/home_controller.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/akses_cepat_section.dart';
-import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/kalender_section.dart';
 import 'package:proyek_4_poki_polban_kita/modules/home/mahasiswa/widgets/laporan_fasilitas_section.dart';
 import 'package:proyek_4_poki_polban_kita/modules/profile/view/role_profile_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/laporan_fasilitas_mahasiswa_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/mahasiswa_bottom_nav_bar.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -32,41 +29,37 @@ class HomeView extends StatelessWidget {
           onRefresh: controller.refreshData,
           child: CustomScrollView(
             slivers: [
-              Obx(
-                () => AppHomeAppBar(
-                  title: 'Halo, ${controller.currentUser?.name ?? 'Mahasiswa'}',
-                  subtitle: 'Mahasiswa JTK',
-                  avatarIcon: Icons.person_rounded,
-                  unreadCount: controller.unreadNotifCount.value,
-                  onNotificationTap: controller.onNotificationTapped,
-                ),
+              AppHomeAppBar(
+                title: 'Halo, ${controller.currentUser?.name ?? 'Mahasiswa'}',
+                subtitle: 'Mahasiswa JTK',
+                avatarIcon: Icons.person_rounded,
               ),
               SliverToBoxAdapter(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 20),
-                    KalenderSection(controller: controller),
 
-                    const SizedBox(height: 24),
+                    // KalenderSection(controller: controller),
 
-                    AksesCepatSection(
-                      controller: controller,
-                      onNavigate: (target) => _navigateMahasiswa(
-                        context,
-                        target,
-                        role: 'mahasiswa',
-                      ),
-                    ),
+                    // const SizedBox(height: 24),
 
-                    const SizedBox(height: 24),
+                    // AksesCepatSection(
+                    //   controller: controller,
+                    //   onNavigate: (target) => _navigateMahasiswa(
+                    //     context,
+                    //     target,
+                    //     role: 'mahasiswa',
+                    //   ),
+                    // ),
+
+                    // const SizedBox(height: 24),
 
                     LaporanFasilitasSection(
                       controller: controller,
                       onNavigate: (target) => _navigateMahasiswa(
                         context,
                         target,
-                        role: 'mahasiswa',
                       ),
                     ),
 
@@ -78,18 +71,13 @@ class HomeView extends StatelessWidget {
           ),
         );
       }),
-      bottomNavigationBar: const MahasiswaBottomNavBar(
-        selected: MahasiswaNavDestination.home,
-      ),
     );
   }
 }
 
 void _navigateMahasiswa(
   BuildContext context,
-  MahasiswaNavTarget? target, {
-  required String role,
-}) {
+  MahasiswaNavTarget? target) {
   if (target == null) return;
 
   if (target == MahasiswaNavTarget.laporanFasilitas) {
@@ -113,7 +101,7 @@ void _navigateMahasiswa(
   if (target == MahasiswaNavTarget.profile) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => RoleProfileView(role: role)),
+      MaterialPageRoute(builder: (context) => RoleProfileView(role: 'mahasiswa')),
     );
   }
 }

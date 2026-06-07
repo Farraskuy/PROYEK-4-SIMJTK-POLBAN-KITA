@@ -38,9 +38,6 @@ class HomeTeknisiController extends GetxController {
   /// Status koneksi internet (offline-first sesuai PDF)
   final RxBool isOnline = true.obs;
 
-  /// Jumlah notifikasi belum dibaca
-  final RxInt unreadNotif = 2.obs;
-
   // --------------------------------------------------------
   // SERVICES
   // --------------------------------------------------------
@@ -123,11 +120,6 @@ class HomeTeknisiController extends GetxController {
       default:
         return null;
     }
-  }
-
-  /// Notifikasi bell
-  void onNotifikasiTapped() {
-    unreadNotif.value = 0;
   }
 
   /// Tap pada kartu tugas mendesak.

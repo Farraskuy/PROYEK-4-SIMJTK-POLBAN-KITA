@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/model/aspirasi_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
@@ -5,11 +7,11 @@ import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/lapo
 import 'package:proyek_4_poki_polban_kita/modules/onboarding/view/onboarding_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/mahasiswa_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_card.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_empty_state.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/widgets/aspirasi_card.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/detail_aspirasi_view.dart';
@@ -29,6 +31,7 @@ class RoleProfileView extends StatefulWidget {
 
 class _RoleProfileViewState extends State<RoleProfileView> {
   late Future<_ProfileData> _profileFuture;
+  int _loadGeneration = 0;
 
   @override
   void initState() {
@@ -51,8 +54,6 @@ class _RoleProfileViewState extends State<RoleProfileView> {
     }
   }
 
-  bool get _showBottomNav => widget.role == 'mahasiswa';
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -65,19 +66,6 @@ class _RoleProfileViewState extends State<RoleProfileView> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
                 child: CircularProgressIndicator(color: AppColors.primary),
-              );
-            }
-
-            if (snapshot.hasError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    'Gagal memuat profil: ${snapshot.error}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.body),
-                  ),
-                ),
               );
             }
 
@@ -100,8 +88,6 @@ class _RoleProfileViewState extends State<RoleProfileView> {
                     title: 'Halo, ${data.firstName}',
                     subtitle: '${data.roleLabel} JTK',
                     avatarIcon: Icons.person_rounded,
-                    unreadCount: 0,
-                    onNotificationTap: null,
                   ),
                   SliverToBoxAdapter(child: _ProfileHero(data: data)),
                   SliverToBoxAdapter(
@@ -121,7 +107,11 @@ class _RoleProfileViewState extends State<RoleProfileView> {
                                     icon: Icons.assignment_outlined,
                                     color: AppColors.primary,
                                     onTap: () {
-                                      Get.to(() => MahasiswaOwnReportsView(ownLaporan: data.ownLaporan));
+                                      Get.to(
+                                        () => MahasiswaOwnReportsView(
+                                          ownLaporan: data.ownLaporan,
+                                        ),
+                                      );
                                     },
                                   ),
                                 ),
@@ -134,7 +124,11 @@ class _RoleProfileViewState extends State<RoleProfileView> {
                                     icon: Icons.chat_bubble_outline_rounded,
                                     color: AppColors.secondary,
                                     onTap: () {
-                                      Get.to(() => MahasiswaOwnAspirationsView(ownAspirasi: data.ownAspirasi));
+                                      Get.to(
+                                        () => MahasiswaOwnAspirationsView(
+                                          ownAspirasi: data.ownAspirasi,
+                                        ),
+                                      );
                                     },
                                   ),
                                 ),
@@ -152,36 +146,29 @@ class _RoleProfileViewState extends State<RoleProfileView> {
             );
           },
         ),
-        bottomNavigationBar: _showBottomNav
-            ? const MahasiswaBottomNavBar(
-                selected: MahasiswaNavDestination.profil,
-              )
-            : null,
       ),
     );
   }
 
   Future<_ProfileData> _loadProfileData() async {
+    final generation = ++_loadGeneration;
     final auth = AuthService();
-    final user = auth.currentUser ?? await auth.loadSavedSession();
+    var user = auth.currentUser;
+    if (user == null) {
+      try {
+        user = await auth.loadSavedSession();
+      } catch (_) {
+        user = null;
+      }
+    }
+
     final userIds = <String>{};
     if (user != null) {
       if (user.id.isNotEmpty) userIds.add(user.id);
       if (user.nomorInduk.isNotEmpty) userIds.add(user.nomorInduk);
     }
 
-    final aspirasiListRaw = await AspirasiService().fetchAllAspirasi();
-    final aspirasiList = aspirasiListRaw
-        .where((item) => item.pelaporId != null && userIds.contains(item.pelaporId))
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-    final laporanList = await LaporanFasilitasService().getAll();
-    final ownLaporan =
-        laporanList.where((item) => userIds.contains(item.pelapor_id)).toList()
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-    return _ProfileData(
+    final baseData = _ProfileData(
       roleLabel: _roleLabel,
       name: user?.name.isNotEmpty == true ? user!.name : 'Pengguna',
       nomorInduk: user?.nomorInduk ?? '-',
@@ -189,9 +176,54 @@ class _RoleProfileViewState extends State<RoleProfileView> {
           ? user!.programStudy
           : 'Dept. of Computer Science',
       initials: _initials(user?.name ?? _roleLabel),
-      ownAspirasi: aspirasiList,
-      ownLaporan: ownLaporan,
+      ownAspirasi: const [],
+      ownLaporan: const [],
     );
+
+    unawaited(_loadProfileHistory(baseData, userIds, generation));
+    return baseData;
+  }
+
+  Future<void> _loadProfileHistory(
+    _ProfileData baseData,
+    Set<String> userIds,
+    int generation,
+  ) async {
+    var aspirasiList = <AspirasiModel>[];
+    var ownLaporan = <LaporanFasilitasModel>[];
+
+    await Future.wait([
+      () async {
+        try {
+          final raw = await AspirasiService().fetchAllAspirasi();
+          aspirasiList =
+              raw
+                  .where(
+                    (item) =>
+                        item.pelaporId != null &&
+                        userIds.contains(item.pelaporId),
+                  )
+                  .toList()
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        } catch (_) {}
+      }(),
+      () async {
+        try {
+          final raw = await LaporanFasilitasService().getAll();
+          ownLaporan =
+              raw.where((item) => userIds.contains(item.pelapor_id)).toList()
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        } catch (_) {}
+      }(),
+    ]);
+
+    if (!mounted || generation != _loadGeneration) return;
+
+    setState(() {
+      _profileFuture = Future.value(
+        baseData.copyWith(ownAspirasi: aspirasiList, ownLaporan: ownLaporan),
+      );
+    });
   }
 
   String _initials(String value) {
@@ -231,6 +263,21 @@ class _ProfileData {
     return parts.isEmpty ? name : parts.first;
   }
 
+  _ProfileData copyWith({
+    List<AspirasiModel>? ownAspirasi,
+    List<LaporanFasilitasModel>? ownLaporan,
+  }) {
+    return _ProfileData(
+      roleLabel: roleLabel,
+      name: name,
+      nomorInduk: nomorInduk,
+      programStudy: programStudy,
+      initials: initials,
+      ownAspirasi: ownAspirasi ?? this.ownAspirasi,
+      ownLaporan: ownLaporan ?? this.ownLaporan,
+    );
+  }
+
   factory _ProfileData.empty(String roleLabel) {
     return _ProfileData(
       roleLabel: roleLabel,
@@ -243,7 +290,6 @@ class _ProfileData {
     );
   }
 }
-
 
 class _ProfileHero extends StatelessWidget {
   const _ProfileHero({required this.data});
@@ -496,7 +542,6 @@ class _HeroLine extends StatelessWidget {
   }
 }
 
-
 class _SignOutTile extends StatelessWidget {
   const _SignOutTile();
 
@@ -533,7 +578,6 @@ class _SignOutTile extends StatelessWidget {
   }
 }
 
-
 class _OwnHistoryCardButton extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -560,7 +604,7 @@ class _OwnHistoryCardButton extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -582,19 +626,18 @@ class _OwnHistoryCardButton extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
+                        color: color.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        icon,
-                        color: color,
-                        size: 20,
-                      ),
+                      child: Icon(icon, color: color, size: 20),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.08),
+                        color: color.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -637,14 +680,14 @@ class _OwnHistoryCardButton extends StatelessWidget {
   }
 }
 
-
 class MahasiswaOwnReportsView extends StatefulWidget {
   final List<LaporanFasilitasModel> ownLaporan;
 
   const MahasiswaOwnReportsView({super.key, required this.ownLaporan});
 
   @override
-  State<MahasiswaOwnReportsView> createState() => _MahasiswaOwnReportsViewState();
+  State<MahasiswaOwnReportsView> createState() =>
+      _MahasiswaOwnReportsViewState();
 }
 
 class _MahasiswaOwnReportsViewState extends State<MahasiswaOwnReportsView> {
@@ -662,7 +705,9 @@ class _MahasiswaOwnReportsViewState extends State<MahasiswaOwnReportsView> {
     if (_currentFilter == 'Terbaru') {
       list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     } else if (_currentFilter == 'Selesai') {
-      list = list.where((l) => l.status == StatusLaporan.resolved || l.sudahDicetak).toList();
+      list = list
+          .where((l) => l.status == StatusLaporan.resolved || l.sudahDicetak)
+          .toList();
       list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     }
     return list;
@@ -740,93 +785,110 @@ class _MahasiswaOwnReportsViewState extends State<MahasiswaOwnReportsView> {
           ),
           if (filtered.isEmpty)
             const SliverFillRemaining(
-              child: Center(
-                child: Text(
-                  'Belum ada laporan fasilitas.',
-                  style: TextStyle(color: AppColors.body, fontFamily: 'Poppins'),
-                ),
-              ),
+              hasScrollBody: false,
+              child: LaporanFasilitasEmptyState(),
             )
           else
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final laporan = filtered[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: LaporanFasilitasCard(
-                        laporan: laporan,
-                        currentUserId: laporan.pelapor_id,
-                        showVoteColumn: false,
-                        showActions: true,
-                        showVoteButtons: false,
-                        onTap: () async {
-                          final changed = await Get.to(() => DetailLaporanFasilitasView(
-                                laporanId: laporan.id,
-                                role: 'mahasiswa',
-                              ));
-                          if (changed == true) {
-                            final fresh = await LaporanFasilitasService().getAll();
-                            final user = AuthService().currentUser;
-                            if (user != null) {
-                              setState(() {
-                                _listLaporan = fresh
-                                    .where((item) => item.pelapor_id == user.id || item.pelapor_id == user.nomorInduk)
-                                    .toList();
-                              });
-                            }
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final laporan = filtered[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: LaporanFasilitasCard(
+                      laporan: laporan,
+                      currentUserId: laporan.pelapor_id,
+                      showVoteColumn: false,
+                      showActions: true,
+                      showVoteButtons: false,
+                      onTap: () async {
+                        final changed = await Get.to(
+                          () => DetailLaporanFasilitasView(
+                            laporanId: laporan.id,
+                            role: 'mahasiswa',
+                          ),
+                        );
+                        if (changed == true) {
+                          final fresh = await LaporanFasilitasService()
+                              .getAll();
+                          final user = AuthService().currentUser;
+                          if (user != null) {
+                            setState(() {
+                              _listLaporan = fresh
+                                  .where(
+                                    (item) =>
+                                        item.pelapor_id == user.id ||
+                                        item.pelapor_id == user.nomorInduk,
+                                  )
+                                  .toList();
+                            });
                           }
-                        },
-                        onEdit: () {
-                          final currentUser = AuthService().currentUser;
-                          if (currentUser == null) return;
-                          if (laporan.pelapor_id != currentUser.id && 
-                              laporan.pelapor_id != currentUser.nomorInduk) {
-                            Get.snackbar('Gagal', 'Anda hanya bisa mengubah laporan Anda sendiri');
-                            return;
-                          }
-                          final laporCtrl = Get.put(LaporFasilitasController());
-                          laporCtrl.setupEditPage(laporan);
-                          Get.to(() => const LaporFasilitasView());
-                        },
-                        onDelete: () {
-                          final currentUser = AuthService().currentUser;
-                          if (currentUser == null) return;
-                          if (laporan.pelapor_id != currentUser.id && 
-                              laporan.pelapor_id != currentUser.nomorInduk) {
-                            Get.snackbar('Gagal', 'Anda hanya bisa menghapus laporan Anda sendiri');
-                            return;
-                          }
-                          Get.defaultDialog(
-                            title: 'Hapus Laporan',
-                            middleText: 'Apakah Anda yakin ingin menghapus laporan ini?',
-                            textConfirm: 'Hapus',
-                            textCancel: 'Batal',
-                            confirmTextColor: Colors.white,
-                            buttonColor: AppColors.danger,
-                            onConfirm: () async {
-                              try {
-                                await LaporanFasilitasService().delete(laporan.id);
-                                Get.back();
-                                Get.snackbar('Sukses', 'Laporan berhasil dihapus');
-                                setState(() {
-                                  _listLaporan.removeWhere((item) => item.id == laporan.id);
-                                });
-                              } catch (e) {
-                                Get.snackbar('Gagal', 'Gagal menghapus laporan: $e');
-                              }
-                            }
+                        }
+                      },
+                      onEdit: () {
+                        final currentUser = AuthService().currentUser;
+                        if (currentUser == null) return;
+                        if (laporan.pelapor_id != currentUser.id &&
+                            laporan.pelapor_id != currentUser.nomorInduk) {
+                          Get.snackbar(
+                            'Gagal',
+                            'Anda hanya bisa mengubah laporan Anda sendiri',
                           );
-                        },
-                        onUpvote: () {},
-                        onDownvote: () {},
-                      ),
-                    );
-                  },
-                  childCount: filtered.length,
-                ),
+                          return;
+                        }
+                        final laporCtrl = Get.put(LaporFasilitasController());
+                        laporCtrl.setupEditPage(laporan);
+                        Get.to(() => const LaporFasilitasView());
+                      },
+                      onDelete: () {
+                        final currentUser = AuthService().currentUser;
+                        if (currentUser == null) return;
+                        if (laporan.pelapor_id != currentUser.id &&
+                            laporan.pelapor_id != currentUser.nomorInduk) {
+                          Get.snackbar(
+                            'Gagal',
+                            'Anda hanya bisa menghapus laporan Anda sendiri',
+                          );
+                          return;
+                        }
+                        Get.defaultDialog(
+                          title: 'Hapus Laporan',
+                          middleText:
+                              'Apakah Anda yakin ingin menghapus laporan ini?',
+                          textConfirm: 'Hapus',
+                          textCancel: 'Batal',
+                          confirmTextColor: Colors.white,
+                          buttonColor: AppColors.danger,
+                          onConfirm: () async {
+                            try {
+                              await LaporanFasilitasService().delete(
+                                laporan.id,
+                              );
+                              Get.back();
+                              Get.snackbar(
+                                'Sukses',
+                                'Laporan berhasil dihapus',
+                              );
+                              setState(() {
+                                _listLaporan.removeWhere(
+                                  (item) => item.id == laporan.id,
+                                );
+                              });
+                            } catch (e) {
+                              Get.snackbar(
+                                'Gagal',
+                                'Gagal menghapus laporan: $e',
+                              );
+                            }
+                          },
+                        );
+                      },
+                      onUpvote: () {},
+                      onDownvote: () {},
+                    ),
+                  );
+                }, childCount: filtered.length),
               ),
             ),
         ],
@@ -841,10 +903,12 @@ class MahasiswaOwnAspirationsView extends StatefulWidget {
   const MahasiswaOwnAspirationsView({super.key, required this.ownAspirasi});
 
   @override
-  State<MahasiswaOwnAspirationsView> createState() => _MahasiswaOwnAspirationsViewState();
+  State<MahasiswaOwnAspirationsView> createState() =>
+      _MahasiswaOwnAspirationsViewState();
 }
 
-class _MahasiswaOwnAspirationsViewState extends State<MahasiswaOwnAspirationsView> {
+class _MahasiswaOwnAspirationsViewState
+    extends State<MahasiswaOwnAspirationsView> {
   late List<AspirasiModel> _listAspirasi;
   String _currentFilter = 'Terbaru'; // 'Terbaru' or 'Selesai'
 
@@ -937,80 +1001,96 @@ class _MahasiswaOwnAspirationsViewState extends State<MahasiswaOwnAspirationsVie
           ),
           if (filtered.isEmpty)
             const SliverFillRemaining(
-              child: Center(
-                child: Text(
-                  'Belum ada aspirasi.',
-                  style: TextStyle(color: AppColors.body, fontFamily: 'Poppins'),
-                ),
+              hasScrollBody: false,
+              child: LaporanFasilitasEmptyState(
+                icon: Icons.campaign_outlined,
+                title: 'Belum ada aspirasi',
+                description: 'Aspirasi Anda akan muncul di bagian ini.',
               ),
             )
           else
             SliverPadding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               sliver: SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final aspirasi = filtered[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: AspirasiCard(
-                        aspirasi: aspirasi,
-                        isUpvoted: false,
-                        isDownvoted: false,
-                        showActions: true,
-                        showVoteButtons: false,
-                        onUpvote: () {},
-                        onDownvote: () {},
-                        onEdit: () {
-                          final currentUser = AuthService().currentUser;
-                          if (currentUser == null) return;
-                          if (aspirasi.pelaporId != currentUser.id && 
-                              aspirasi.pelaporId != currentUser.nomorInduk) {
-                            Get.snackbar('Gagal', 'Anda hanya bisa mengubah aspirasi Anda sendiri');
-                            return;
-                          }
-                          Get.to(() => AspirasiEditView(aspirasi: aspirasi));
-                        },
-                        onDelete: () {
-                          final currentUser = AuthService().currentUser;
-                          if (currentUser == null) return;
-                          if (aspirasi.pelaporId != currentUser.id && 
-                              aspirasi.pelaporId != currentUser.nomorInduk) {
-                            Get.snackbar('Gagal', 'Anda hanya bisa menghapus aspirasi Anda sendiri');
-                            return;
-                          }
-                          Get.defaultDialog(
-                            title: 'Hapus Aspirasi',
-                            middleText: 'Apakah Anda yakin ingin menghapus aspirasi ini?',
-                            textConfirm: 'Hapus',
-                            textCancel: 'Batal',
-                            confirmTextColor: Colors.white,
-                            buttonColor: AppColors.danger,
-                            onConfirm: () async {
-                              try {
-                                await AspirasiService().deleteAspirasi(aspirasi.id);
-                                Get.back();
-                                Get.snackbar('Sukses', 'Aspirasi berhasil dihapus');
-                                setState(() {
-                                  _listAspirasi.removeWhere((item) => item.id == aspirasi.id);
-                                });
-                              } catch (e) {
-                                Get.snackbar('Gagal', 'Gagal menghapus aspirasi: $e');
-                              }
-                            }
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final aspirasi = filtered[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: AspirasiCard(
+                      aspirasi: aspirasi,
+                      isUpvoted: false,
+                      isDownvoted: false,
+                      showActions: true,
+                      showVoteButtons: false,
+                      onUpvote: () {},
+                      onDownvote: () {},
+                      onEdit: () {
+                        final currentUser = AuthService().currentUser;
+                        if (currentUser == null) return;
+                        if (aspirasi.pelaporId != currentUser.id &&
+                            aspirasi.pelaporId != currentUser.nomorInduk) {
+                          Get.snackbar(
+                            'Gagal',
+                            'Anda hanya bisa mengubah aspirasi Anda sendiri',
                           );
-                        },
-                        onTap: () {
-                          Get.to(() => DetailAspirasiView(
-                                aspirasi: aspirasi,
-                                role: 'mahasiswa',
-                              ));
-                        },
-                      ),
-                    );
-                  },
-                  childCount: filtered.length,
-                ),
+                          return;
+                        }
+                        Get.to(() => AspirasiEditView(aspirasi: aspirasi));
+                      },
+                      onDelete: () {
+                        final currentUser = AuthService().currentUser;
+                        if (currentUser == null) return;
+                        if (aspirasi.pelaporId != currentUser.id &&
+                            aspirasi.pelaporId != currentUser.nomorInduk) {
+                          Get.snackbar(
+                            'Gagal',
+                            'Anda hanya bisa menghapus aspirasi Anda sendiri',
+                          );
+                          return;
+                        }
+                        Get.defaultDialog(
+                          title: 'Hapus Aspirasi',
+                          middleText:
+                              'Apakah Anda yakin ingin menghapus aspirasi ini?',
+                          textConfirm: 'Hapus',
+                          textCancel: 'Batal',
+                          confirmTextColor: Colors.white,
+                          buttonColor: AppColors.danger,
+                          onConfirm: () async {
+                            try {
+                              await AspirasiService().deleteAspirasi(
+                                aspirasi.id,
+                              );
+                              Get.back();
+                              Get.snackbar(
+                                'Sukses',
+                                'Aspirasi berhasil dihapus',
+                              );
+                              setState(() {
+                                _listAspirasi.removeWhere(
+                                  (item) => item.id == aspirasi.id,
+                                );
+                              });
+                            } catch (e) {
+                              Get.snackbar(
+                                'Gagal',
+                                'Gagal menghapus aspirasi: $e',
+                              );
+                            }
+                          },
+                        );
+                      },
+                      onTap: () {
+                        Get.to(
+                          () => DetailAspirasiView(
+                            aspirasi: aspirasi,
+                            role: 'mahasiswa',
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }, childCount: filtered.length),
               ),
             ),
         ],

@@ -19,7 +19,6 @@ class _LoginViewState extends State<LoginView> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isLoading = false;
-  final bool _rememberMe = false;
   bool _obscurePassword = true;
   String? _status;
 

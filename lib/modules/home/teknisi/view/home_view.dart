@@ -259,7 +259,6 @@ class HomeTeknisiView extends StatelessWidget {
           ),
         );
       }),
-      bottomNavigationBar: _buildBottomNavBar(context, ctrl),
     );
   }
 
@@ -275,8 +274,6 @@ class HomeTeknisiView extends StatelessWidget {
         avatarText: ctrl.currentTeknisi.value.name.isEmpty
             ? null
             : ctrl.currentTeknisi.value.name[0].toUpperCase(),
-        unreadCount: ctrl.unreadNotif.value,
-        onNotificationTap: ctrl.onNotifikasiTapped,
       ),
     );
   }

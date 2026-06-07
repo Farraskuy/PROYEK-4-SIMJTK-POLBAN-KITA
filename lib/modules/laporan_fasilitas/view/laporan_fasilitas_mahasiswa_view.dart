@@ -9,7 +9,6 @@ import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/lapo
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_page_header.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/mahasiswa_bottom_nav_bar.dart';
 
 class LaporanFasilitasMahasiswaView extends StatelessWidget {
   const LaporanFasilitasMahasiswaView({super.key, this.role = 'mahasiswa'});
@@ -43,14 +42,10 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
           onRefresh: controller.fetchLaporan,
           child: CustomScrollView(
             slivers: [
-              Obx(
-                () => AppHomeAppBar(
-                  title: 'Halo, ${controller.currentUserName}',
-                  subtitle: _subtitle,
-                  avatarIcon: Icons.person_rounded,
-                  unreadCount: controller.unreadNotifCount.value,
-                  onNotificationTap: () => (),
-                ),
+              AppHomeAppBar(
+                title: 'Halo, ${controller.currentUserName}',
+                subtitle: _subtitle,
+                avatarIcon: Icons.person_rounded,
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
               SliverToBoxAdapter(
@@ -86,16 +81,12 @@ class LaporanFasilitasMahasiswaView extends StatelessWidget {
           ),
         );
       }),
-      bottomNavigationBar: role == 'mahasiswa'
-          ? const MahasiswaBottomNavBar(
-              selected: MahasiswaNavDestination.laporanFasilitas,
-            )
-          : null,
       floatingActionButton: role == 'mahasiswa'
           ? SizedBox(
               width: 56,
               height: 56,
               child: FloatingActionButton(
+                heroTag: 'fab_laporan',
                 onPressed: () async {
                   final changed = await Navigator.push(
                     context,

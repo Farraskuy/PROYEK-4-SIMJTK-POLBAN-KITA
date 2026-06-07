@@ -25,11 +25,6 @@ class ProfileSettingsCard extends StatelessWidget {
           ),
           SizedBox(height: 22),
           _SettingsTile(
-            icon: Icons.notifications_outlined,
-            title: 'Notifications',
-            subtitle: 'Manage email and push alerts',
-          ),
-          _SettingsTile(
             icon: Icons.cloud_off_outlined,
             title: 'Offline Storage',
             subtitle: 'Clear cache, downloaded materials',

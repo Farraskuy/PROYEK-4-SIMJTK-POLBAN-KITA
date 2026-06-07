@@ -2,35 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 
 class LaporanFasilitasEmptyState extends StatelessWidget {
-  const LaporanFasilitasEmptyState({super.key});
+  const LaporanFasilitasEmptyState({
+    super.key,
+    this.icon = Icons.assignment_outlined,
+    this.title = 'Belum ada laporan fasilitas',
+    this.description = 'Laporan yang masuk akan muncul di bagian ini.',
+  });
+
+  final IconData icon;
+  final String title;
+  final String description;
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(16, 24, 16, 24),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.assignment_outlined,
+              icon,
               size: 48,
               color: AppColors.muted,
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(
-              'Belum ada laporan fasilitas',
-              style: TextStyle(
+              title,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: AppColors.title,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
-              'Laporan yang masuk akan muncul di bagian ini.',
+              description,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
                 color: AppColors.body,
                 height: 1.4,

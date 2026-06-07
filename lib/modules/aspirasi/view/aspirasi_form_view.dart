@@ -95,16 +95,6 @@ class _AspirasiFormScaffold extends StatelessWidget {
         title: title,
         subtitle: 'Mahasiswa JTK',
         showBack: true,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.notifications_outlined,
-              color: AppColors.title,
-              size: 24,
-            ),
-            onPressed: controller.onNotificationTapped,
-          ),
-        ],
       ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),

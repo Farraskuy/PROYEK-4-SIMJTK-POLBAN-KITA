@@ -25,14 +25,7 @@ class MahasiswaBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final navItems = _items.map((e) => AppNavItem(label: e.label, icon: e.icon)).toList();
-    return AppBottomNavBar(
-      items: navItems,
-      selectedIndex: selected.index,
-      onTap: (index) => _navigate(
-        context,
-        MahasiswaNavDestination.values[index],
-      ),
-    );
+    return const SizedBox.shrink();
   }
 
   void _navigate(BuildContext context, MahasiswaNavDestination target) {

@@ -75,6 +75,7 @@ class AdminUserView extends StatelessWidget {
           ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_admin_user',
         onPressed: () async {
           final result = await Get.to(() => const AdminAddUserView());
           if (result == true) {
@@ -83,21 +84,6 @@ class AdminUserView extends StatelessWidget {
         },
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white),
-      ),
-      bottomNavigationBar: AppBottomNavBar(
-        items: const [
-          AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
-          AppNavItem(label: 'Layanan', icon: Icons.apartment_rounded),
-          AppNavItem(label: 'Aspirasi', icon: Icons.campaign_rounded),
-          AppNavItem(label: 'User', icon: Icons.group_rounded),
-        ],
-        selectedIndex: 3, // Set to 3 since this is the User tab
-        onTap: (index) {
-          if (index != 3) { // Hanya pindah jika bukan tab User
-            adminCtrl.onNavTapped(index);
-            if (index == 0) Get.back(); // Kembali ke dashboard
-          }
-        },
       ),
     );
   }

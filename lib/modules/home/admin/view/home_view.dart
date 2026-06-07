@@ -113,7 +113,6 @@ class AdminDashboardView extends StatelessWidget {
           ),
         );
       }),
-      bottomNavigationBar: _buildBottomNavBar(context, ctrl),
     );
   }
 
@@ -126,8 +125,6 @@ class AdminDashboardView extends StatelessWidget {
         title: 'Institution Admin',
         subtitle: ctrl.currentAdmin.value.name,
         avatarIcon: Icons.admin_panel_settings_rounded,
-        unreadCount: ctrl.unreadNotif.value,
-        onNotificationTap: ctrl.onNotifikasiTapped,
       ),
     );
   }
