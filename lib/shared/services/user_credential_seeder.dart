@@ -1,6 +1,5 @@
 import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter/foundation.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/log_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/role_service.dart';
@@ -74,10 +73,9 @@ class UserCredentialSeeder {
 
     final mongo = MonggoDBServices();
     await mongo.ensureConnected();
-    final usersCollection = mongo.getCollection(_usersCollection);
 
     for (final item in defaultCredentials) {
-      await _upsertAndDedupeOne(usersCollection, item);
+      await _upsertAndDedupeOne(mongo, item);
     }
 
     await LogService.writeLog(
@@ -88,19 +86,16 @@ class UserCredentialSeeder {
   }
 
   static Future<void> _upsertAndDedupeOne(
-    DbCollection usersCollection,
+    MonggoDBServices mongo,
     SeedUserCredential credential,
   ) async {
     final now = DateTime.now().toIso8601String();
     final hashedPassword = BCrypt.hashpw(credential.password, BCrypt.gensalt());
 
-    final existing = await usersCollection
-        .find(
-          where
-              .eq('username', credential.username)
-              .or(where.eq('nomor_induk', credential.username)),
-        )
-        .toList();
+    final existing = await mongo.fetchByAnyField(_usersCollection, {
+      'username': credential.username,
+      'nomor_induk': credential.username,
+    });
 
     final patch = {
       'username': credential.username,
@@ -119,7 +114,7 @@ class UserCredentialSeeder {
 
     if (existing.isEmpty) {
       final newDoc = {'_id': credential.username, ...patch, 'createdAt': now};
-      await usersCollection.insertOne(newDoc);
+      await mongo.insertData(_usersCollection, newDoc);
       return;
     }
 
@@ -127,22 +122,7 @@ class UserCredentialSeeder {
     final keeperId = keeper['_id'];
 
     if (keeperId != null) {
-      await usersCollection.updateOne(
-        where.eq('_id', keeperId),
-        modify
-            .set('username', patch['username'])
-            .set('nomor_induk', patch['nomor_induk'])
-            .set('name', patch['name'])
-            .set('programStudy', patch['programStudy'])
-            .set('photoUrl', patch['photoUrl'])
-            .set('password_hash', patch['password_hash'])
-            .set('password', patch['password'])
-            .set('role', patch['role'])
-            .set('source', patch['source'])
-            .set('isActive', patch['isActive'])
-            .set('updatedAt', patch['updatedAt'])
-            .set('lastLoginAt', patch['lastLoginAt']),
-      );
+      await mongo.updateById(_usersCollection, keeperId, patch);
     }
 
     if (existing.length > 1) {
@@ -150,7 +130,7 @@ class UserCredentialSeeder {
       for (final duplicate in duplicates) {
         final duplicateId = duplicate['_id'];
         if (duplicateId != null) {
-          await usersCollection.deleteOne(where.eq('_id', duplicateId));
+          await mongo.deleteById(_usersCollection, duplicateId);
         }
       }
     }

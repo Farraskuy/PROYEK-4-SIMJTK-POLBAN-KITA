@@ -1,6 +1,5 @@
 // lib/modules/laporan_fasilitas/service/detail_laporan_fasilitas_service.dart
 
-import 'package:mongo_dart/mongo_dart.dart';
 import '../model/laporan_fasilitas_model.dart';
 import '../../../shared/services/mongodb_service.dart';
 
@@ -11,9 +10,10 @@ class DetailLaporanFasilitasService {
   Future<LaporanFasilitasModel?> getLaporanById(String id) async {
     try {
       // Menggunakan fetch dengan filter selector pada field _id
-      final result = await MonggoDBServices().fetch(
+      final result = await MonggoDBServices().fetchByField(
         collectionName,
-        where.eq('_id', id),
+        '_id',
+        id,
       );
 
       if (result.isNotEmpty) {
@@ -35,9 +35,9 @@ class DetailLaporanFasilitasService {
         'updatedAt': DateTime.now().toIso8601String(),
       };
 
-      await MonggoDBServices().updateOneByFilter(
+      await MonggoDBServices().updateById(
         collectionName,
-        where.eq('_id', laporanId),
+        laporanId,
         updateData,
       );
     } catch (e) {

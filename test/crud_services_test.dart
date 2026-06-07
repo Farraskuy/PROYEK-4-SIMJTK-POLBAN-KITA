@@ -8,6 +8,9 @@ import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/lapo
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/service/user_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/hive_service.dart';
+import 'package:hive/hive.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   late MonggoDBServices mongoService;
@@ -16,6 +19,23 @@ void main() {
   final kategoriService = KategoriFasilitasService();
 
   setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    HttpOverrides.global = null;
+
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('dev.fluttercommunity.plus/connectivity'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'check') {
+          return ['wifi'];
+        }
+        return null;
+      },
+    );
+
+    final tempDir = Directory.systemTemp.createTempSync('test_hive_crud_');
+    HiveService.testPath = tempDir.path;
+
     final envFile = File('.env');
     if (envFile.existsSync()) {
       dotenv.loadFromString(envString: envFile.readAsStringSync());
@@ -26,6 +46,13 @@ void main() {
 
   tearDownAll(() async {
     await mongoService.close();
+    await Hive.close();
+    try {
+      final dir = Directory(HiveService.testPath!);
+      if (dir.existsSync()) {
+        dir.deleteSync(recursive: true);
+      }
+    } catch (_) {}
   });
 
   setUp(() async {

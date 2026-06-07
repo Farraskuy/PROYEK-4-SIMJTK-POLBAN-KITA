@@ -1,6 +1,5 @@
 // lib/modules/teknisi/analisa_kerusakan/service/analisa_kerusakan_service.dart
 
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 import '../model/analisa_kerusakan_model.dart';
 
@@ -17,9 +16,10 @@ class AnalisaKerusakanService {
       await _dbService.ensureConnected();
 
       // Mengambil data dan mengurutkannya dari yang terbaru (descending)
-      final List<Map<String, dynamic>> rawData = await _dbService.fetch(
+      final List<Map<String, dynamic>> rawData = await _dbService.fetchAll(
         collectionName,
-        where.sortBy('created_at', descending: true),
+        sortBy: 'created_at',
+        descending: true,
       );
 
       // Memetakan raw JSON ke dalam List objek Model
@@ -54,9 +54,12 @@ class AnalisaKerusakanService {
     try {
       await _dbService.ensureConnected();
 
-      final List<Map<String, dynamic>> rawData = await _dbService.fetch(
+      final List<Map<String, dynamic>> rawData = await _dbService.fetchByField(
         collectionName,
-        where.eq('laporan_id', laporanId).sortBy('created_at', descending: true),
+        'laporan_id',
+        laporanId,
+        sortBy: 'created_at',
+        descending: true,
       );
 
       return rawData.map((json) => AnalisaKerusakanModel.fromJson(json)).toList();

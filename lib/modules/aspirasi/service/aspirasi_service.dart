@@ -3,74 +3,122 @@
 // ============================================================
 
 import 'package:flutter/foundation.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/model/aspirasi_model.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/service/aspirasi_sync_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/hive_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
-import '../model/aspirasi_model.dart';
-import 'package:flutter/foundation.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/network_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/sync_queue_service.dart';
 
 class AspirasiService {
-  static const String _collectionName = 'aspirasi';
-  final MonggoDBServices _db = MonggoDBServices();
+  static const String collectionName = 'aspirasi';
+  final SyncQueueService _queue = SyncQueueService();
+  final AspirasiSyncService _sync = AspirasiSyncService();
+  final NetworkService _network = NetworkService();
 
-  @visibleForTesting
-  static Future<List<Map<String, dynamic>>> Function(
-    String collection,
-    SelectorBuilder filter,
-  )? fetchOverride;
-
-  @visibleForTesting
-  static Future<void> Function(String collection, Map<String, dynamic> data)?
-      insertOverride;
-
-  @visibleForTesting
-  static Future<void> Function(
-    String collection,
-    dynamic id,
-    Map<String, dynamic> data,
-  )? updateOverride;
-
-  @visibleForTesting
-  static Future<void> Function(String collection, String id)? deleteOverride;
-
-  /// Mengambil semua data aspirasi dari MongoDB
+  /// Mengambil semua data aspirasi (mencoba sync, lalu menyajikan data lokal/remote)
   Future<List<AspirasiModel>> fetchAllAspirasi() async {
-      try {
-        final data = await _db.fetch(_collectionName, where);
-        return data.map((e) => AspirasiModel.fromJson(e)).toList();
-      } catch (e) {
-        throw Exception('Gagal memuat aspirasi: $e');
-      }
-    }
+    await HiveService.init();
+    await _trySyncPending();
 
-  /// Menyimpan aspirasi baru ke MongoDB
+    final local = _readLocalAll();
+    if (!await _network.isOnline) return local;
+
+    try {
+      final rows = await MonggoDBServices().fetchAll(collectionName);
+      await _replaceLocalFromRemote(rows);
+      return _readLocalAll();
+    } catch (e) {
+      debugPrint('Gagal refresh aspirasi dari MongoDB, memakai Hive: $e');
+      return local;
+    }
+  }
+
+  /// Menyimpan aspirasi baru (tulis lokal, antre sync)
   Future<void> createAspirasi(AspirasiModel aspirasi) async {
-    try {
-      final override = insertOverride;
-      if (override != null) {
-        await override(_collectionName, aspirasi.toJson());
-        return;
-      }
-      await _db.insertData(_collectionName, aspirasi.toJson());
-    } catch (e) {
-      throw Exception('Gagal menyimpan aspirasi: $e');
-    }
+    final local = aspirasi.copyWith(syncStatus: 'pending');
+    await _saveLocal(local);
+    await _queue.enqueue(
+      collection: collectionName,
+      operation: SyncQueueOperation.create,
+      documentId: local.id,
+      payload: local.toJson(),
+    );
+    await _trySyncPending();
   }
 
-  /// Memperbarui aspirasi yang ada (contoh: untuk sistem vote nanti)
+  /// Memperbarui aspirasi (tulis lokal, antre sync)
   Future<void> updateAspirasi(AspirasiModel aspirasi) async {
-    try {
-      await _db.updateData(_collectionName, aspirasi.id, aspirasi.toJson());
-    } catch (e) {
-      throw Exception('Gagal memperbarui aspirasi: $e');
+    final local = aspirasi.copyWith(syncStatus: 'pending');
+    await _saveLocal(local);
+    await _queue.enqueue(
+      collection: collectionName,
+      operation: SyncQueueOperation.update,
+      documentId: local.id,
+      payload: local.toJson(),
+    );
+    await _trySyncPending();
+  }
+
+  /// Menghapus aspirasi (tanda lokal dihapus, antre sync)
+  Future<void> deleteAspirasi(String id) async {
+    await HiveService.init();
+    final existing = _readLocalById(id);
+    if (existing != null) {
+      await _saveLocal(existing.copyWith(syncStatus: 'deleted'));
+    }
+    await _queue.enqueue(
+      collection: collectionName,
+      operation: SyncQueueOperation.delete,
+      documentId: id,
+      payload: {'_id': id, 'id': id},
+    );
+    await _trySyncPending();
+  }
+
+  // Helper Methods
+
+  Future<void> _saveLocal(AspirasiModel aspirasi) async {
+    await HiveService.init();
+    await HiveService.aspirasiBox.put(aspirasi.id, aspirasi.toJson());
+  }
+
+  AspirasiModel? _readLocalById(String id) {
+    final value = HiveService.aspirasiBox.get(id);
+    if (value is! Map) return null;
+    final data = Map<String, dynamic>.from(value);
+    if (data['syncStatus'] == 'deleted') return null;
+    return AspirasiModel.fromJson(data);
+  }
+
+  List<AspirasiModel> _readLocalAll() {
+    return HiveService.aspirasiBox.values
+        .whereType<Map>()
+        .map((item) => AspirasiModel.fromJson(Map<String, dynamic>.from(item)))
+        .where((aspirasi) => aspirasi.syncStatus != 'deleted')
+        .toList();
+  }
+
+  Future<void> _replaceLocalFromRemote(List<Map<String, dynamic>> rows) async {
+    final pendingIds = (await _queue.pendingItems(collection: collectionName))
+        .map((item) => item['documentId']?.toString())
+        .whereType<String>()
+        .toSet();
+
+    for (final row in rows) {
+      final aspirasi = AspirasiModel.fromJson(row).copyWith(syncStatus: 'synced');
+      if (!pendingIds.contains(aspirasi.id)) {
+        await _saveLocal(aspirasi);
+      }
     }
   }
 
-  /// Menghapus aspirasi dari MongoDB
-  Future<void> deleteAspirasi(String id) async {
+  Future<void> _trySyncPending() async {
+    if (!await _network.isOnline) return;
     try {
-      await _db.deleteData(_collectionName, id);
+      await _sync.syncPending();
     } catch (e) {
-      throw Exception('Gagal menghapus aspirasi: $e');
+      debugPrint('Gagal sync pending aspirasi: $e');
     }
   }
 }

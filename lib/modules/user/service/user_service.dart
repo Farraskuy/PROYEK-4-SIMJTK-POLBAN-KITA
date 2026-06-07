@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 
@@ -13,12 +11,16 @@ class UserService {
   }
 
   Future<List<UserModel>> getAll() async {
-    final rows = await MonggoDBServices().fetch(collectionName, where.exists('_id'));
+    final rows = await MonggoDBServices().fetchAll(collectionName);
     return rows.map(UserModel.fromJson).toList();
   }
 
   Future<UserModel?> getById(String id) async {
-    final rows = await _fetchByFilter(where.eq('_id', id));
+    final rows = await MonggoDBServices().fetchByField(
+      collectionName,
+      '_id',
+      id,
+    );
     if (rows.isEmpty) {
       return null;
     }
@@ -28,9 +30,9 @@ class UserService {
 
   Future<UserModel> update(UserModel user) async {
     final data = user.toJson();
-    await MonggoDBServices().updateOneByFilter(
+    await MonggoDBServices().updateById(
       collectionName,
-      where.eq('_id', user.id),
+      user.id,
       data,
     );
     return user;
@@ -38,9 +40,5 @@ class UserService {
 
   Future<void> delete(String id) async {
     await MonggoDBServices().deleteData(collectionName, id);
-  }
-
-  Future<List<Map<String, dynamic>>> _fetchByFilter(SelectorBuilder filter) async {
-    return MonggoDBServices().fetch(collectionName, filter);
   }
 }

@@ -99,6 +99,9 @@ class AspirasiModel {
   /// kategori aspirasi
   final KategoriAspirasi kategori;
 
+  /// sync status (local, pending, synced, deleted)
+  final String syncStatus;
+
   /// createdAt (DateTime)
   final DateTime createdAt;
 
@@ -116,6 +119,7 @@ class AspirasiModel {
     this.tanggapanJurusan,
     required this.status,
     required this.kategori,
+    this.syncStatus = 'synced',
     required this.createdAt,
   });
 
@@ -153,6 +157,7 @@ class AspirasiModel {
     List<String>? downvoterIds,
     String? tanggapanJurusan,
     StatusAspirasi? status,
+    String? syncStatus,
   }) {
     return AspirasiModel(
       id: id,
@@ -168,6 +173,7 @@ class AspirasiModel {
       tanggapanJurusan: tanggapanJurusan ?? this.tanggapanJurusan,
       status: status ?? this.status,
       kategori: kategori,
+      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt,
     );
   }
@@ -193,6 +199,7 @@ class AspirasiModel {
         (e) => e.name == json['kategori'],
         orElse: () => KategoriAspirasi.umum,
       ),
+      syncStatus: (json['syncStatus'] ?? 'synced').toString(),
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'].toString())
           : DateTime.now(),
@@ -202,6 +209,7 @@ class AspirasiModel {
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
+      'id': id,
       'topik': topik,
       'isiSaran': isiSaran,
       'pelaporId': pelaporId,
@@ -214,6 +222,7 @@ class AspirasiModel {
       'tanggapanJurusan': tanggapanJurusan,
       'status': status.name,
       'kategori': kategori.name,
+      'syncStatus': syncStatus,
       'createdAt': createdAt.toIso8601String(),
     };
   }

@@ -1,22 +1,45 @@
 import 'package:flutter/foundation.dart';
-import 'package:mongo_dart/mongo_dart.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_sync_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/hive_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/network_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/sync_queue_service.dart';
 
 class LaporanFasilitasService {
   static const String collectionName = 'laporan_fasilitas';
+  final SyncQueueService _queue = SyncQueueService();
+  final LaporanFasilitasSyncService _sync = LaporanFasilitasSyncService();
+  final NetworkService _network = NetworkService();
 
   Future<LaporanFasilitasModel> create(LaporanFasilitasModel laporan) async {
-    final data = laporan.toJson();
-    final mongo = MonggoDBServices();
-    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum insert
-    await mongo.insertData(collectionName, data);
-    return laporan;
+    final local = laporan.copyWith(syncStatus: 'pending');
+    await _saveLocal(local);
+    await _queue.enqueue(
+      collection: collectionName,
+      operation: SyncQueueOperation.create,
+      documentId: local.id,
+      payload: local.toJson(),
+    );
+    await _trySyncPending();
+    return _readLocalById(local.id) ?? local;
   }
 
   Future<List<LaporanFasilitasModel>> getAll() async {
-    final rows = await _fetchByFilter(where.exists('_id'));
-    return rows.map(LaporanFasilitasModel.fromJson).toList();
+    await HiveService.init();
+    await _trySyncPending();
+
+    final local = _readLocalAll();
+    if (!await _network.isOnline) return local;
+
+    try {
+      final rows = await _fetchAll();
+      await _replaceLocalFromRemote(rows);
+      return _readLocalAll();
+    } catch (e) {
+      debugPrint('Gagal refresh laporan dari MongoDB, memakai Hive: $e');
+      return local;
+    }
   }
 
   Future<List<LaporanFasilitasModel>> getForRole(String role) async {
@@ -44,21 +67,35 @@ class LaporanFasilitasService {
   }
 
   Future<LaporanFasilitasModel?> getById(String id) async {
-    final rows = await _fetchByFilter(where.eq('_id', id));
-    if (rows.isEmpty) return null;
-    return LaporanFasilitasModel.fromJson(rows.first);
+    await HiveService.init();
+    await _trySyncPending();
+
+    final local = _readLocalById(id);
+    if (!await _network.isOnline) return local;
+
+    try {
+      final rows = await _fetchById(id);
+      if (rows.isEmpty) return local;
+      final remote = LaporanFasilitasModel.fromJson(rows.first)
+          .copyWith(syncStatus: 'synced');
+      await _saveLocal(remote);
+      return _readLocalById(id);
+    } catch (_) {
+      return local;
+    }
   }
 
   Future<LaporanFasilitasModel> update(LaporanFasilitasModel laporan) async {
-    final data = laporan.toJson();
-    final mongo = MonggoDBServices();
-    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum update
-    await mongo.updateOneByFilter(
-      collectionName,
-      where.eq('_id', laporan.id),
-      data,
+    final local = laporan.copyWith(syncStatus: 'pending');
+    await _saveLocal(local);
+    await _queue.enqueue(
+      collection: collectionName,
+      operation: SyncQueueOperation.update,
+      documentId: local.id,
+      payload: local.toJson(),
     );
-    return laporan;
+    await _trySyncPending();
+    return _readLocalById(local.id) ?? local;
   }
 
   Future<void> tanggapiPetugas({
@@ -93,28 +130,67 @@ class LaporanFasilitasService {
   }
 
   Future<void> delete(String id) async {
-    final mongo = MonggoDBServices();
-    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum delete
-    await mongo.deleteData(collectionName, id);
+    await HiveService.init();
+    final existing = _readLocalById(id);
+    if (existing != null) {
+      await _saveLocal(existing.copyWith(syncStatus: 'deleted'));
+    }
+    await _queue.enqueue(
+      collection: collectionName,
+      operation: SyncQueueOperation.delete,
+      documentId: id,
+      payload: {'_id': id, 'id': id},
+    );
+    await _trySyncPending();
   }
 
   Future<void> _updateById(String id, Map<String, dynamic> data) async {
-    final mongo = MonggoDBServices();
-    await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum update parsial
-    await mongo.updateOneByFilter(
-      collectionName,
-      where.eq('_id', id),
-      data,
+    final existing = await getById(id);
+    if (existing == null) return;
+
+    final merged = {
+      ...existing.toJson(),
+      ...data,
+      '_id': id,
+      'id': id,
+      'syncStatus': 'pending',
+    };
+    final local = LaporanFasilitasModel.fromJson(merged);
+    await _saveLocal(local);
+    await _queue.enqueue(
+      collection: collectionName,
+      operation: SyncQueueOperation.update,
+      documentId: id,
+      payload: local.toJson(),
     );
+    await _trySyncPending();
   }
 
-  Future<List<Map<String, dynamic>>> _fetchByFilter(
-    SelectorBuilder filter,
-  ) async {
+  Future<List<Map<String, dynamic>>> _fetchAll({
+    String? sortBy,
+    bool descending = false,
+  }) async {
     final mongo = MonggoDBServices();
-    
-    final rawRows = await mongo.fetch(collectionName, filter);
+    final rawRows = await mongo.fetchAll(
+      collectionName,
+      sortBy: sortBy,
+      descending: descending,
+    );
 
+    return _enrichWithUserNames(mongo, rawRows);
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchById(String id) async {
+    final mongo = MonggoDBServices();
+    final rawRows = await mongo.fetchByField(collectionName, '_id', id);
+
+    return _enrichWithUserNames(mongo, rawRows);
+  }
+
+  Future<List<Map<String, dynamic>>> _enrichWithUserNames(
+    MonggoDBServices mongo,
+    List<Map<String, dynamic>> rawRows,
+  ) async {
     if (rawRows.isEmpty) return rawRows;
 
     // --- PROSES MENGAMBIL NAMA USER DARI KOLEKSI 'users' ---
@@ -129,7 +205,7 @@ class LaporanFasilitasService {
       Map<String, String> userMap = {};
 
       if (userIds.isNotEmpty) {
-        final usersData = await mongo.fetch('users', where.oneFrom('_id', userIds));
+        final usersData = await mongo.fetchOneFrom('users', '_id', userIds);
         
         for (var u in usersData) {
           final uId = u['_id']?.toString();
@@ -159,7 +235,54 @@ class LaporanFasilitasService {
   }
 
   Future<List<LaporanFasilitasModel>> fetchAll() async {
-    final rawRows = await _fetchByFilter(where.sortBy('createdAt', descending: true));
-    return rawRows.map(LaporanFasilitasModel.fromJson).toList();
+    final rows = await getAll();
+    return rows..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  }
+
+  Future<void> _saveLocal(LaporanFasilitasModel laporan) async {
+    await HiveService.init();
+    await HiveService.laporanBox.put(laporan.id, laporan.toJson());
+  }
+
+  LaporanFasilitasModel? _readLocalById(String id) {
+    final value = HiveService.laporanBox.get(id);
+    if (value is! Map) return null;
+    final data = Map<String, dynamic>.from(value);
+    if (data['syncStatus'] == 'deleted') return null;
+    return LaporanFasilitasModel.fromJson(data);
+  }
+
+  List<LaporanFasilitasModel> _readLocalAll() {
+    return HiveService.laporanBox.values
+        .whereType<Map>()
+        .map((item) => LaporanFasilitasModel.fromJson(
+              Map<String, dynamic>.from(item),
+            ))
+        .where((laporan) => laporan.syncStatus != 'deleted')
+        .toList();
+  }
+
+  Future<void> _replaceLocalFromRemote(List<Map<String, dynamic>> rows) async {
+    final pendingIds = (await _queue.pendingItems(collection: collectionName))
+        .map((item) => item['documentId']?.toString())
+        .whereType<String>()
+        .toSet();
+
+    for (final row in rows) {
+      final laporan = LaporanFasilitasModel.fromJson(row)
+          .copyWith(syncStatus: 'synced');
+      if (!pendingIds.contains(laporan.id)) {
+        await _saveLocal(laporan);
+      }
+    }
+  }
+
+  Future<void> _trySyncPending() async {
+    if (!await _network.isOnline) return;
+    try {
+      await _sync.syncPending();
+    } catch (e) {
+      debugPrint('Gagal sync pending laporan fasilitas: $e');
+    }
   }
 }

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:bcrypt/bcrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:mongo_dart/mongo_dart.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/log_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
@@ -84,9 +83,9 @@ class AuthService {
   /// Login menggunakan API (mengakses database Mongo)
   Future<bool> login(String username, String password) async {
     try {
-      var userList = await _fetchUsers(where.eq('username', username));
+      var userList = await _fetchUsersByField('username', username);
       if (userList.isEmpty) {
-        userList = await _fetchUsers(where.eq('nomor_induk', username));
+        userList = await _fetchUsersByField('nomor_induk', username);
       }
 
       final userMap = userList.isNotEmpty ? userList.first : null;
@@ -112,9 +111,9 @@ class AuthService {
         final userId = userMap['_id'];
         if (userId != null) {
           try {
-            await MonggoDBServices().updateOneByFilter(
+            await MonggoDBServices().updateById(
               _usersCollection,
-              where.eq('_id', userId),
+              userId,
               {'lastLoginAt': DateTime.now().toIso8601String()},
             );
           } catch (e) {
@@ -141,8 +140,11 @@ class AuthService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> _fetchUsers(SelectorBuilder filter) async {
-    return MonggoDBServices().fetch(_usersCollection, filter);
+  Future<List<Map<String, dynamic>>> _fetchUsersByField(
+    String field,
+    Object? value,
+  ) async {
+    return MonggoDBServices().fetchByField(_usersCollection, field, value);
   }
 
   /// Logout - menghapus sesi
@@ -502,9 +504,10 @@ class AuthService {
       'lastLoginAt': now,
     };
 
-    final existingByUsername = await MonggoDBServices().fetch(
+    final existingByUsername = await MonggoDBServices().fetchByField(
       _usersCollection,
-      where.eq('username', usernameToStore),
+      'username',
+      usernameToStore,
     );
 
     if (existingByUsername.isEmpty) {
@@ -521,10 +524,10 @@ class AuthService {
     final existing = existingByUsername.first;
     final existingId = existing['_id'];
 
-    if (existingId is ObjectId) {
-      await MonggoDBServices().updateOneByFilter(
+    if (existingId != null) {
+      await MonggoDBServices().updateById(
         _usersCollection,
-        where.eq('_id', existingId),
+        existingId,
         profilePatch,
       );
     }

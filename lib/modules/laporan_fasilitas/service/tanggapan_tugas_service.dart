@@ -1,6 +1,4 @@
 import 'package:hive/hive.dart';
-import 'package:flutter/foundation.dart';
-import 'package:mongo_dart/mongo_dart.dart' hide Box;
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/cloudinary_service.dart';
@@ -56,8 +54,7 @@ class TanggapanTugasService {
     final mongo = MonggoDBServices();
     await mongo.ensureConnected();
 
-    final filter = where.eq('laporan_id', laporanId);
-    final existing = await mongo.fetch(_collection, filter);
+    final existing = await mongo.fetchByField(_collection, 'laporan_id', laporanId);
     final photoPaths = (data['foto_analisa_urls'] as List?)
             ?.map((item) => item.toString())
             .toList() ??
@@ -100,7 +97,7 @@ class TanggapanTugasService {
       };
       await mongo.insertData(_collection, newData);
     } else {
-      await mongo.updateOneByFilter(_collection, filter, syncedData);
+      await mongo.updateByField(_collection, 'laporan_id', laporanId, syncedData);
     }
 
     final laporanPatch = {
@@ -109,9 +106,9 @@ class TanggapanTugasService {
       'status': status.value,
       'updatedAt': DateTime.now().toIso8601String(),
     };
-    await mongo.updateOneByFilter(
+    await mongo.updateById(
       'laporan_fasilitas',
-      where.eq('_id', laporanId),
+      laporanId,
       laporanPatch,
     );
 
@@ -144,9 +141,10 @@ class TanggapanTugasService {
     try {
       final mongo = MonggoDBServices();
       await mongo.ensureConnected();
-      final rows = await mongo.fetch(
+      final rows = await mongo.fetchByField(
         _collection,
-        where.eq('laporan_id', laporanId),
+        'laporan_id',
+        laporanId,
       );
       if (rows.isEmpty) return local;
       return {...rows.first, ...?local};

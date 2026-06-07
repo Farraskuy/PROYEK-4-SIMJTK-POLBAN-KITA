@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/cloudinary_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/network_service.dart';
 import '../model/laporan_fasilitas_model.dart';
 import '../service/laporan_fasilitas_service.dart';
 
@@ -23,6 +24,7 @@ class LaporFasilitasController extends GetxController {
 
   final LaporanFasilitasService _service = LaporanFasilitasService();
   final CloudinaryService _cloudinaryService = CloudinaryService();
+  final NetworkService _networkService = NetworkService();
 
   String get pageTitle =>
       isEditMode.value ? 'Edit Laporan' : 'Lapor Kerusakan Fasilitas';
@@ -40,8 +42,6 @@ class LaporFasilitasController extends GetxController {
     selectedFotoPaths.assignAll(laporan.foto_urls);
   }
 
-  /// ─── FUNGSI BARU PENAMPUNG DATA KAMERA ───
-  /// Menerima path file dari VisionView lokal dan menyimpannya ke dalam list laporan.
   void tambahFotoPath(String path) {
     if (path.isNotEmpty) {
       selectedFotoPaths.add(path);
@@ -68,10 +68,7 @@ class LaporFasilitasController extends GetxController {
       final pelaporId =
           currentUser?.id ?? currentUser?.nomorInduk ?? 'anonymous';
       final old = _laporanLama;
-      final fotoUrls = await _cloudinaryService.uploadImages(
-        selectedFotoPaths,
-        folder: 'simjtk/laporan_fasilitas',
-      );
+      final fotoUrls = await _resolveFotoUrls();
 
       final laporanData = LaporanFasilitasModel(
         id: isEditMode.value
@@ -111,6 +108,24 @@ class LaporFasilitasController extends GetxController {
       return false;
     } finally {
       isSubmitting.value = false;
+    }
+  }
+
+  Future<List<String>> _resolveFotoUrls() async {
+    final paths = selectedFotoPaths.toList();
+    if (paths.isEmpty) return paths;
+
+    if (!await _networkService.isOnline) {
+      return paths;
+    }
+
+    try {
+      return await _cloudinaryService.uploadImages(
+        paths,
+        folder: 'simjtk/laporan_fasilitas',
+      );
+    } catch (_) {
+      return paths;
     }
   }
 

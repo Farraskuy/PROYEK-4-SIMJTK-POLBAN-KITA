@@ -280,6 +280,56 @@ class MonggoDBServices {
     }
   }
 
+  Future<List<Map<String, dynamic>>> fetchAll(
+    String collection, {
+    String? sortBy,
+    bool descending = false,
+  }) {
+    final filter = sortBy == null
+        ? where.exists('_id')
+        : where.sortBy(sortBy, descending: descending);
+    return fetch(collection, filter);
+  }
+
+  Future<List<Map<String, dynamic>>> fetchByField(
+    String collection,
+    String field,
+    Object? value, {
+    String? sortBy,
+    bool descending = false,
+  }) {
+    final filter = where.eq(field, value);
+    if (sortBy != null) {
+      filter.sortBy(sortBy, descending: descending);
+    }
+    return fetch(collection, filter);
+  }
+
+  Future<List<Map<String, dynamic>>> fetchOneFrom(
+    String collection,
+    String field,
+    List<Object?> values,
+  ) {
+    return fetch(collection, where.oneFrom(field, values));
+  }
+
+  Future<List<Map<String, dynamic>>> fetchByAnyField(
+    String collection,
+    Map<String, Object?> fields,
+  ) {
+    SelectorBuilder? filter;
+    for (final entry in fields.entries) {
+      final selector = where.eq(entry.key, entry.value);
+      filter = filter == null ? selector : filter.or(selector);
+    }
+
+    if (filter == null) {
+      return fetchAll(collection);
+    }
+
+    return fetch(collection, filter);
+  }
+
   Future<void> updateData(
     String collectionName,
     String id,
@@ -332,6 +382,23 @@ class MonggoDBServices {
     }
   }
 
+  Future<void> updateByField(
+    String collectionName,
+    String field,
+    Object? value,
+    Map<String, dynamic> newData,
+  ) {
+    return updateOneByFilter(collectionName, where.eq(field, value), newData);
+  }
+
+  Future<void> updateById(
+    String collectionName,
+    Object? id,
+    Map<String, dynamic> newData,
+  ) {
+    return updateByField(collectionName, '_id', id, newData);
+  }
+
   Map<String, dynamic> _asSetUpdate(Map<String, dynamic> data) {
     final hasOperator = data.keys.any((key) => key.startsWith(r'$'));
     if (hasOperator) {
@@ -356,6 +423,28 @@ class MonggoDBServices {
     } catch (e) {
       await LogService.writeLog(
         "Failed to delete data from MongoDB: $e",
+        source: "mongodb_service.dart",
+        level: 1,
+      );
+
+      rethrow;
+    }
+  }
+
+  Future<void> deleteById(String collectionName, Object? id) async {
+    try {
+      await _executeWithReconnect(() async {
+        final collection = getCollection(collectionName);
+        await collection.deleteOne({'_id': id});
+      }, action: "Delete data by id di $collectionName");
+
+      await LogService.writeLog(
+        "Data deleted from $collectionName by id",
+        source: "mongodb_service.dart",
+      );
+    } catch (e) {
+      await LogService.writeLog(
+        "Failed to delete data by id from MongoDB: $e",
         source: "mongodb_service.dart",
         level: 1,
       );
