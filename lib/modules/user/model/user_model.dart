@@ -48,6 +48,34 @@ class UserModel {
     );
   }
 
+  UserModel copyWith({
+    String? id,
+    String? name,
+    String? nomorInduk,
+    String? passwordHash,
+    String? role,
+    bool? isActive,
+    String? createdAt,
+    String? email,
+    String? programStudy,
+    String? photoUrl,
+    String? source,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      nomorInduk: nomorInduk ?? this.nomorInduk,
+      passwordHash: passwordHash ?? this.passwordHash,
+      role: role ?? this.role,
+      isActive: isActive ?? this.isActive,
+      createdAt: createdAt ?? this.createdAt,
+      email: email ?? this.email,
+      programStudy: programStudy ?? this.programStudy,
+      photoUrl: photoUrl ?? this.photoUrl,
+      source: source ?? this.source,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       '_id': id,

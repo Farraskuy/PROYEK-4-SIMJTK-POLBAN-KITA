@@ -161,12 +161,10 @@ class LaporanFasilitasService {
     List<Map<String, dynamic>> rawRows;
     final mongo = MonggoDBServices();
     
-    // Pastikan koneksi aman sebelum menarik data
-    await mongo.ensureConnected(); 
-    
     if (override != null) {
       rawRows = await override(collectionName, filter);
     } else {
+      await mongo.ensureConnected(); 
       rawRows = await mongo.fetch(collectionName, filter);
     }
 
