@@ -84,10 +84,10 @@ class AspirasiModel {
   /// downvoteCount — tambahan fitur
   final int downvoteCount;
 
-  /// upvoterIds (List<String>) — agar tidak bisa double vote
+  /// upvoterIds (`List<String>`) — agar tidak bisa double vote
   final List<String> upvoterIds;
 
-  /// downvoterIds (List<String>)
+  /// downvoterIds (`List<String>`)
   final List<String> downvoterIds;
 
   /// tanggapanJurusan (String, Nullable) — balasan resmi Admin
@@ -304,21 +304,25 @@ class AspirasiModel {
 
 // --------------- FORM INPUT MODEL ---------------
 class AspirasiFormInput {
+  final String judul;
   final String isiSaran;
   final KategoriAspirasi kategori;
 
   const AspirasiFormInput({
+    this.judul = '',
     this.isiSaran = '',
     this.kategori = KategoriAspirasi.umum,
   });
 
-  bool get isValid => isiSaran.trim().length >= 20;
+  bool get isValid => judul.trim().length >= 5 && isiSaran.trim().length >= 20;
 
   AspirasiFormInput copyWith({
+    String? judul,
     String? isiSaran,
     KategoriAspirasi? kategori,
   }) {
     return AspirasiFormInput(
+      judul: judul ?? this.judul,
       isiSaran: isiSaran ?? this.isiSaran,
       kategori: kategori ?? this.kategori,
     );

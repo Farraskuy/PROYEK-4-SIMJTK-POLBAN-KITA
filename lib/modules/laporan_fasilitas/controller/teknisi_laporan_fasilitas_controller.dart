@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/tanggapan_tugas_service.dart';
+import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 
 enum TeknisiLaporanSort { mendesak, terbaru, terlama }
@@ -45,8 +46,7 @@ class TeknisiLaporanFasilitasController extends GetxController {
   final RxString searchQuery = ''.obs;
   final RxBool isLoading = false.obs;
 
-  String get currentUserName =>
-      AuthService().currentUser?.name ?? 'Petugas';
+  UserModel? get user => AuthService().currentUser;
 
   bool get isSearchActive => searchQuery.value.isNotEmpty;
 

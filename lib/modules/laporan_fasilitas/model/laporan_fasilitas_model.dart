@@ -13,6 +13,7 @@ enum StatusLaporan {
   final String label;
 
   static StatusLaporan fromValue(Object? value) {
+    if (value is StatusLaporan) return value;
     final normalized = value.toString().trim().toLowerCase();
     if (normalized == 'assigned') return StatusLaporan.in_progress;
     if (normalized == 'rejected') return StatusLaporan.cancelled;

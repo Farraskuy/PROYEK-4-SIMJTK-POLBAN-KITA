@@ -1,110 +1,111 @@
-// ============================================================
-// FILE: modules/admin/dashboard/view/admin_dashboard_view.dart
-// Kelompok A7 â€“ SIMJTK (Sistem Informasi Mahasiswa JTK)
-// ============================================================
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controller/home_controller.dart';
-import '../model/home_model.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/admin_aspirasi_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/home/admin/controller/home_controller.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/admin_laporan_fasilitas_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/user/view/admin_user_view.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/app_dashboard_components.dart';
-import 'package:proyek_4_poki_polban_kita/modules/user/view/admin_add_user_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/profile/view/role_profile_view.dart';
 
-// ============================================================
-// DESIGN TOKENS
-// ============================================================
-class _C {
-  static const primary = Color(0xFF1A3A6B);
-  static const primaryDark = Color(0xFF0D2545);
-  static const primaryLight = Color(0xFF2B5BAE);
-  static const accent = Color(0xFF3E7BFA);
-  static const surface = Color(0xFFF0F4FA);
-  static const white = Colors.white;
-  static const cardBg = Color(0xFFFFFFFF);
-  static const textPrimary = Color(0xFF1A1A2E);
-  static const textSecondary = Color(0xFF6B7280);
-  static const textLight = Color(0xFFB0B8CC);
-  static const divider = Color(0xFFE5E9F2);
-  static const navActive = Color(0xFF1A3A6B);
-  static const navInactive = Color(0xFF9CA3AF);
-  static const navBg = Color(0xFF0D2545);
-  static const chipPerbaikan = Color(0xFF2B5BAE);
-  static const chipPerbaikanBg = Color(0xFFE3F2FD);
-  static const chipLaporan = Color(0xFFD32F2F);
-  static const chipLaporanBg = Color(0xFFFFEBEE);
-  static const chipAspirasi = Color(0xFF2E7D32);
-  static const chipAspirasi_bg = Color(0xFFE8F5E9);
-  static const chipLostFound = Color(0xFFE65100);
-  static const chipLostFoundBg = Color(0xFFFFF3E0);
-  static const chipDelegasi = Color(0xFF6A1B9A);
-  static const chipDelegasiBg = Color(0xFFF3E5F5);
-  static const positifColor = Color(0xFF4CAF50);
-  static const tindakanBg = Color(0xFFEDF2FF);
-}
-
-// ============================================================
-// ADMIN DASHBOARD VIEW
-// ============================================================
 class AdminDashboardView extends StatelessWidget {
   const AdminDashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final ctrl = Get.put(AdminDashboardController());
+    final controller = Get.put(AdminDashboardController());
 
     return Scaffold(
-      backgroundColor: _C.surface,
+      backgroundColor: AppColors.background,
       body: Obx(() {
-        if (ctrl.isLoading.value) {
+        if (controller.isLoading.value) {
           return const Center(
-            child: CircularProgressIndicator(color: _C.primary),
+            child: CircularProgressIndicator(color: AppColors.primary),
           );
         }
+
         return RefreshIndicator(
-          color: _C.primary,
-          onRefresh: ctrl.onRefresh,
+          color: AppColors.primary,
+          onRefresh: controller.onRefresh,
           child: CustomScrollView(
             slivers: [
-              // ---- APP BAR ----
-              _buildSliverAppBar(ctrl),
-
+              AppHomeAppBar(
+                title: 'Portal Admin / TU',
+                subtitle: 'SIMJTK',
+                avatarIcon: Icons.admin_panel_settings_rounded,
+                avatarText: (controller.user?.name ?? 'Admin').isEmpty
+                    ? 'A'
+                    : controller.user!.name[0].toUpperCase(),
+              ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ---- SAPAAN ----
-                      _buildSapaan(ctrl),
+                      Text(
+                        '${controller.sapaanAdmin},',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.body,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Obx(
+                        () => Text(
+                          controller.user?.name ?? 'Admin',
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.title,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Pantau laporan fasilitas dan tanggapi aspirasi mahasiswa.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.body,
+                          height: 1.45,
+                        ),
+                      ),
                       const SizedBox(height: 20),
-
-                      // ---- KARTU TOTAL LAPORAN ----
-                      _buildKartuTotalLaporan(ctrl),
-                      const SizedBox(height: 14),
-
-                      // ---- KARTU RINGKASAN (2 kolom) ----
-                      _buildKartuRingkasan(ctrl),
+                      _SummaryGrid(controller: controller),
                       const SizedBox(height: 24),
-
-                      _buildTambahUserShortcut(context),
-                      const SizedBox(height: 16),
-
-                      _buildProfilShortcut(context),
-                      const SizedBox(height: 16),
-
-                      // ---- TINDAKAN CEPAT ----
-                      _buildTindakanCepat(ctrl),
-                      const SizedBox(height: 24),
-
-                      // ---- AKTIVITAS TERBARU ----
-                      _buildAktivitasHeader(ctrl),
+                      const Text(
+                        'Akses Admin / TU',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.title,
+                        ),
+                      ),
                       const SizedBox(height: 12),
-                      _buildAktivitasList(ctrl),
-                      const SizedBox(height: 24),
+                      _ActionCard(
+                        icon: Icons.apartment_rounded,
+                        title: 'Laporan Fasilitas',
+                        description:
+                            'Lihat seluruh laporan fasilitas dari mahasiswa.',
+                        onTap: () =>
+                            Get.to(() => const AdminLaporanFasilitasView()),
+                      ),
+                      const SizedBox(height: 12),
+                      _ActionCard(
+                        icon: Icons.campaign_rounded,
+                        title: 'Aspirasi Mahasiswa',
+                        description:
+                            'Tinjau dan berikan tanggapan resmi jurusan.',
+                        onTap: () => Get.to(() => const AdminAspirasiView()),
+                      ),
+                      const SizedBox(height: 12),
+                      _ActionCard(
+                        icon: Icons.manage_accounts_rounded,
+                        title: 'Kelola User',
+                        description:
+                            'Tambah, ubah, dan hapus akun pengguna aplikasi.',
+                        onTap: () => Get.to(() => const AdminUserView()),
+                      ),
                     ],
                   ),
                 ),
@@ -115,776 +116,172 @@ class AdminDashboardView extends StatelessWidget {
       }),
     );
   }
-
-  // ============================================================
-  // SLIVER APP BAR
-  // ============================================================
-  Widget _buildSliverAppBar(AdminDashboardController ctrl) {
-    return Obx(
-      () => AppHomeAppBar(
-        title: 'Institution Admin',
-        subtitle: ctrl.currentAdmin.value.name,
-        avatarIcon: Icons.admin_panel_settings_rounded,
-      ),
-    );
-  }
-
-  // ============================================================
-  // SAPAAN
-  // ============================================================
-  Widget _buildSapaan(AdminDashboardController ctrl) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          ctrl.sapaanAdmin.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: _C.textSecondary,
-            letterSpacing: 1.0,
-          ),
-        ),
-        const SizedBox(height: 4),
-
-        Obx(
-          () => Text(
-            ctrl.currentAdmin.value.name,
-            style: const TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              color: _C.textPrimary,
-              height: 1.1,
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        const Text(
-          'Ringkasan aktivitas institusi hari ini.',
-          style: TextStyle(fontSize: 13, color: _C.textSecondary),
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // KARTU TOTAL LAPORAN (besar, dark blue)
-  // ============================================================
-  Widget _buildKartuTotalLaporan(AdminDashboardController ctrl) {
-    return Obx(() {
-      final stat = ctrl.statistikLaporan.value;
-      if (stat == null) return const SizedBox.shrink();
-
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [_C.primary, _C.primaryDark],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: _C.primary.withOpacity(0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Konten kiri
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Total Laporan',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    _formatAngka(stat.totalLaporan),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 38,
-                      fontWeight: FontWeight.w800,
-                      height: 1.0,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        stat.isPositif
-                            ? Icons.trending_up_rounded
-                            : Icons.trending_down_rounded,
-                        color: stat.isPositif
-                            ? Colors.greenAccent
-                            : Colors.redAccent,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        stat.persenLabel,
-                        style: TextStyle(
-                          color: stat.isPositif
-                              ? Colors.greenAccent
-                              : Colors.redAccent,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Progress bar status laporan
-                  _LaporanProgressBar(stat: stat),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-
-            // Ikon kanan
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.description_outlined,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  // ============================================================
-  // KARTU RINGKASAN (2 kolom)
-  // ============================================================
-  Widget _buildKartuRingkasan(AdminDashboardController ctrl) {
-    return Obx(() {
-      final r = ctrl.statistikRingkasan.value;
-      if (r == null) return const SizedBox.shrink();
-
-      return Row(
-        children: [
-          Expanded(
-            child: _RingkasanCard(
-              icon: Icons.engineering_rounded,
-              label: 'Teknisi Aktif',
-              value: '${r.teknisiAktif}',
-              color: AppColors.primaryLight,
-              backgroundColor: AppColors.blueSoft,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _RingkasanCard(
-              icon: Icons.pending_actions_rounded,
-              label: 'Aspirasi Tertunda',
-              value: '${r.aspirasiTertunda}',
-              color: AppColors.warning,
-              backgroundColor: AppColors.orangeSoft,
-            ),
-          ),
-        ],
-      );
-    });
-  }
-
-  Widget _buildTambahUserShortcut(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const AdminAddUserView())),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: _C.cardBg,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _C.divider),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: const Row(
-          children: [
-            _ShortcutIcon(icon: Icons.person_add_alt_1_rounded),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Tambah User',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: _C.textPrimary,
-                    ),
-                  ),
-                  SizedBox(height: 3),
-                  Text(
-                    'Buat akun mahasiswa, dosen, teknisi, TU, atau admin.',
-                    style: TextStyle(fontSize: 12, color: _C.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: _C.textSecondary),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfilShortcut(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => const RoleProfileView(role: 'admin'),
-        ),
-      ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: _C.cardBg,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _C.divider),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: const Row(
-          children: [
-            _ShortcutIcon(icon: Icons.manage_accounts_rounded),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Profil Admin',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: _C.textPrimary,
-                    ),
-                  ),
-                  SizedBox(height: 3),
-                  Text(
-                    'Pantau aktivitas pribadi dan ringkasan kontribusi.',
-                    style: TextStyle(fontSize: 12, color: _C.textSecondary),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ============================================================
-  // TINDAKAN CEPAT
-  // ============================================================
-  Widget _buildTindakanCepat(AdminDashboardController ctrl) {
-    const iconMap = {
-      TindakanCepatType.tugaskan: Icons.assignment_ind_rounded,
-      TindakanCepatType.siarkan: Icons.campaign_rounded,
-      TindakanCepatType.moderasi: Icons.verified_user_rounded,
-      TindakanCepatType.tambahAgenda: Icons.calendar_month_rounded,
-    };
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Tindakan Cepat',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: _C.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 12),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            // 4 item per baris dengan jarak antar item 10, sehingga 3 celah = 30
-            final itemWidth = ((constraints.maxWidth - 30) / 4).floorToDouble();
-            return Obx(
-              () => Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: ctrl.tindakanCepatList.map((item) {
-                  return SizedBox(
-                    width: itemWidth,
-                    child: _TindakanCepatButton(
-                      label: item.label,
-                      icon: iconMap[item.type] ?? Icons.flash_on_rounded,
-                      onTap: () => ctrl.onTindakanCepatTapped(item.type),
-                    ),
-                  );
-                }).toList(),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // AKTIVITAS TERBARU HEADER
-  // ============================================================
-  Widget _buildAktivitasHeader(AdminDashboardController ctrl) {
-    return Row(
-      children: [
-        const Text(
-          'Aktivitas Terbaru',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-            color: _C.textPrimary,
-          ),
-        ),
-        const Spacer(),
-        GestureDetector(
-          onTap: ctrl.onLihatSemuaAktivitas,
-          child: const Text(
-            'Lihat Semua',
-            style: TextStyle(
-              fontSize: 13,
-              color: _C.primaryLight,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ============================================================
-  // AKTIVITAS LIST
-  // ============================================================
-  Widget _buildAktivitasList(AdminDashboardController ctrl) {
-    return Obx(
-      () => ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: ctrl.aktivitasList.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 10),
-        itemBuilder: (context, index) {
-          final item = ctrl.aktivitasList[index];
-          return _AktivitasCard(
-            aktivitas: item,
-            onTap: () => ctrl.onAktivitasTapped(item),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildBottomNavBar(
-    BuildContext context,
-    AdminDashboardController ctrl,
-  ) {
-    const items = [
-      AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
-      AppNavItem(label: 'Layanan', icon: Icons.apartment_rounded),
-      AppNavItem(label: 'Aspirasi', icon: Icons.campaign_rounded),
-      AppNavItem(label: 'User', icon: Icons.group_rounded),
-    ];
-
-    return Obx(
-      () => AppBottomNavBar(
-        items: items,
-        selectedIndex: ctrl.selectedNavIndex.value,
-        onTap: (index) {
-          ctrl.onNavTapped(index);
-        },
-      ),
-    );
-  }
-
-  // ---- HELPER ----
-  String _formatAngka(int n) {
-    if (n >= 1000) {
-      final s = n.toString();
-      return '${s.substring(0, s.length - 3)},${s.substring(s.length - 3)}';
-    }
-    return n.toString();
-  }
 }
 
-// ============================================================
-// WIDGET: Progress Bar status laporan (dalam kartu biru)
-// ============================================================
-class _LaporanProgressBar extends StatelessWidget {
-  final StatistikLaporanModel stat;
-  const _LaporanProgressBar({required this.stat});
+class _SummaryGrid extends StatelessWidget {
+  const _SummaryGrid({required this.controller});
+
+  final AdminDashboardController controller;
 
   @override
   Widget build(BuildContext context) {
-    final total = stat.totalLaporan > 0 ? stat.totalLaporan : 1;
-    return Column(
-      children: [
-        Row(
-          children: [
-            _BarItem(
-              label: 'Selesai',
-              value: stat.laporanResolved / total,
-              color: Colors.greenAccent,
-            ),
-            const SizedBox(width: 6),
-            _BarItem(
-              label: 'Proses',
-              value: stat.laporanInProgress / total,
-              color: Colors.amberAccent,
-            ),
-            const SizedBox(width: 6),
-            _BarItem(
-              label: 'Pending',
-              value: stat.laporanPending / total,
-              color: Colors.orangeAccent,
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Row(
-          children: [
-            _LegendDot(
-              color: Colors.greenAccent,
-              label: 'Selesai ${stat.laporanResolved}',
-            ),
-            const SizedBox(width: 10),
-            _LegendDot(
-              color: Colors.amberAccent,
-              label: 'Proses ${stat.laporanInProgress}',
-            ),
-            const SizedBox(width: 10),
-            _LegendDot(
-              color: Colors.orangeAccent,
-              label: 'Pending ${stat.laporanPending}',
-            ),
-          ],
-        ),
-      ],
+    return Obx(
+      () => GridView.count(
+        crossAxisCount: 2,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.38,
+        children: [
+          _SummaryCard(
+            label: 'Total Laporan',
+            value: controller.totalLaporan.value,
+            icon: Icons.assignment_outlined,
+            color: AppColors.primary,
+          ),
+          _SummaryCard(
+            label: 'Laporan Aktif',
+            value: controller.laporanAktif.value,
+            icon: Icons.pending_actions_rounded,
+            color: AppColors.warning,
+          ),
+          _SummaryCard(
+            label: 'Laporan Selesai',
+            value: controller.laporanSelesai.value,
+            icon: Icons.check_circle_outline_rounded,
+            color: AppColors.success,
+          ),
+          _SummaryCard(
+            label: 'Aspirasi Belum Ditanggapi',
+            value: controller.aspirasiBelumDitanggapi.value,
+            icon: Icons.forum_outlined,
+            color: AppColors.secondary,
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _BarItem extends StatelessWidget {
-  final String label;
-  final double value;
-  final Color color;
-  const _BarItem({
+class _SummaryCard extends StatelessWidget {
+  const _SummaryCard({
     required this.label,
     required this.value,
+    required this.icon,
     required this.color,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: (value * 100).round().clamp(1, 100),
-      child: Container(
-        height: 6,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(3),
-        ),
-      ),
-    );
-  }
-}
-
-class _LegendDot extends StatelessWidget {
-  final Color color;
   final String label;
-  const _LegendDot({required this.color, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 7,
-          height: 7,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white60, fontSize: 10),
-        ),
-      ],
-    );
-  }
-}
-
-// ============================================================
-// WIDGET: Kartu Ringkasan Kecil
-// ============================================================
-class _ShortcutIcon extends StatelessWidget {
+  final int value;
   final IconData icon;
-  const _ShortcutIcon({required this.icon});
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 44,
-      height: 44,
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: _C.tindakanBg,
-        borderRadius: BorderRadius.circular(12),
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
       ),
-      child: Icon(icon, size: 24, color: _C.primary),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(height: 12),
+          Text(
+            '$value',
+            style: const TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: AppColors.title,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.body,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _RingkasanCard extends AppStatCard {
-  const _RingkasanCard({
-    required super.icon,
-    required super.label,
-    required super.value,
-    required super.color,
-    required super.backgroundColor,
-  });
-}
-
-// ============================================================
-// WIDGET: Tombol Tindakan Cepat
-// ============================================================
-class _TindakanCepatButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _TindakanCepatButton({
-    required this.label,
+class _ActionCard extends StatelessWidget {
+  const _ActionCard({
     required this.icon,
+    required this.title,
+    required this.description,
     required this.onTap,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-        decoration: BoxDecoration(
-          color: _C.cardBg,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _C.divider, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: _C.tindakanBg,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, size: 22, color: _C.primary),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: _C.textPrimary,
-                height: 1.3,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// WIDGET: Kartu Aktivitas Terbaru
-// ============================================================
-class _AktivitasCard extends StatelessWidget {
-  final AktivitasTerbaruModel aktivitas;
+  final IconData icon;
+  final String title;
+  final String description;
   final VoidCallback onTap;
 
-  const _AktivitasCard({required this.aktivitas, required this.onTap});
-
-  // Warna & ikon per tipe aktivitas
-  Color get _chipColor {
-    switch (aktivitas.tipe) {
-      case TipeAktivitas.perbaikan:
-        return _C.chipPerbaikan;
-      case TipeAktivitas.laporanBaru:
-        return _C.chipLaporan;
-      case TipeAktivitas.aspirasiBaru:
-        return _C.chipAspirasi;
-      case TipeAktivitas.lostFound:
-        return _C.chipLostFound;
-      case TipeAktivitas.delegasi:
-        return _C.chipDelegasi;
-    }
-  }
-
-  Color get _chipBgColor {
-    switch (aktivitas.tipe) {
-      case TipeAktivitas.perbaikan:
-        return _C.chipPerbaikanBg;
-      case TipeAktivitas.laporanBaru:
-        return _C.chipLaporanBg;
-      case TipeAktivitas.aspirasiBaru:
-        return _C.chipAspirasi_bg;
-      case TipeAktivitas.lostFound:
-        return _C.chipLostFoundBg;
-      case TipeAktivitas.delegasi:
-        return _C.chipDelegasiBg;
-    }
-  }
-
-  IconData get _tipeIcon {
-    switch (aktivitas.tipe) {
-      case TipeAktivitas.perbaikan:
-        return Icons.build_circle_rounded;
-      case TipeAktivitas.laporanBaru:
-        return Icons.report_problem_rounded;
-      case TipeAktivitas.aspirasiBaru:
-        return Icons.campaign_rounded;
-      case TipeAktivitas.lostFound:
-        return Icons.search_rounded;
-      case TipeAktivitas.delegasi:
-        return Icons.assignment_ind_rounded;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: _C.cardBg,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _C.divider, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Ikon tipe
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: _chipBgColor,
-                borderRadius: BorderRadius.circular(12),
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: AppColors.blueSoft,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: Icon(icon, color: AppColors.primary),
               ),
-              child: Icon(_tipeIcon, size: 22, color: _chipColor),
-            ),
-            const SizedBox(width: 12),
-
-            // Konten
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Label tipe + jam
-                  Row(
-                    children: [
-                      Text(
-                        aktivitas.tipe.label,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: _chipColor,
-                          letterSpacing: 0.5,
-                        ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.title,
                       ),
-                      const Spacer(),
-                      Text(
-                        aktivitas.jamLabel,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: _C.textLight,
-                        ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.body,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-
-                  // Judul
-                  Text(
-                    aktivitas.judul,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: _C.textPrimary,
                     ),
-                  ),
-                  const SizedBox(height: 3),
-
-                  // Deskripsi
-                  Text(
-                    aktivitas.deskripsi,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: _C.textSecondary,
-                      height: 1.4,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+              const Icon(Icons.chevron_right_rounded, color: AppColors.muted),
+            ],
+          ),
         ),
       ),
     );

@@ -38,7 +38,7 @@ class AspirasiController extends GetxController
   final RxBool isLoading = false.obs;
 
   /// Data user yang sedang login
-  UserModel? get currentUser => AuthService().currentUser;
+  UserModel? get user => AuthService().currentUser;
 
   final RxString currentUserId = ''.obs;
   final RxString currentUserName = 'Mahasiswa'.obs;
@@ -51,6 +51,7 @@ class AspirasiController extends GetxController
   // --------------------------------------------------------
 
   /// Controller teks area aspirasi
+  final judulController = TextEditingController();
   final isiSaranController = TextEditingController();
   final adminSearchController = TextEditingController();
   final RxString adminSearchQuery = ''.obs;
@@ -59,6 +60,7 @@ class AspirasiController extends GetxController
   final RxBool isSubmitting = false.obs;
 
   /// Error teks deskripsi
+  final RxString errorJudul = ''.obs;
   final RxString errorIsiSaran = ''.obs;
 
   /// Aspirasi yang sedang diedit
@@ -74,6 +76,8 @@ class AspirasiController extends GetxController
   // --------------------------------------------------------
   static const int minIsiSaranLength = 20;
   static const int maxIsiSaranLength = 1000;
+  static const int minJudulLength = 5;
+  static const int maxJudulLength = 80;
 
   // --------------------------------------------------------
   // LIFECYCLE
@@ -87,6 +91,9 @@ class AspirasiController extends GetxController
     _initCurrentUser();
     _loadAspirasi();
 
+    judulController.addListener(() {
+      if (judulController.text.isNotEmpty) errorJudul.value = '';
+    });
     isiSaranController.addListener(() {
       if (isiSaranController.text.isNotEmpty) errorIsiSaran.value = '';
     });
@@ -114,6 +121,7 @@ class AspirasiController extends GetxController
   void onClose() {
     tabController.removeListener(_onTabChanged);
     tabController.dispose();
+    judulController.dispose();
     isiSaranController.dispose();
     adminSearchController.dispose();
     super.onClose();
@@ -192,6 +200,13 @@ class AspirasiController extends GetxController
   void clearAdminSearch() => adminSearchController.clear();
 
   bool _validateForm() {
+    if (judulController.text.trim().length < minJudulLength) {
+      errorJudul.value =
+          'Judul minimal $minJudulLength karakter. '
+          'Saat ini: ${judulController.text.trim().length} karakter.';
+      return false;
+    }
+    errorJudul.value = '';
     if (isiSaranController.text.trim().length < minIsiSaranLength) {
       errorIsiSaran.value =
           'Aspirasi minimal $minIsiSaranLength karakter. '
@@ -203,7 +218,9 @@ class AspirasiController extends GetxController
   }
 
   void _resetForm() {
+    judulController.clear();
     isiSaranController.clear();
+    errorJudul.value = '';
     errorIsiSaran.value = '';
   }
 
@@ -226,11 +243,14 @@ class AspirasiController extends GetxController
 
   void prepareEditForm(AspirasiModel aspirasi) {
     _editingAspirasi.value = aspirasi;
+    judulController.text = aspirasi.topik;
     isiSaranController.text = aspirasi.isiSaran;
+    errorJudul.value = '';
     errorIsiSaran.value = '';
   }
 
-  bool get hasDraft => isiSaranController.text.isNotEmpty;
+  bool get hasDraft =>
+      judulController.text.isNotEmpty || isiSaranController.text.isNotEmpty;
 
   /// Tutup form dan kembali ke list
   void onTutupFormConfirmed() {
@@ -244,7 +264,8 @@ class AspirasiController extends GetxController
   // --------------------------------------------------------
 
   /// Hapus isi form
-  bool canHapusForm() => isiSaranController.text.isNotEmpty;
+  bool canHapusForm() =>
+      judulController.text.isNotEmpty || isiSaranController.text.isNotEmpty;
 
   void onHapusFormConfirmed() {
     _resetForm();
@@ -272,7 +293,7 @@ class AspirasiController extends GetxController
       if (current == null) {
         final newAspirasi = AspirasiModel(
           id: _generateId(),
-          topik: _generateTopik(isiSaranController.text.trim()),
+          topik: judulController.text.trim(),
           isiSaran: isiSaranController.text.trim(),
           pelaporId: pelaporId,
           pelaporName: pelaporName,
@@ -286,14 +307,17 @@ class AspirasiController extends GetxController
           createdAt: DateTime.now(),
         );
 
+        await _service.createAspirasi(newAspirasi);
         _allAspirasi.insert(0, newAspirasi);
       } else {
         final idx = _allAspirasi.indexWhere((item) => item.id == current.id);
         if (idx != -1) {
-          _allAspirasi[idx] = current.copyWith(
-            topik: _generateTopik(isiSaranController.text.trim()),
+          final updatedAspirasi = current.copyWith(
+            topik: judulController.text.trim(),
             isiSaran: isiSaranController.text.trim(),
           );
+          await _service.updateAspirasi(updatedAspirasi);
+          _allAspirasi[idx] = updatedAspirasi;
         }
       }
 
@@ -336,13 +360,6 @@ class AspirasiController extends GetxController
     } catch (e) {
       Get.snackbar('Gagal', 'Gagal menghapus aspirasi: $e');
     }
-  }
-
-  /// Generate topik singkat dari isi saran (ambil 7 kata pertama)
-  String _generateTopik(String isiSaran) {
-    final words = isiSaran.split(' ');
-    if (words.length <= 7) return isiSaran;
-    return '${words.take(7).join(' ')}...';
   }
 
   // --------------------------------------------------------
@@ -506,6 +523,8 @@ class AspirasiController extends GetxController
   Future<void> onRefresh() async => await _loadAspirasi();
 
   /// Counter karakter
+  String get judulCounter => '${judulController.text.length}/$maxJudulLength';
+
   String get isiSaranCounter =>
       '${isiSaranController.text.length}/$maxIsiSaranLength';
 }

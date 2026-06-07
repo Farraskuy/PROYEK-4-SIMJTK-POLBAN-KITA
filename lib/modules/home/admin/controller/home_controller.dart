@@ -1,30 +1,26 @@
-// modules/admin/dashboard/controller/home_controller_3.dart
-
 import 'package:get/get.dart';
-import '../model/home_model.dart';
-import '../../../aspirasi/view/admin_aspirasi_view.dart';
-import '../../../laporan_fasilitas/view/admin_laporan_fasilitas_view.dart';
-import '../../../user/view/admin_user_view.dart';
- 
-// // Import file view/screen admin yang sudah ada
-// import '../../../laporan_fasilitas/view/admin_laporan_fasilitas_screen.dart';
-// import '../../../laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/model/aspirasi_model.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/service/aspirasi_service.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
+import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 
 class AdminDashboardController extends GetxController {
-  // --------------------------------------------------------
-  // STATE OBSERVABLES
-  // --------------------------------------------------------
-  final Rx<AdminUserModel> currentAdmin = AdminUserModel.dummy().obs;
-  final Rx<StatistikLaporanModel?> statistikLaporan =
-      Rx<StatistikLaporanModel?>(null);
-  final Rx<StatistikRingkasanModel?> statistikRingkasan =
-      Rx<StatistikRingkasanModel?>(null);
-  final RxList<AktivitasTerbaruModel> aktivitasList =
-      <AktivitasTerbaruModel>[].obs;
-  final RxList<TindakanCepatModel> tindakanCepatList =
-      <TindakanCepatModel>[].obs;
-  final RxInt selectedNavIndex = 0.obs;
+  final LaporanFasilitasService _laporanService = LaporanFasilitasService();
+  final AspirasiService _aspirasiService = AspirasiService();
+
+  UserModel? get user => AuthService().currentUser;
+
+  final RxString adminName = 'Admin'.obs;
   final RxBool isLoading = false.obs;
+
+  final RxInt totalLaporan = 0.obs;
+  final RxInt laporanAktif = 0.obs;
+  final RxInt laporanSelesai = 0.obs;
+  final RxInt totalAspirasi = 0.obs;
+  final RxInt aspirasiBelumDitanggapi = 0.obs;
+  final RxInt aspirasiDitanggapi = 0.obs;
 
   @override
   void onInit() {
@@ -32,94 +28,53 @@ class AdminDashboardController extends GetxController {
     loadDashboardData();
   }
 
-  // --------------------------------------------------------
-  // DATA LOADING
-  // --------------------------------------------------------
   Future<void> loadDashboardData() async {
     isLoading.value = true;
-    tindakanCepatList.assignAll(TindakanCepatModel.list());
+    try {
+      final user =
+          AuthService().currentUser ?? await AuthService().loadSavedSession();
+      adminName.value = user?.name.isNotEmpty == true ? user!.name : 'Admin';
 
-    await Future.wait([
-      _fetchStatistik(),
-      _fetchRingkasan(),
-      _fetchAktivitas(),
-    ]);
+      final results = await Future.wait([
+        _laporanService.getAll(),
+        _aspirasiService.fetchAllAspirasi(),
+      ]);
 
-    isLoading.value = false;
-  }
+      final laporan = results[0] as List<LaporanFasilitasModel>;
+      final aspirasi = results[1] as List<AspirasiModel>;
 
-  Future<void> _fetchStatistik() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    statistikLaporan.value = StatistikLaporanModel.dummy();
-  }
+      totalLaporan.value = laporan.length;
+      laporanSelesai.value = laporan
+          .where((item) => item.status == StatusLaporan.resolved)
+          .length;
+      laporanAktif.value = laporan
+          .where(
+            (item) =>
+                item.status != StatusLaporan.resolved &&
+                item.status != StatusLaporan.cancelled,
+          )
+          .length;
 
-  Future<void> _fetchRingkasan() async {
-    await Future.delayed(const Duration(milliseconds: 200));
-    statistikRingkasan.value = StatistikRingkasanModel.dummy();
-  }
-
-  Future<void> _fetchAktivitas() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    aktivitasList.assignAll(AktivitasTerbaruModel.dummyList());
-  }
-
-  Future<void> onRefresh() async => await loadDashboardData();
-
-  // --------------------------------------------------------
-  // NAVIGATION & ACTIONS (FIXED: Murni GetX)
-  // --------------------------------------------------------
-  void onNavTapped(int index) {
-    // Kita tidak mengubah selectedNavIndex.value jika melakukan navigasi push 
-    // agar saat user memencet "Back", tab Home masih terlihat aktif.
-    
-    if (index == 1) {
-      // Navigasi ke admin fasilitas
-      Get.to(() => const AdminLaporanFasilitasView());
-    } else if (index == 2) {
-      // Navigasi ke Halaman Aspirasi Admin
-      Get.to(() => const AdminAspirasiView());
-    } else if (index == 3) {
-      // Navigasi ke Halaman User
-      Get.to(() => const AdminUserView());
+      totalAspirasi.value = aspirasi.length;
+      aspirasiDitanggapi.value = aspirasi
+          .where((item) => item.status == StatusAspirasi.responded)
+          .length;
+      aspirasiBelumDitanggapi.value =
+          aspirasi.length - aspirasiDitanggapi.value;
+    } catch (_) {
+      Get.snackbar('Gagal', 'Dashboard admin tidak dapat dimuat.');
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  void onTugaskan() {
-    // Navigasi cepat ke panel admin fasilitas[cite: 20]
-    // AppNavigator.push(const AdminLaporanFasilitasScreen());
-  }
+  Future<void> onRefresh() => loadDashboardData();
 
-  void onAktivitasTapped(AktivitasTerbaruModel aktivitas) {
-    switch (aktivitas.tipe) {
-      case TipeAktivitas.perbaikan:
-      case TipeAktivitas.laporanBaru:
-      case TipeAktivitas.delegasi:
-        // Navigasi ke detail laporan menggunakan targetId (UUIDv4)
-        // AppNavigator.push(DetailLaporanFasilitasView(
-        //       laporanId: aktivitas.targetId,
-        //       role: 'admin',
-        //     ));
-        break;
-      default:
-        break;
-    }
-  }
-
-  void onTindakanCepatTapped(TindakanCepatType type) {
-    if (type == TindakanCepatType.tugaskan) onTugaskan();
-    // Tambahkan dispatcher lainnya sesuai kebutuhan
-  }
-
-  void onLihatSemuaAktivitas() {
-    Get.snackbar('Aktivitas', 'Halaman riwayat lengkap segera tersedia.');
-  }
-
-  // ---- GETTERS ----
   String get sapaanAdmin {
     final hour = DateTime.now().hour;
-    if (hour < 11) return 'Selamat Pagi,';
-    if (hour < 15) return 'Selamat Siang,';
-    if (hour < 18) return 'Selamat Sore,';
-    return 'Selamat Malam,';
+    if (hour < 11) return 'Selamat Pagi';
+    if (hour < 15) return 'Selamat Siang';
+    if (hour < 18) return 'Selamat Sore';
+    return 'Selamat Malam';
   }
 }

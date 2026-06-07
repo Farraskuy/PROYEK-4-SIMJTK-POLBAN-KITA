@@ -42,18 +42,11 @@ class MonggoDBServices {
       return _connectInFlight!;
     }
 
-    final completer = Completer<void>();
-    _connectInFlight = completer.future;
-
-    try {
-      await _openConnection();
-      completer.complete();
-    } catch (e, st) {
-      completer.completeError(e, st);
-      rethrow;
-    } finally {
+    _connectInFlight = _openConnection().whenComplete(() {
       _connectInFlight = null;
-    }
+    });
+
+    return _connectInFlight!;
   }
 
   Future<void> _openConnection() async {
@@ -165,19 +158,16 @@ class MonggoDBServices {
       return _reconnectInFlight!;
     }
 
-    final completer = Completer<void>();
-    _reconnectInFlight = completer.future;
-
-    try {
+    Future<void> doReconnect() async {
       await close(shouldLog: false);
       await connect();
-      completer.complete();
-    } catch (e, st) {
-      completer.completeError(e, st);
-      rethrow;
-    } finally {
-      _reconnectInFlight = null;
     }
+
+    _reconnectInFlight = doReconnect().whenComplete(() {
+      _reconnectInFlight = null;
+    });
+
+    return _reconnectInFlight!;
   }
 
   bool _isRecoverableConnectionError(Object error) {
@@ -194,7 +184,8 @@ class MonggoDBServices {
         message.contains('connection closed') ||
         message.contains('connection reset') ||
         message.contains('broken pipe') ||
-        message.contains('socket');
+        message.contains('socket') ||
+        message.contains('no master connection');
   }
 
   Future<T> _executeWithReconnect<T>(

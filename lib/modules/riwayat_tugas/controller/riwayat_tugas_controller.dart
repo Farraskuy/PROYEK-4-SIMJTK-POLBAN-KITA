@@ -1,17 +1,9 @@
-// ============================================================
-// FILE: modules/home/teknisi/riwayat/controller/riwayat_tugas_controller.dart
-// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
-// MODIFIKASI:
-//   - Data dari DB laporan_fasilitas berdasarkan teknisi_id yang login
-//   - Filter: status == resolved
-//   - Tampilkan ID petugas yang menanggapi
-// ============================================================
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/tanggapan_tugas_service.dart';
+import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
 
@@ -86,6 +78,8 @@ class RiwayatTugasController extends GetxController {
   // ID teknisi yang sedang login
   final RxString _currentTeknisiId = '-'.obs;
   String get currentTeknisiId => _currentTeknisiId.value;
+
+  UserModel? get user => AuthService().currentUser;
 
   // --------------------------------------------------------
   // SERVICES

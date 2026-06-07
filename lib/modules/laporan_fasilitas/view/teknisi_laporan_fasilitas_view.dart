@@ -7,6 +7,7 @@ import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/lapo
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/teknisi_laporan_fasilitas_controller.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/teknisi_laporan_fasilitas_card.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 
 class TeknisiLaporanFasilitasView extends StatelessWidget {
   const TeknisiLaporanFasilitasView({super.key});
@@ -17,43 +18,62 @@ class TeknisiLaporanFasilitasView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          _Header(controller: controller),
-          _SearchBar(controller: controller),
-          _FilterBar(controller: controller),
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(
-                  child: CircularProgressIndicator(color: AppColors.primary),
-                );
-              }
-
-              if (controller.tugasTampil.isEmpty) {
-                return RefreshIndicator(
-                  color: AppColors.primary,
-                  onRefresh: controller.fetchTugas,
-                  child: ListView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    children: const [
-                      SizedBox(height: 72),
-                      LaporanFasilitasEmptyState(
-                        icon: Icons.assignment_turned_in_outlined,
-                        title: 'Tidak ada tugas petugas',
-                        description:
-                            'Laporan fasilitas yang perlu ditangani akan muncul di sini.',
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        onRefresh: controller.fetchTugas,
+        child: CustomScrollView(
+          slivers: [
+            _buildAppBar(controller, context),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'Tugas Petugas',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.title,
+                        height: 1.1,
                       ),
-                    ],
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      'Tanggapi dan tindak lanjuti laporan fasilitas yang masuk.',
+                      style: TextStyle(fontSize: 13, color: AppColors.body),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(child: _SearchBar(controller: controller)),
+            SliverToBoxAdapter(child: _FilterBar(controller: controller)),
+            Obx(() {
+              if (controller.isLoading.value) {
+                return const SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   ),
                 );
               }
 
-              return RefreshIndicator(
-                color: AppColors.primary,
-                onRefresh: controller.fetchTugas,
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              if (controller.tugasTampil.isEmpty) {
+                return const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: LaporanFasilitasEmptyState(
+                    icon: Icons.assignment_turned_in_outlined,
+                    title: 'Tidak ada tugas petugas',
+                    description:
+                        'Laporan fasilitas yang perlu ditangani akan muncul di sini.',
+                  ),
+                );
+              }
+
+              return SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                sliver: SliverList.separated(
                   itemCount: controller.tugasTampil.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
@@ -76,10 +96,25 @@ class TeknisiLaporanFasilitasView extends StatelessWidget {
                 ),
               );
             }),
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildAppBar(
+    TeknisiLaporanFasilitasController ctrl,
+    BuildContext context,
+  ) {
+    return Obx(() {
+      final name = ctrl.user?.name ?? 'Teknisi';
+      return AppHomeAppBar(
+        title: 'Halo, $name',
+        subtitle: 'Teknisi JTK',
+        avatarIcon: Icons.engineering_rounded,
+        avatarText: name.isEmpty ? 'T' : name[0].toUpperCase(),
+      );
+    });
   }
 
   Future<void> _openTanggapan(
@@ -103,88 +138,6 @@ class TeknisiLaporanFasilitasView extends StatelessWidget {
     if (changed == true) {
       await controller.fetchTugas();
     }
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({required this.controller});
-
-  final TeknisiLaporanFasilitasController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: AppColors.surface,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: AppColors.primary,
-                    child: Text(
-                      controller.currentUserName.isEmpty
-                          ? 'P'
-                          : controller.currentUserName[0].toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Halo, ${controller.currentUserName}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.title,
-                          ),
-                        ),
-                        const Text(
-                          'Teknisi JTK',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.body,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Tugas Petugas',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.title,
-                  height: 1.1,
-                ),
-              ),
-              const SizedBox(height: 5),
-              const Text(
-                'Tanggapi dan tindak lanjuti laporan fasilitas yang masuk.',
-                style: TextStyle(fontSize: 13, color: AppColors.body),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 

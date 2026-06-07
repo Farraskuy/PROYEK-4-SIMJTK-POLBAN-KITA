@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import '../controller/analisa_kerusakan_controller.dart';
 import '../model/analisa_kerusakan_model.dart';
 import 'form_analisa_view.dart';
@@ -10,23 +11,21 @@ import 'form_analisa_view.dart';
 class AnalisaKerusakanView extends StatelessWidget {
   const AnalisaKerusakanView({super.key});
 
-  static const Color _primary = Color(0xFF1E3A5F);
-
   @override
   Widget build(BuildContext context) {
     final ctrl = Get.put(AnalisaKerusakanController());
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
+      backgroundColor: AppColors.background,
       appBar: _buildAppBar(ctrl, context),
       body: Obx(() {
         if (ctrl.isLoading.value) {
           return const Center(
-            child: CircularProgressIndicator(color: _primary),
+            child: CircularProgressIndicator(color: AppColors.primary),
           );
         }
         return RefreshIndicator(
-          color: _primary,
+          color: AppColors.primary,
           onRefresh: ctrl.loadData,
           child: CustomScrollView(
             slivers: [
@@ -42,13 +41,13 @@ class AnalisaKerusakanView extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 24,
-                          color: _primary,
+                          color: AppColors.primary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Formulir Tanggapan Masalah Kerusakan — POLBAN',
-                        style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                        style: TextStyle(color: AppColors.body, fontSize: 13),
                       ),
                       const SizedBox(height: 16),
                       _buildStatsRow(ctrl),
@@ -75,7 +74,7 @@ class AnalisaKerusakanView extends StatelessWidget {
                         () => Text(
                           '${ctrl.laporanBelumDianalisa.length} tugas baru, ${ctrl.filteredAnalisa.length} tanggapan terkirim',
                           style: const TextStyle(
-                            color: Colors.grey,
+                            color: AppColors.body,
                             fontSize: 12,
                           ),
                         ),
@@ -140,10 +139,10 @@ class AnalisaKerusakanView extends StatelessWidget {
     BuildContext context,
   ) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: _primary),
+        icon: const Icon(Icons.arrow_back, color: AppColors.primary),
         onPressed: () => Navigator.pop(context),
       ),
       titleSpacing: 0,
@@ -151,7 +150,7 @@ class AnalisaKerusakanView extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundColor: _primary,
+            backgroundColor: AppColors.primary,
             child: Icon(Icons.engineering, color: Colors.white, size: 18),
           ),
           SizedBox(width: 10),
@@ -161,14 +160,14 @@ class AnalisaKerusakanView extends StatelessWidget {
               Text(
                 'Modul Teknisi',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: AppColors.title,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               Text(
                 'Tanggapan Tugas',
-                style: TextStyle(color: Colors.grey, fontSize: 11),
+                style: TextStyle(color: AppColors.body, fontSize: 11),
               ),
             ],
           ),
@@ -194,21 +193,21 @@ class AnalisaKerusakanView extends StatelessWidget {
           _StatChip(
             label: 'Total Formulir',
             count: total,
-            color: _primary,
+            color: AppColors.primary,
             icon: Icons.description_outlined,
           ),
           const SizedBox(width: 10),
           _StatChip(
             label: 'Kerusakan Berat',
             count: berat,
-            color: Colors.red,
+            color: AppColors.danger,
             icon: Icons.warning_amber_outlined,
           ),
           const SizedBox(width: 10),
           _StatChip(
             label: 'Belum Dianalisa',
             count: pending,
-            color: Colors.orange,
+            color: AppColors.warning,
             icon: Icons.pending_outlined,
           ),
         ],
@@ -221,15 +220,15 @@ class AnalisaKerusakanView extends StatelessWidget {
       () => Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.orange.withOpacity(0.08),
+          color: AppColors.orangeSoft,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.orange.withOpacity(0.3)),
+          border: Border.all(color: AppColors.warning),
         ),
         child: Row(
           children: [
             const Icon(
               Icons.assignment_late_outlined,
-              color: Colors.orange,
+              color: AppColors.warning,
               size: 18,
             ),
             const SizedBox(width: 8),
@@ -237,7 +236,7 @@ class AnalisaKerusakanView extends StatelessWidget {
               child: Text(
                 '${ctrl.laporanBelumDianalisa.length} laporan menunggu formulir analisa',
                 style: const TextStyle(
-                  color: Colors.orange,
+                  color: AppColors.warning,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -275,16 +274,16 @@ class AnalisaKerusakanView extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: isActive ? _primary : Colors.white,
+                    color: isActive ? AppColors.primary : AppColors.surface,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isActive ? _primary : Colors.grey.shade300,
+                      color: isActive ? AppColors.primary : AppColors.border,
                     ),
                   ),
                   child: Text(
                     f['label']!,
                     style: TextStyle(
-                      color: isActive ? Colors.white : Colors.grey,
+                      color: isActive ? Colors.white : AppColors.body,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -303,11 +302,11 @@ class AnalisaKerusakanView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.description_outlined, size: 64, color: Colors.grey[300]),
+          Icon(Icons.description_outlined, size: 64, color: AppColors.muted),
           const SizedBox(height: 12),
           Text(
             'Belum ada tugas atau tanggapan',
-            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+            style: TextStyle(color: AppColors.muted, fontSize: 14),
           ),
         ],
       ),
@@ -357,7 +356,7 @@ class _StatChip extends StatelessWidget {
                   Text(
                     label,
                     style: TextStyle(
-                      color: Colors.grey[700],
+                      color: AppColors.body,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -390,12 +389,6 @@ class _PendingTaskCard extends StatelessWidget {
 
   const _PendingTaskCard({required this.task, required this.ctrl});
 
-  // Design Tokens menyelaraskan dengan Laporan Fasilitas View
-  static const Color _primaryBlue = Color(0xFF1A3A6B);
-  static const Color _borderCol = Color(0xFFDDE3EF);
-  static const Color _textDark = Color(0xFF1A1A2E);
-  static const Color _textGrey = Color(0xFF6B7280);
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -415,7 +408,7 @@ class _PendingTaskCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _borderCol, width: 1.2),
+          border: Border.all(color: AppColors.border, width: 1.2),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.02),
@@ -432,13 +425,13 @@ class _PendingTaskCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: _primaryBlue.withOpacity(0.08),
+                color: AppColors.blueSoft,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Center(
                 child: Icon(
                   Icons.assignment_outlined,
-                  color: _primaryBlue,
+                  color: AppColors.primary,
                   size: 24,
                 ),
               ),
@@ -456,7 +449,7 @@ class _PendingTaskCard extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
-                      color: _textDark,
+                      color: AppColors.title,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -466,13 +459,13 @@ class _PendingTaskCard extends StatelessWidget {
                   // Lokasi
                   Row(
                     children: [
-                      const Icon(Icons.location_on, size: 14, color: _textGrey),
+                      const Icon(Icons.location_on, size: 14, color: AppColors.body),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           task.lokasi,
                           style: const TextStyle(
-                            color: _textGrey,
+                            color: AppColors.body,
                             fontSize: 12,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -490,7 +483,7 @@ class _PendingTaskCard extends StatelessWidget {
                       Text(
                         _formatDate(task.createdAt),
                         style: const TextStyle(
-                          color: _textGrey,
+                          color: AppColors.body,
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -605,10 +598,6 @@ class _AnalisaCard extends StatelessWidget {
 
   const _AnalisaCard({required this.analisa, required this.formatRupiah});
 
-  static const Color _primaryBlue = Color(0xFF1A3A6B);
-  static const Color _borderCol = Color(0xFFDDE3EF);
-  static const Color _textDark = Color(0xFF1A1A2E);
-
   @override
   Widget build(BuildContext context) {
     final tingkatColor = _tingkatColor(analisa.tingkatKerusakan);
@@ -622,7 +611,7 @@ class _AnalisaCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isCritical ? Colors.red.withOpacity(0.4) : _borderCol,
+          color: isCritical ? AppColors.danger.withOpacity(0.4) : AppColors.border,
           width: isCritical ? 1.5 : 1.2,
         ),
         boxShadow: [
@@ -646,13 +635,13 @@ class _AnalisaCard extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: AppColors.greySoft,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Center(
                     child: Icon(
                       Icons.build_circle_outlined,
-                      color: Colors.grey,
+                      color: AppColors.body,
                       size: 24,
                     ),
                   ),
@@ -667,7 +656,7 @@ class _AnalisaCard extends StatelessWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
-                          color: _textDark,
+                          color: AppColors.title,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -676,14 +665,14 @@ class _AnalisaCard extends StatelessWidget {
                           Icon(
                             Icons.qr_code,
                             size: 12,
-                            color: Colors.grey.shade500,
+                            color: AppColors.body,
                           ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               '${analisa.kodeAlat} • ${analisa.noInventaris}',
                               style: TextStyle(
-                                color: Colors.grey.shade600,
+                                color: AppColors.body,
                                 fontSize: 11,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -720,13 +709,13 @@ class _AnalisaCard extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
+                              color: AppColors.greySoft,
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               analisa.kategoriKerusakan.label,
                               style: const TextStyle(
-                                color: Colors.grey,
+                                color: AppColors.body,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -742,7 +731,7 @@ class _AnalisaCard extends StatelessWidget {
           ),
 
           // PEMBATAS
-          Divider(height: 1, color: Colors.grey.shade200),
+          Divider(height: 1, color: AppColors.border),
 
           // ISI TANGGAPAN
           Padding(
@@ -769,7 +758,7 @@ class _AnalisaCard extends StatelessWidget {
                         Text(
                           _fmtDate(analisa.createdAt),
                           style: TextStyle(
-                            color: Colors.grey.shade500,
+                            color: AppColors.body,
                             fontSize: 11,
                           ),
                         ),
@@ -779,7 +768,7 @@ class _AnalisaCard extends StatelessWidget {
                       Text(
                         formatRupiah(analisa.estimasiBiaya),
                         style: const TextStyle(
-                          color: _primaryBlue,
+                          color: AppColors.primary,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
@@ -803,7 +792,7 @@ class _AnalisaCard extends StatelessWidget {
           style: const TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.bold,
-            color: Colors.grey,
+            color: AppColors.body,
             letterSpacing: 0.5,
           ),
         ),
@@ -811,7 +800,7 @@ class _AnalisaCard extends StatelessWidget {
         Text(
           content,
           style: TextStyle(
-            color: Colors.grey.shade700,
+            color: AppColors.body,
             fontSize: 12,
             height: 1.4,
           ),
@@ -844,7 +833,7 @@ class _AnalisaCard extends StatelessWidget {
       case KategoriKerusakan.instalasi:
         return Colors.orange;
       case KategoriKerusakan.lainnya:
-        return Colors.grey;
+        return AppColors.body;
     }
   }
 

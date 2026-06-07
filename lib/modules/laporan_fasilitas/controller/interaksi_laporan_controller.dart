@@ -1,7 +1,6 @@
-// lib/modules/laporan_fasilitas/controller/interaksi_laporan_controller.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/laporan_fasilitas_model.dart';
 import '../service/laporan_fasilitas_service.dart';
@@ -27,7 +26,7 @@ class InteraksiLaporanController extends GetxController {
     return user.id.isNotEmpty ? user.id : user.nomorInduk;
   }
 
-  String get currentUserName => AuthService().currentUser?.name ?? 'Mahasiswa';
+  UserModel? get user => AuthService().currentUser;
 
   bool get isMahasiswa => role == 'mahasiswa';
   bool get isPetugas => role == 'teknisi' || role == 'petugas';

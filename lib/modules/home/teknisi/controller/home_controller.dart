@@ -10,12 +10,15 @@ import '../model/home_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/tanggapan_tugas_service.dart';
+import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 
 class HomeTeknisiController extends GetxController {
   // --------------------------------------------------------
   // STATE OBSERVABLES
   // --------------------------------------------------------
+
+  UserModel? get user => AuthService().currentUser;
 
   /// Data teknisi yang sedang login
   final Rx<TeknisiUserModel> currentTeknisi = TeknisiUserModel.dummy().obs;

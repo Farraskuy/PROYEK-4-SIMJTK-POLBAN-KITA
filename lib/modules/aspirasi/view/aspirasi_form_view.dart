@@ -116,7 +116,7 @@ class _AspirasiFormScaffold extends StatelessWidget {
                   border: Border.all(color: AppColors.border, width: 1),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
+                      color: Colors.black.withValues(alpha: 0.04),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -137,6 +137,55 @@ class _AspirasiFormScaffold extends StatelessWidget {
                         ),
                       ),
                     ),
+                    Obx(
+                      () => Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        child: TextField(
+                          controller: controller.judulController,
+                          maxLength: AspirasiController.maxJudulLength,
+                          textInputAction: TextInputAction.next,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: AppColors.title,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: 'Judul Aspirasi',
+                            hintText: 'Contoh: Penambahan ruang diskusi',
+                            counterText: controller.judulCounter,
+                            counterStyle: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.muted,
+                            ),
+                            errorText: controller.errorJudul.value.isEmpty
+                                ? null
+                                : controller.errorJudul.value,
+                            filled: true,
+                            fillColor: AppColors.background,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppColors.border,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 1.4,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Divider(height: 1, color: AppColors.border),
                     Obx(
                       () => Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -173,37 +222,6 @@ class _AspirasiFormScaffold extends StatelessWidget {
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    const Divider(height: 1, color: AppColors.border),
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                Text(
-                                  'Post as Anonymous',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.title,
-                                  ),
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  'Identitas Anda akan disembunyikan.',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.body,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ],
@@ -251,8 +269,8 @@ class _AspirasiFormScaffold extends StatelessWidget {
                               : onSubmit,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
-                            disabledBackgroundColor:
-                                AppColors.primary.withOpacity(0.6),
+                            disabledBackgroundColor: AppColors.primary
+                                .withValues(alpha: 0.6),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),

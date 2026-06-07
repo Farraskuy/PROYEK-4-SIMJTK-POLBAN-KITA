@@ -21,17 +21,7 @@ class AuthService {
   static final AuthService _instance = AuthService._internal();
 
   @visibleForTesting
-  static Future<List<Map<String, dynamic>>> Function(
-    String collection,
-    SelectorBuilder filter,
-  )? fetchUsersOverride;
-  
-  @visibleForTesting
-  static Future<UserModel> Function({
-    required String username,
-    required String password,
-    required Map<String, dynamic> profile,
-  })? registerUserOverride;
+  static final Map<String, dynamic> mockStorageMap = {}; // Helper for secure storage mocks if needed
   
   @visibleForTesting
   static Future<WebViewController> Function({
@@ -152,11 +142,6 @@ class AuthService {
   }
 
   Future<List<Map<String, dynamic>>> _fetchUsers(SelectorBuilder filter) async {
-    final override = fetchUsersOverride;
-    if (override != null) {
-      return override(_usersCollection, filter);
-    }
-
     return MonggoDBServices().fetch(_usersCollection, filter);
   }
 
@@ -494,15 +479,6 @@ class AuthService {
     required String password,
     required Map<String, dynamic> profile,
   }) async {
-    final override = registerUserOverride;
-    if (override != null) {
-      return override(
-        username: username,
-        password: password,
-        profile: profile,
-      );
-    }
-
     final nimFromWebsite = (profile['nim'] ?? '').toString().trim();
     final usernameToStore = nimFromWebsite.isNotEmpty
         ? nimFromWebsite

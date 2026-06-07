@@ -33,7 +33,10 @@ dependencies:
   provider: ^6.1.5+1
   get: ^4.6.6
   google_fonts: ^6.2.1
-  
+  cloudinary_flutter: ^1.0.0
+  cloudinary_url_gen: ^1.0.0
+  crypto: ^3.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -44,4 +47,5 @@ flutter:
   uses-material-design: true
 
   assets:
+    - .env
     - .env.example

@@ -10,11 +10,15 @@ class TeknisiLaporanFasilitasCard extends StatelessWidget {
     required this.laporan,
     required this.onTap,
     required this.onRespond,
+    this.respondLabel = 'Tanggapi Laporan',
+    this.respondIcon = Icons.chat_bubble_outline_rounded,
   });
 
   final LaporanFasilitasModel laporan;
   final VoidCallback onTap;
   final VoidCallback onRespond;
+  final String respondLabel;
+  final IconData respondIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -148,13 +152,13 @@ class TeknisiLaporanFasilitasCard extends StatelessWidget {
                 width: double.infinity,
                 child: FilledButton.icon(
                   onPressed: onRespond,
-                  icon: const Icon(
-                    Icons.chat_bubble_outline_rounded,
+                  icon: Icon(
+                    respondIcon,
                     size: 18,
                   ),
-                  label: const Text(
-                    'Tanggapi Laporan',
-                    style: TextStyle(fontWeight: FontWeight.w700),
+                  label: Text(
+                    respondLabel,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,

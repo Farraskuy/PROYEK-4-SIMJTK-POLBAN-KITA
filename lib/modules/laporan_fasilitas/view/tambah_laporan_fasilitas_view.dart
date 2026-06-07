@@ -3,26 +3,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import '../controller/lapor_fasilitas_controller.dart';
 import '../view/vision_view.dart';
-
-// ============================================================
-// DESIGN TOKENS
-// ============================================================
-class _AppColors {
-  static const primary = Color(0xFF1A3A6B);
-  static const primaryLight = Color(0xFF2B5BAE);
-  static const surface = Color(0xFFF5F7FA);
-  static const cardBg = Color(0xFFFFFFFF);
-  static const inputBorder = Color(0xFFDDE3EF);
-  static const inputFocused = Color(0xFF1A3A6B);
-  static const inputError = Color(0xFFD32F2F);
-  static const textPrimary = Color(0xFF1A1A2E);
-  static const textSecondary = Color(0xFF6B7280);
-  static const textLight = Color(0xFFB0B8CC);
-  static const uploadBg = Color(0xFFF0F4FF);
-  static const uploadBorder = Color(0xFFB0C0E0);
-}
 
 // ============================================================
 // TAMBAH LAPORAN FASILITAS VIEW
@@ -58,15 +41,15 @@ class _TambahLaporanFasilitasViewState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _AppColors.surface,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
         automaticallyImplyLeading: false,
         title: const Text(
           'Lapor Kerusakan',
           style: TextStyle(
-            color: _AppColors.textPrimary,
+            color: AppColors.title,
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
@@ -141,7 +124,7 @@ class _TambahLaporanFasilitasViewState
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
-            color: _AppColors.textPrimary,
+            color: AppColors.title,
           ),
         ),
         const SizedBox(height: 8),
@@ -149,7 +132,7 @@ class _TambahLaporanFasilitasViewState
           'Lengkapi formulir di bawah ini agar teknisi dapat segera menangani masalah fasilitas.',
           style: TextStyle(
             fontSize: 13,
-            color: _AppColors.textSecondary,
+            color: AppColors.body,
             height: 1.5,
           ),
         ),
@@ -180,23 +163,23 @@ class _TambahLaporanFasilitasViewState
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 24),
               decoration: BoxDecoration(
-                color: _AppColors.uploadBg,
+                color: AppColors.blueSoft,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: _AppColors.uploadBorder, width: 1.2),
+                border: Border.all(color: AppColors.primaryLight, width: 1.2),
               ),
               child: const Column(
                 children: [
                   Icon(
                     Icons.camera_enhance_outlined,
                     size: 36,
-                    color: _AppColors.primaryLight,
+                    color: AppColors.primaryLight,
                   ),
                   SizedBox(height: 8),
                   Text(
                     'Klik untuk Ambil Gambar via Vision Camera',
                     style: TextStyle(
                       fontSize: 13,
-                      color: _AppColors.primaryLight,
+                      color: AppColors.primaryLight,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -224,7 +207,7 @@ class _TambahLaporanFasilitasViewState
                       width: 90,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: _AppColors.inputBorder),
+                        border: Border.all(color: AppColors.border),
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(7),
@@ -263,7 +246,7 @@ class _TambahLaporanFasilitasViewState
                   }
                 },
           style: ElevatedButton.styleFrom(
-            backgroundColor: _AppColors.primary,
+            backgroundColor: AppColors.primary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -309,13 +292,13 @@ class _FormFieldWrapper extends StatelessWidget {
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: _AppColors.textPrimary,
+              color: AppColors.title,
             ),
             children: isRequired
                 ? const [
                     TextSpan(
                       text: ' *',
-                      style: TextStyle(color: _AppColors.inputError),
+                      style: TextStyle(color: AppColors.danger),
                     ),
                   ]
                 : [],
@@ -346,20 +329,20 @@ class _StyledTextField extends StatelessWidget {
       maxLines: maxLines,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: _AppColors.textLight, fontSize: 14),
+        hintStyle: const TextStyle(color: AppColors.muted, fontSize: 14),
         filled: true,
-        fillColor: _AppColors.cardBg,
+        fillColor: AppColors.surface,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
-            color: _AppColors.inputBorder,
+            color: AppColors.border,
             width: 1.2,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(
-            color: _AppColors.inputFocused,
+            color: AppColors.primary,
             width: 1.8,
           ),
         ),

@@ -42,9 +42,12 @@ class MahasiswaLaporanFasilitasView extends StatelessWidget {
           child: CustomScrollView(
             slivers: [
               AppHomeAppBar(
-                title: 'Halo, ${controller.currentUserName}',
+                title: 'Halo, ${controller.user?.name ?? 'Mahasiswa'}',
                 subtitle: _subtitle,
                 avatarIcon: Icons.person_rounded,
+                avatarText: (controller.user?.name ?? 'Mahasiswa').isEmpty
+                    ? 'M'
+                    : controller.user!.name[0].toUpperCase(),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
               SliverToBoxAdapter(
@@ -59,9 +62,8 @@ class MahasiswaLaporanFasilitasView extends StatelessWidget {
                 () => SliverToBoxAdapter(
                   child: LaporanFasilitasSortBar(
                     selectedIndex: controller.sortMode.value.index,
-                    onChanged: (index) => controller.sortLaporan(
-                      LaporanSortMode.values[index],
-                    ),
+                    onChanged: (index) =>
+                        controller.sortLaporan(LaporanSortMode.values[index]),
                   ),
                 ),
               ),
@@ -80,27 +82,26 @@ class MahasiswaLaporanFasilitasView extends StatelessWidget {
           ),
         );
       }),
-      floatingActionButton: role == 'mahasiswa'
-          ? SizedBox(
-              width: 56,
-              height: 56,
-              child: FloatingActionButton(
-                heroTag: 'fab_laporan',
-                onPressed: () async {
-                  final changed = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const TambahLaporanFasilitasView()),
-                  );
-                  if (changed == true) controller.fetchLaporan();
-                },
-                backgroundColor: AppColors.primary,
-                shape: const CircleBorder(),
-                elevation: 4,
-                child: const Icon(Icons.add, color: Colors.white, size: 28),
+      floatingActionButton: SizedBox(
+        width: 56,
+        height: 56,
+        child: FloatingActionButton(
+          heroTag: 'fab_laporan',
+          onPressed: () async {
+            final changed = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const TambahLaporanFasilitasView(),
               ),
-            )
-          : null,
+            );
+            if (changed == true) controller.fetchLaporan();
+          },
+          backgroundColor: AppColors.primary,
+          shape: const CircleBorder(),
+          elevation: 4,
+          child: const Icon(Icons.add, color: Colors.white, size: 28),
+        ),
+      ),
     );
   }
 }
@@ -122,7 +123,9 @@ class _TeknisiSortBarState extends State<_TeknisiSortBar> {
   void _toggle(bool topUpvote) {
     if (_isTopUpvote == topUpvote) return;
     setState(() => _isTopUpvote = topUpvote);
-    widget.controller.sortLaporan(topUpvote ? LaporanSortMode.populer : LaporanSortMode.terbaru);
+    widget.controller.sortLaporan(
+      topUpvote ? LaporanSortMode.populer : LaporanSortMode.terbaru,
+    );
   }
 
   @override
@@ -158,28 +161,28 @@ class _TeknisiSortBarState extends State<_TeknisiSortBar> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: active ? const Color(0xFF1A3A6B) : Colors.white,
+          color: active ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: active
-                ? const Color(0xFF1A3A6B)
-                : const Color(0xFFDDE3EF),
+            color: active ? AppColors.primary : AppColors.border,
             width: 1.2,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 13,
-                color: active ? Colors.white : const Color(0xFF6B7280)),
+            Icon(
+              icon,
+              size: 13,
+              color: active ? Colors.white : AppColors.body,
+            ),
             const SizedBox(width: 5),
             Text(
               label,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                color: active ? Colors.white : const Color(0xFF6B7280),
+                color: active ? Colors.white : AppColors.body,
               ),
             ),
           ],

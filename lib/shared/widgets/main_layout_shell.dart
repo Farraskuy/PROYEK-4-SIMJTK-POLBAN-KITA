@@ -118,6 +118,7 @@ class _MainLayoutShellState extends State<MainLayoutShell> {
           AdminDashboardView(),
           AdminLaporanFasilitasView(),
           AdminAspirasiView(),
+          RoleProfileView(role: 'admin'),
         ];
       case UserRole.mahasiswa:
         return const [
@@ -143,6 +144,7 @@ class _MainLayoutShellState extends State<MainLayoutShell> {
           BottomNavigationBarItem(icon: Icon(Icons.dashboard_rounded), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.apartment_rounded), label: 'Layanan'),
           BottomNavigationBarItem(icon: Icon(Icons.campaign_rounded), label: 'Aspirasi'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profil'),
         ];
       case UserRole.mahasiswa:
         return const [

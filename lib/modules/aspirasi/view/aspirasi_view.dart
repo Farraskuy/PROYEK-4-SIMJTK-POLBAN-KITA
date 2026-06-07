@@ -23,23 +23,24 @@ class AspirasiView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: _AspirasiListPage(ctrl: ctrl),
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: 'fab_aspirasi',
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const AspirasiCreateView()),
-          );
-        },
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.edit_rounded, color: AppColors.surface),
-        label: const Text(
-          'Tulis Aspirasi',
-          style: TextStyle(
-            color: AppColors.surface,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Poppins',
-          ),
+      floatingActionButton: SizedBox(
+        width: 56,
+        height: 56,
+        child: FloatingActionButton(
+          heroTag: 'fab_aspirasi',
+          onPressed: () async {
+            final changed = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const AspirasiCreateView(),
+              ),
+            );
+            if (changed == true) ctrl.onRefresh();
+          },
+          backgroundColor: AppColors.primary,
+          shape: const CircleBorder(),
+          elevation: 4,
+          child: const Icon(Icons.add, color: Colors.white, size: 28),
         ),
       ),
     );
@@ -59,9 +60,12 @@ class _AspirasiListPage extends StatelessWidget {
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         Obx(
           () => AppHomeAppBar(
-            title: 'Halo, ${ctrl.currentUserName.value}',
+            title: 'Halo, ${ctrl.user?.name ?? 'Mahasiswa'}',
             subtitle: 'Mahasiswa JTK',
             avatarIcon: Icons.person_rounded,
+            avatarText: (ctrl.user?.name ?? 'Mahasiswa').isEmpty
+                ? 'M'
+                : ctrl.user!.name[0].toUpperCase(),
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 12)),

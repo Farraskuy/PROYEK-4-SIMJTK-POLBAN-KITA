@@ -30,9 +30,12 @@ class HomeView extends StatelessWidget {
           child: CustomScrollView(
             slivers: [
               AppHomeAppBar(
-                title: 'Halo, ${controller.currentUser?.name ?? 'Mahasiswa'}',
+                title: 'Halo, ${controller.user?.name ?? 'Mahasiswa'}',
                 subtitle: 'Mahasiswa JTK',
                 avatarIcon: Icons.person_rounded,
+                avatarText: (controller.user?.name ?? 'Mahasiswa').isEmpty
+                    ? 'M'
+                    : controller.user!.name[0].toUpperCase(),
               ),
               SliverToBoxAdapter(
                 child: Column(

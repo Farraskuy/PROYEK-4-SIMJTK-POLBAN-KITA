@@ -1,6 +1,7 @@
 // lib/modules/laporan_fasilitas/view/selesaikan_tugas_view.dart
 
 import 'package:flutter/material.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import '../controller/selesaikan_tugas_controller.dart';
 import '../model/laporan_fasilitas_model.dart';
 
@@ -31,11 +32,15 @@ class _SelesaikanTugasViewState extends State<SelesaikanTugasView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
+        backgroundColor: AppColors.surface,
         title: const Text(
           'Selesaikan Tugas',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: AppColors.title,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -66,7 +71,7 @@ class _SelesaikanTugasViewState extends State<SelesaikanTugasView> {
               maxLines: 3,
               decoration: InputDecoration(
                 hintText: "Masukkan detail perbaikan yang dilakukan...",
-                fillColor: Colors.white,
+                fillColor: AppColors.surface,
                 filled: true,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -98,7 +103,7 @@ class _SelesaikanTugasViewState extends State<SelesaikanTugasView> {
             const SizedBox(height: 4),
             Text(
               "Lokasi: ${widget.laporan.lokasi}",
-              style: const TextStyle(color: Colors.grey),
+              style: const TextStyle(color: AppColors.body),
             ),
           ],
         ),
@@ -115,17 +120,17 @@ class _SelesaikanTugasViewState extends State<SelesaikanTugasView> {
         height: 150,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: AppColors.border),
         ),
         child: const Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.camera_alt_outlined, size: 40, color: Colors.grey),
+            Icon(Icons.camera_alt_outlined, size: 40, color: AppColors.muted),
             Text(
               "Ambil Foto Hasil Perbaikan",
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: AppColors.body),
             ),
           ],
         ),
@@ -138,7 +143,7 @@ class _SelesaikanTugasViewState extends State<SelesaikanTugasView> {
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF1A7FC1),
+          backgroundColor: AppColors.primary,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

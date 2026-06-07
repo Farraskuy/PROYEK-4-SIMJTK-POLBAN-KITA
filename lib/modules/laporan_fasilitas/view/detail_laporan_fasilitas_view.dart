@@ -29,8 +29,6 @@ class _DetailLaporanFasilitasViewState
   bool get _isPetugas => widget.role == 'teknisi' || widget.role == 'petugas';
   bool get _isTu => widget.role == 'tu';
 
-  static const Color _primaryBlue = Color(0xFF1A9AD7);
-
   @override
   void initState() {
     super.initState();
@@ -51,10 +49,10 @@ class _DetailLaporanFasilitasViewState
 
   Color _statusColor(String status) {
     final s = status.toLowerCase();
-    if (s.contains('perbaiki')) return const Color(0xFFF59E0B);
-    if (s.contains('selesai')) return const Color(0xFF22C55E);
-    if (s.contains('teknisi') || s.contains('ditugaskan')) return _primaryBlue;
-    return Colors.grey;
+    if (s.contains('perbaiki')) return AppColors.warning;
+    if (s.contains('selesai')) return AppColors.success;
+    if (s.contains('teknisi') || s.contains('ditugaskan')) return AppColors.primary;
+    return AppColors.body;
   }
 
   @override
@@ -71,7 +69,7 @@ class _DetailLaporanFasilitasViewState
     final laporan = _controller.laporan!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
           // ── Hero + AppBar ──────────────────────────────────────────
@@ -130,7 +128,7 @@ class _DetailLaporanFasilitasViewState
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A1A1A),
+                          color: AppColors.title,
                           height: 1.3,
                         ),
                       ),
@@ -140,12 +138,12 @@ class _DetailLaporanFasilitasViewState
                         laporan.deskripsi,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: Color(0xFF555555),
+                          color: AppColors.body,
                           height: 1.6,
                         ),
                       ),
                       const SizedBox(height: 14),
-                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                      const Divider(height: 1, color: AppColors.border),
                       const SizedBox(height: 14),
                       // Grid meta
                       Row(
@@ -201,7 +199,7 @@ class _DetailLaporanFasilitasViewState
                           laporan.catatanPetugas!,
                           style: const TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF555555),
+                            color: AppColors.body,
                           ),
                         ),
                       ],
@@ -223,7 +221,7 @@ class _DetailLaporanFasilitasViewState
                           laporan.kebutuhanTu!,
                           style: const TextStyle(
                             fontSize: 13,
-                            color: Color(0xFF555555),
+                            color: AppColors.body,
                           ),
                         ),
                       ],
@@ -271,7 +269,7 @@ class _DetailLaporanFasilitasViewState
                           Icon(
                             Icons.settings_outlined,
                             size: 18,
-                            color: _primaryBlue,
+                            color: AppColors.primary,
                           ),
                           const SizedBox(width: 6),
                           const Text(
@@ -279,7 +277,7 @@ class _DetailLaporanFasilitasViewState
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1A1A1A),
+                              color: AppColors.title,
                             ),
                           ),
                         ],
@@ -311,14 +309,14 @@ class _DetailLaporanFasilitasViewState
       gradient: LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFF1a1a2e), Color(0xFF16213e), Color(0xFF0f3460)],
+        colors: [AppColors.navyDark, AppColors.navy, AppColors.primary],
       ),
     ),
-    child: const Center(
+    child: Center(
       child: Icon(
         Icons.desktop_windows_outlined,
         size: 64,
-        color: Color(0x33FFFFFF),
+        color: AppColors.surface.withValues(alpha: 0.2),
       ),
     ),
   );
@@ -381,7 +379,7 @@ class _DetailLaporanFasilitasViewState
         style: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF1A1A1A),
+          color: AppColors.title,
         ),
       ),
     ],
@@ -400,13 +398,13 @@ class _DetailLaporanFasilitasViewState
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF444444),
+            color: AppColors.neutral,
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 13, color: Color(0xFF555555)),
+            style: const TextStyle(fontSize: 13, color: AppColors.body),
           ),
         ),
       ],
@@ -419,7 +417,7 @@ class _DetailLaporanFasilitasViewState
     style: const TextStyle(
       fontSize: 13,
       fontWeight: FontWeight.w600,
-      color: Color(0xFF1A1A1A),
+      color: AppColors.title,
     ),
   );
 
@@ -572,23 +570,23 @@ class _DetailLaporanFasilitasViewState
 
     switch (step.state) {
       case _TlState.done:
-        dotColor = _primaryBlue;
+        dotColor = AppColors.primary;
         dotIcon = const Icon(Icons.check, size: 13, color: Colors.white);
-        titleColor = const Color(0xFF1A1A1A);
+        titleColor = AppColors.title;
         break;
       case _TlState.active:
-        dotColor = const Color(0xFFF59E0B);
+        dotColor = AppColors.warning;
         dotIcon = const Icon(
           Icons.build_outlined,
           size: 12,
           color: Colors.white,
         );
-        titleColor = const Color(0xFFF59E0B);
+        titleColor = AppColors.warning;
         break;
       case _TlState.pending:
-        dotColor = const Color(0xFFE5E5E5);
+        dotColor = AppColors.border;
         dotIcon = const SizedBox.shrink();
-        titleColor = const Color(0xFFBBBBBB);
+        titleColor = AppColors.muted;
         break;
     }
 
@@ -607,7 +605,7 @@ class _DetailLaporanFasilitasViewState
                     color: dotColor,
                     shape: BoxShape.circle,
                     border: step.state == _TlState.pending
-                        ? Border.all(color: const Color(0xFFCCCCCC), width: 2)
+                        ? Border.all(color: AppColors.border, width: 2)
                         : null,
                   ),
                   child: Center(child: dotIcon),
@@ -617,8 +615,8 @@ class _DetailLaporanFasilitasViewState
                     child: Container(
                       width: 2,
                       color: step.state == _TlState.done
-                          ? _primaryBlue
-                          : const Color(0xFFE5E5E5),
+                          ? AppColors.primary
+                          : AppColors.border,
                     ),
                   ),
               ],
@@ -645,8 +643,8 @@ class _DetailLaporanFasilitasViewState
                     style: TextStyle(
                       fontSize: 12,
                       color: step.state == _TlState.pending
-                          ? const Color(0xFFCCCCCC)
-                          : const Color(0xFF888888),
+                          ? AppColors.border
+                          : AppColors.body,
                       height: 1.5,
                     ),
                   ),
@@ -656,7 +654,7 @@ class _DetailLaporanFasilitasViewState
                       step.time,
                       style: const TextStyle(
                         fontSize: 11,
-                        color: Color(0xFFAAAAAA),
+                        color: AppColors.muted,
                       ),
                     ),
                   ],
@@ -704,7 +702,7 @@ class _DetailLaporanFasilitasViewState
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A1A),
+              color: AppColors.title,
             ),
           ),
           const SizedBox(height: 12),
@@ -724,7 +722,7 @@ class _DetailLaporanFasilitasViewState
               style: ElevatedButton.styleFrom(
                 backgroundColor: laporan.sudahDicetak
                     ? Colors.grey.shade300
-                    : _primaryBlue,
+                    : AppColors.primary,
                 foregroundColor: laporan.sudahDicetak
                     ? Colors.grey.shade600
                     : Colors.white,

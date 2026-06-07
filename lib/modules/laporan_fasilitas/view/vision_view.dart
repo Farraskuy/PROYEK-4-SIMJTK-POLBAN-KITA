@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 
 import '../controller/vision_controller.dart';
 
@@ -78,7 +79,7 @@ class _VisionViewState extends State<VisionView>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.danger,
               content: Text('Gagal mengambil foto. Coba lagi.'),
             ),
           );
@@ -92,7 +93,7 @@ class _VisionViewState extends State<VisionView>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.danger,
               content: Text('File foto tidak ditemukan.'),
             ),
           );
@@ -108,7 +109,7 @@ class _VisionViewState extends State<VisionView>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: Colors.red[900],
+            backgroundColor: AppColors.danger,
             content: Text('Error: $e'),
           ),
         );
@@ -121,9 +122,9 @@ class _VisionViewState extends State<VisionView>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.navyDark,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D1421),
+        backgroundColor: AppColors.navyDark,
         foregroundColor: Colors.white,
         title: const Text(
           "Smart-Patrol Vision",
@@ -137,7 +138,7 @@ class _VisionViewState extends State<VisionView>
                   ? Icons.flash_on
                   : Icons.flash_off,
               color: _visionController.isFlashlightOn
-                  ? const Color(0xFF4CFFB3)
+                  ? AppColors.success
                   : Colors.white,
             ),
             onPressed: _visionController.toggleFlashlight,
@@ -176,14 +177,14 @@ class _VisionViewState extends State<VisionView>
               color: canCapture ? Colors.white : Colors.white30,
               border: Border.all(
                 color: canCapture
-                    ? const Color(0xFF4CFFB3)
+                    ? AppColors.success
                     : Colors.transparent,
                 width: 3,
               ),
               boxShadow: canCapture
                   ? [
                       BoxShadow(
-                        color: const Color(0xFF4CFFB3).withOpacity(0.4),
+                        color: AppColors.success.withOpacity(0.4),
                         blurRadius: 16,
                         spreadRadius: 2,
                       ),
@@ -195,7 +196,7 @@ class _VisionViewState extends State<VisionView>
                     padding: EdgeInsets.all(20),
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      color: Color(0xFF4CFFB3),
+                      color: AppColors.success,
                     ),
                   )
                 : Icon(
@@ -212,12 +213,12 @@ class _VisionViewState extends State<VisionView>
   /// Build loading state dengan pesan informatif
   Widget _buildLoadingState() {
     return Container(
-      color: const Color(0xFF0A0F1A),
+      color: AppColors.navyDark,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(color: Color(0xFF4CFFB3)),
+            const CircularProgressIndicator(color: AppColors.success),
             const SizedBox(height: 16),
             const Text(
               "Menghubungkan ke Sensor Visual...",
@@ -237,7 +238,7 @@ class _VisionViewState extends State<VisionView>
               ElevatedButton(
                 onPressed: () => openAppSettings(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CFFB3),
+                  backgroundColor: AppColors.success,
                   foregroundColor: Colors.black,
                 ),
                 child: const Text("Open Settings"),

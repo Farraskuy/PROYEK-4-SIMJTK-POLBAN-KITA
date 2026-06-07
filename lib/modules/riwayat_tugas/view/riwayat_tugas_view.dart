@@ -8,28 +8,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 import '../controller/riwayat_tugas_controller.dart';
-
-// ============================================================
-// DESIGN TOKENS
-// ============================================================
-class _C {
-  static const primary = Color(0xFF1A3A6B);
-  static const surface = Color(0xFFF0F4FA);
-  static const white = Colors.white;
-  static const cardBg = Color(0xFFFFFFFF);
-  static const textPrimary = Color(0xFF1A1A2E);
-  static const textSecondary = Color(0xFF6B7280);
-  static const textLight = Color(0xFFB0B8CC);
-  static const divider = Color(0xFFE5E9F2);
-  static const searchBg = Color(0xFFFFFFFF);
-  static const searchBorder = Color(0xFFDDE3EF);
-  static const chipActive = Color(0xFF1A3A6B);
-  static const chipInactiveBg = Color(0xFFFFFFFF);
-  static const chipInactiveFg = Color(0xFF6B7280);
-  static const chipInactiveBorder = Color(0xFFDDE3EF);
-  static const selesaiBg = Color(0xFF1A3A6B);
-}
 
 // ============================================================
 // RIWAYAT TUGAS VIEW
@@ -42,29 +23,36 @@ class RiwayatTugasView extends StatelessWidget {
     final ctrl = Get.put(RiwayatTugasController());
 
     return Scaffold(
-      backgroundColor: _C.surface,
-      body: Column(
-        children: [
-          _buildHeader(ctrl, context),
-          _buildSearchBar(ctrl),
-          _buildFilterChips(ctrl),
-          Expanded(
-            child: Obx(() {
+      backgroundColor: AppColors.background,
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        onRefresh: ctrl.onRefresh,
+        child: CustomScrollView(
+          slivers: [
+            _buildAppBar(ctrl, context),
+            SliverToBoxAdapter(child: _buildHeaderContent(ctrl)),
+            SliverToBoxAdapter(child: _buildSearchBar(ctrl)),
+            SliverToBoxAdapter(child: _buildFilterChips(ctrl)),
+            Obx(() {
               if (ctrl.isLoading.value) {
-                return const Center(
-                    child: CircularProgressIndicator(color: _C.primary));
-              }
-              if (ctrl.riwayatTampil.isEmpty) {
-                return _EmptyState(
-                  isSearch: ctrl.isSearchActive,
-                  filter: ctrl.activeFilter.value,
+                return const SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  ),
                 );
               }
-              return RefreshIndicator(
-                color: _C.primary,
-                onRefresh: ctrl.onRefresh,
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              if (ctrl.riwayatTampil.isEmpty) {
+                return SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _EmptyState(
+                    isSearch: ctrl.isSearchActive,
+                    filter: ctrl.activeFilter.value,
+                  ),
+                );
+              }
+              return SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                sliver: SliverList.separated(
                   itemCount: ctrl.riwayatTampil.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
@@ -77,6 +65,71 @@ class RiwayatTugasView extends StatelessWidget {
                 ),
               );
             }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // APP BAR
+  // ============================================================
+  Widget _buildAppBar(RiwayatTugasController ctrl, BuildContext context) {
+    return Obx(() {
+      final name = ctrl.user?.name ?? 'Teknisi';
+      return AppHomeAppBar(
+        title: 'Halo, $name',
+        subtitle: 'Teknisi JTK',
+        avatarIcon: Icons.engineering_rounded,
+        avatarText: name.isEmpty ? 'T' : name[0].toUpperCase(),
+      );
+    });
+  }
+
+  Widget _buildHeaderContent(RiwayatTugasController ctrl) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Riwayat Tugas',
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
+              color: AppColors.title,
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Laporan yang telah Anda selesaikan.',
+            style: TextStyle(fontSize: 13, color: AppColors.body),
+          ),
+          const SizedBox(height: 8),
+          Obx(
+            () => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.blueSoft,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.badge_rounded, size: 13, color: AppColors.primary),
+                  const SizedBox(width: 5),
+                  Text(
+                    'ID Petugas: ${ctrl.user?.nomorInduk ?? ctrl.user?.id ?? '-'}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -86,9 +139,9 @@ class RiwayatTugasView extends StatelessWidget {
   // ============================================================
   // HEADER
   // ============================================================
-  Widget _buildHeader(RiwayatTugasController ctrl, BuildContext context) {
+  Widget buildHeaderLegacy(RiwayatTugasController ctrl, BuildContext context) {
     return Container(
-      color: _C.white,
+      color: AppColors.surface,
       child: SafeArea(
         bottom: false,
         child: Padding(
@@ -98,33 +151,37 @@ class RiwayatTugasView extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 22,
-                    backgroundColor: _C.primary,
-                    child: Icon(
-                      Icons.engineering_rounded,
-                      color: Colors.white,
-                      size: 22,
+                    backgroundColor: AppColors.primary,
+                    child: Text(
+                      (ctrl.user?.name ?? 'Teknisi').isEmpty
+                          ? 'T'
+                          : ctrl.user!.name[0].toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Portal Teknisi',
-                          style: TextStyle(
+                          'Halo, ${ctrl.user?.name ?? 'Teknisi'}',
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
-                            color: _C.textPrimary,
+                            color: AppColors.title,
                           ),
                         ),
-                        Text(
+                        const Text(
                           'Teknisi JTK',
                           style: TextStyle(
                             fontSize: 12,
-                            color: _C.textSecondary,
+                            color: AppColors.body,
                           ),
                         ),
                       ],
@@ -138,14 +195,14 @@ class RiwayatTugasView extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w800,
-                  color: _C.textPrimary,
+                  color: AppColors.title,
                   height: 1.1,
                 ),
               ),
               const SizedBox(height: 4),
               const Text(
                 'Laporan yang telah Anda selesaikan.',
-                style: TextStyle(fontSize: 13, color: _C.textSecondary),
+                style: TextStyle(fontSize: 13, color: AppColors.body),
               ),
 
               // ─── Info ID Petugas ───
@@ -154,21 +211,21 @@ class RiwayatTugasView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEDF2FF),
+                      color: AppColors.blueSoft,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.badge_rounded,
-                            size: 13, color: _C.primary),
+                            size: 13, color: AppColors.primary),
                         const SizedBox(width: 5),
                         Text(
-                          'ID Petugas: ${ctrl.currentTeknisiId}',
+                          'ID Petugas: ${ctrl.user?.nomorInduk ?? ctrl.user?.id ?? '-'}',
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: _C.primary,
+                            color: AppColors.primary,
                           ),
                         ),
                       ],
@@ -186,36 +243,36 @@ class RiwayatTugasView extends StatelessWidget {
   // ============================================================
   Widget _buildSearchBar(RiwayatTugasController ctrl) {
     return Container(
-      color: _C.white,
+      color: AppColors.surface,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Obx(() => TextField(
             controller: ctrl.searchController,
-            style: const TextStyle(fontSize: 14, color: _C.textPrimary),
+            style: const TextStyle(fontSize: 14, color: AppColors.title),
             decoration: InputDecoration(
               hintText: 'Cari riwayat tugas...',
               hintStyle:
-                  const TextStyle(color: _C.textLight, fontSize: 14),
+                  const TextStyle(color: AppColors.muted, fontSize: 14),
               prefixIcon: const Icon(Icons.search_rounded,
-                  color: _C.textLight, size: 20),
+                  color: AppColors.muted, size: 20),
               suffixIcon: ctrl.isSearchActive
                   ? IconButton(
                       icon: const Icon(Icons.close_rounded,
-                          color: _C.textLight, size: 18),
+                          color: AppColors.muted, size: 18),
                       onPressed: ctrl.onClearSearch,
                     )
                   : null,
               filled: true,
-              fillColor: _C.searchBg,
+              fillColor: AppColors.surface,
               contentPadding: const EdgeInsets.symmetric(vertical: 12),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: const BorderSide(
-                    color: _C.searchBorder, width: 1.2),
+                    color: AppColors.border, width: 1.2),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide:
-                    const BorderSide(color: _C.primary, width: 1.5),
+                    const BorderSide(color: AppColors.primary, width: 1.5),
               ),
             ),
           )),
@@ -227,10 +284,10 @@ class RiwayatTugasView extends StatelessWidget {
   // ============================================================
   Widget _buildFilterChips(RiwayatTugasController ctrl) {
     return Container(
-      color: _C.white,
+      color: AppColors.surface,
       child: Column(
         children: [
-          const Divider(height: 1, color: _C.divider),
+          const Divider(height: 1, color: AppColors.border),
           SizedBox(
             height: 52,
             child: Obx(() => ListView(
@@ -297,10 +354,10 @@ class _FilterChip extends StatelessWidget {
         padding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: isActive ? _C.chipActive : _C.chipInactiveBg,
+          color: isActive ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isActive ? _C.chipActive : _C.chipInactiveBorder,
+            color: isActive ? AppColors.primary : AppColors.border,
             width: 1.2,
           ),
         ),
@@ -313,7 +370,7 @@ class _FilterChip extends StatelessWidget {
                 fontSize: 13,
                 fontWeight:
                     isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive ? Colors.white : _C.chipInactiveFg,
+                color: isActive ? Colors.white : AppColors.body,
               ),
             ),
             if (count > 0) ...[
@@ -324,7 +381,7 @@ class _FilterChip extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isActive
                       ? Colors.white.withValues(alpha: 0.25)
-                      : _C.primary.withValues(alpha: 0.08),
+                      : AppColors.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -332,7 +389,7 @@ class _FilterChip extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    color: isActive ? Colors.white : _C.primary,
+                    color: isActive ? Colors.white : AppColors.primary,
                   ),
                 ),
               ),
@@ -362,9 +419,9 @@ class _RiwayatCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: _C.cardBg,
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: _C.divider, width: 1),
+          border: Border.all(color: AppColors.border, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -386,7 +443,7 @@ class _RiwayatCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: _C.textLight,
+                      color: AppColors.muted,
                       letterSpacing: 0.3,
                     ),
                     maxLines: 1,
@@ -400,7 +457,7 @@ class _RiwayatCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: _C.selesaiBg,
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -431,7 +488,7 @@ class _RiwayatCard extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
-                color: _C.textPrimary,
+                color: AppColors.title,
                 height: 1.3,
               ),
               maxLines: 2,
@@ -443,13 +500,13 @@ class _RiwayatCard extends StatelessWidget {
             Row(
               children: [
                 const Icon(Icons.location_on_outlined,
-                    size: 13, color: _C.textLight),
+                    size: 13, color: AppColors.muted),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
                     laporan.lokasi,
                     style: const TextStyle(
-                        fontSize: 12, color: _C.textSecondary),
+                        fontSize: 12, color: AppColors.body),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -462,13 +519,13 @@ class _RiwayatCard extends StatelessWidget {
             Row(
               children: [
                 const Icon(Icons.calendar_today_outlined,
-                    size: 13, color: _C.textLight),
+                    size: 13, color: AppColors.muted),
                 const SizedBox(width: 5),
                 Text(
                   'Selesai: ${item.tanggalLabel}',
                   style: const TextStyle(
                     fontSize: 12,
-                    color: _C.textSecondary,
+                    color: AppColors.body,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -476,14 +533,14 @@ class _RiwayatCard extends StatelessWidget {
             ),
 
             const SizedBox(height: 10),
-            const Divider(height: 1, color: _C.divider),
+            const Divider(height: 1, color: AppColors.border),
             const SizedBox(height: 10),
 
             // ---- ID Petugas yang menanggapi ----
             Row(
               children: [
                 const Icon(Icons.engineering_rounded,
-                    size: 13, color: _C.textLight),
+                    size: 13, color: AppColors.muted),
                 const SizedBox(width: 5),
                 Expanded(
                   child: Text(
@@ -491,7 +548,7 @@ class _RiwayatCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: _C.primary,
+                      color: AppColors.primary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -508,14 +565,14 @@ class _RiwayatCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(Icons.notes_rounded,
-                      size: 13, color: _C.textLight),
+                      size: 13, color: AppColors.muted),
                   const SizedBox(width: 5),
                   Expanded(
                     child: Text(
                       laporan.catatanPetugas!,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: _C.textSecondary,
+                        color: AppColors.body,
                         height: 1.4,
                       ),
                       maxLines: 2,
@@ -532,12 +589,12 @@ class _RiwayatCard extends StatelessWidget {
               Row(
                 children: [
                   const Icon(Icons.photo_library_outlined,
-                      size: 13, color: _C.textLight),
+                      size: 13, color: AppColors.muted),
                   const SizedBox(width: 5),
                   Text(
                     '${laporan.foto_urls.length} foto bukti',
                     style: const TextStyle(
-                        fontSize: 11, color: _C.textLight),
+                        fontSize: 11, color: AppColors.muted),
                   ),
                 ],
               ),
@@ -578,20 +635,20 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 56, color: const Color(0xFFB0B8CC)),
+          Icon(icon, size: 56, color: AppColors.muted),
           const SizedBox(height: 12),
           Text(
             title,
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF6B7280),
+              color: AppColors.body,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             subtitle,
-            style: const TextStyle(fontSize: 12, color: Color(0xFFB0B8CC)),
+            style: const TextStyle(fontSize: 12, color: AppColors.muted),
             textAlign: TextAlign.center,
           ),
         ],

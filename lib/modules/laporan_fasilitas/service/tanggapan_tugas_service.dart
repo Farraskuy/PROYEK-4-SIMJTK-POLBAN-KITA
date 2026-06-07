@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mongo_dart/mongo_dart.dart' hide Box;
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
@@ -93,23 +94,25 @@ class TanggapanTugasService {
     };
 
     if (existing.isEmpty) {
-      await mongo.insertData(_collection, {
+      final newData = {
         ...syncedData,
         'created_at': DateTime.now(),
-      });
+      };
+      await mongo.insertData(_collection, newData);
     } else {
       await mongo.updateOneByFilter(_collection, filter, syncedData);
     }
 
+    final laporanPatch = {
+      'teknisi_id': data['teknisi_id'],
+      'catatan_petugas': data['analisa_masalah'],
+      'status': status.value,
+      'updatedAt': DateTime.now().toIso8601String(),
+    };
     await mongo.updateOneByFilter(
       'laporan_fasilitas',
       where.eq('_id', laporanId),
-      {
-        'teknisi_id': data['teknisi_id'],
-        'catatan_petugas': data['analisa_masalah'],
-        'status': status.value,
-        'updatedAt': DateTime.now().toIso8601String(),
-      },
+      laporanPatch,
     );
 
     await saveLocal(laporanId, syncedData, pendingSync: false);

@@ -19,7 +19,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
 
-  await dotenv.load(fileName: '.env.example');
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (e) {
+    await dotenv.load(fileName: '.env.example');
+  }
   AccessControlService.initSimjtkRoles();
 
   try {

@@ -85,9 +85,12 @@ class _RoleProfileViewState extends State<RoleProfileView> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
                   AppHomeAppBar(
-                    title: 'Halo, ${data.firstName}',
+                    title: 'Halo, ${AuthService().currentUser?.name ?? data.firstName}',
                     subtitle: '${data.roleLabel} JTK',
                     avatarIcon: Icons.person_rounded,
+                    avatarText: (AuthService().currentUser?.name ?? data.firstName).isEmpty
+                        ? 'P'
+                        : (AuthService().currentUser?.name ?? data.firstName)[0].toUpperCase(),
                   ),
                   SliverToBoxAdapter(child: _ProfileHero(data: data)),
                   SliverToBoxAdapter(

@@ -1,9 +1,3 @@
-// ============================================================
-// FILE: modules/home/teknisi/view/home_teknisi_view.dart
-// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
-// MODIFIKASI: Tugas Mendesak dari DB laporan_fasilitas, sort by vote_score
-// ============================================================
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
@@ -15,90 +9,6 @@ import 'package:proyek_4_poki_polban_kita/modules/home/teknisi/view/form_analisa
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/teknisi_laporan_fasilitas_card.dart';
-
-// ============================================================
-// DESIGN TOKENS
-// ============================================================
-class _C {
-  static const primary = AppColors.primary;
-  static const primaryLight = AppColors.primaryLight;
-  static const surface = AppColors.background;
-  static const white = AppColors.surface;
-  static const cardBg = AppColors.surface;
-  static const textPrimary = AppColors.title;
-  static const textSecondary = AppColors.body;
-  static const textLight = AppColors.muted;
-  static const divider = AppColors.border;
-  static const navBg = AppColors.surface;
-  static const navActive = AppColors.primary;
-  static const navInactive = AppColors.muted;
-  static const selesaiBg = AppColors.primary;
-  static const pendingBg = AppColors.blueSoft;
-  static const highPriorityBadge = AppColors.redSoft;
-  static const highPriorityText = AppColors.danger;
-  static const medPriorityBadge = AppColors.blueSoft;
-  static const medPriorityText = AppColors.primaryLight;
-  static const lowPriorityBadge = AppColors.greySoft;
-  static const lowPriorityText = AppColors.neutral;
-  static const jaringanIcon = AppColors.primaryLight;
-  static const jaringanIconBg = AppColors.blueSoft;
-  static const hardwareIcon = AppColors.danger;
-  static const hardwareIconBg = AppColors.redSoft;
-  static const acIcon = AppColors.success;
-  static const acIconBg = AppColors.greenSoft;
-  static const umIcon = AppColors.purple;
-  static const umIconBg = AppColors.purpleSoft;
-  static const upvoteBg = AppColors.greenSoft;
-  static const upvoteText = AppColors.success;
-}
-
-// ============================================================
-// ICON MAP untuk kategori fasilitas
-// ============================================================
-IconData _kategoriIcon(String kategori) {
-  switch (kategori) {
-    case 'Jaringan Internet':
-      return Icons.wifi_rounded;
-    case 'Perangkat PC':
-      return Icons.computer_rounded;
-    case 'AC / Pendingin':
-      return Icons.ac_unit_rounded;
-    case 'Kebersihan':
-      return Icons.cleaning_services_rounded;
-    case 'Listrik & Proyektor':
-      return Icons.electrical_services_rounded;
-    case 'Furnitur':
-      return Icons.chair_rounded;
-    default:
-      return Icons.build_rounded;
-  }
-}
-
-Color _kategoriIconColor(String kategori) {
-  switch (kategori) {
-    case 'Jaringan Internet':
-      return AppColors.primary;
-    case 'Perangkat PC':
-      return AppColors.danger;
-    case 'AC / Pendingin':
-      return AppColors.success;
-    default:
-      return AppColors.purple;
-  }
-}
-
-Color _kategoriIconBg(String kategori) {
-  switch (kategori) {
-    case 'Jaringan Internet':
-      return AppColors.blueSoft;
-    case 'Perangkat PC':
-      return AppColors.redSoft;
-    case 'AC / Pendingin':
-      return AppColors.greenSoft;
-    default:
-      return AppColors.purpleSoft;
-  }
-}
 
 // ============================================================
 // MODUL MAINTENANCE SECTION
@@ -273,12 +183,12 @@ class HomeTeknisiView extends StatelessWidget {
   Widget _buildAppBar(HomeTeknisiController ctrl, BuildContext context) {
     return Obx(
       () => AppHomeAppBar(
-        title: 'Halo, ${ctrl.currentTeknisi.value.name}',
+        title: 'Halo, ${ctrl.user?.name ?? 'Teknisi'}',
         subtitle: 'Teknisi JTK',
         avatarIcon: Icons.engineering_rounded,
-        avatarText: ctrl.currentTeknisi.value.name.isEmpty
-            ? null
-            : ctrl.currentTeknisi.value.name[0].toUpperCase(),
+        avatarText: (ctrl.user?.name ?? 'Teknisi').isEmpty
+            ? 'T'
+            : ctrl.user!.name[0].toUpperCase(),
       ),
     );
   }
@@ -292,11 +202,11 @@ class HomeTeknisiView extends StatelessWidget {
       children: [
         Obx(
           () => Text(
-            'Hallo, ${ctrl.currentTeknisi.value.name}',
+            'Hallo, ${ctrl.user?.name ?? 'Teknisi'}',
             style: const TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
-              color: _C.textPrimary,
+              color: AppColors.title,
               height: 1.1,
             ),
           ),
@@ -304,7 +214,7 @@ class HomeTeknisiView extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           ctrl.sapaan,
-          style: const TextStyle(fontSize: 13, color: _C.textSecondary),
+          style: const TextStyle(fontSize: 13, color: AppColors.body),
         ),
       ],
     );
@@ -325,7 +235,7 @@ class HomeTeknisiView extends StatelessWidget {
           border: Border.all(color: AppColors.border, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 3),
             ),
@@ -344,7 +254,7 @@ class HomeTeknisiView extends StatelessWidget {
                       children: const [
                         Icon(
                           Icons.assignment_rounded,
-                          color: _C.primary,
+                          color: AppColors.primary,
                           size: 18,
                         ),
                         SizedBox(width: 6),
@@ -418,7 +328,7 @@ class HomeTeknisiView extends StatelessWidget {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.15),
+                                color: Colors.white.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Icon(
@@ -473,12 +383,12 @@ class HomeTeknisiView extends StatelessWidget {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.1),
+                                color: AppColors.primary.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Icon(
                                 Icons.access_time_rounded,
-                                color: _C.primary,
+                                color: AppColors.primary,
                                 size: 18,
                               ),
                             ),
@@ -507,7 +417,7 @@ class HomeTeknisiView extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: _C.textPrimary,
+            color: AppColors.title,
           ),
         ),
         const SizedBox(width: 6),
@@ -515,19 +425,23 @@ class HomeTeknisiView extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
           decoration: BoxDecoration(
-            color: _C.upvoteBg,
+            color: AppColors.greenSoft,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Row(
             children: const [
-              Icon(Icons.arrow_upward_rounded, size: 11, color: _C.upvoteText),
+              Icon(
+                Icons.arrow_upward_rounded,
+                size: 11,
+                color: AppColors.success,
+              ),
               SizedBox(width: 3),
               Text(
                 'Top Upvote',
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
-                  color: _C.upvoteText,
+                  color: AppColors.success,
                 ),
               ),
             ],
@@ -612,7 +526,7 @@ class _EmptyMendesak extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E9F2), width: 1),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -620,7 +534,7 @@ class _EmptyMendesak extends StatelessWidget {
           Icon(
             Icons.check_circle_outline_rounded,
             size: 44,
-            color: Color(0xFF81C784),
+            color: AppColors.success,
           ),
           SizedBox(height: 10),
           Text(
@@ -634,7 +548,7 @@ class _EmptyMendesak extends StatelessWidget {
           SizedBox(height: 4),
           Text(
             'Belum ada laporan fasilitas yang masuk',
-            style: TextStyle(fontSize: 12, color: _C.textLight),
+            style: TextStyle(fontSize: 12, color: AppColors.muted),
           ),
         ],
       ),

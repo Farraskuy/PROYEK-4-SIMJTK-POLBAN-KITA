@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/laporan_fasilitas_model.dart';
 import '../service/laporan_fasilitas_service.dart';
 
@@ -10,6 +12,12 @@ extension AdminLaporanFilterLabel on AdminLaporanFilter {
         AdminLaporanFilter.semua => 'Semua',
         AdminLaporanFilter.aktif => 'Aktif',
         AdminLaporanFilter.selesai => 'Selesai',
+      };
+
+  IconData get icon => switch (this) {
+        AdminLaporanFilter.semua => Icons.dashboard_outlined,
+        AdminLaporanFilter.aktif => Icons.pending_actions_rounded,
+        AdminLaporanFilter.selesai => Icons.check_circle_outline_rounded,
       };
 }
 
@@ -23,6 +31,10 @@ class AdminLaporanController extends GetxController {
       AdminLaporanFilter.semua.obs;
   final RxString searchQuery = ''.obs;
   final RxBool isLoading = true.obs;
+
+  UserModel? get user => AuthService().currentUser;
+
+  bool get isSearchActive => searchQuery.value.isNotEmpty;
 
   @override
   void onInit() {

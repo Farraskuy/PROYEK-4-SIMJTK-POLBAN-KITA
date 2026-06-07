@@ -6,36 +6,8 @@ import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 class LaporanFasilitasService {
   static const String collectionName = 'laporan_fasilitas';
 
-  @visibleForTesting
-  static Future<List<Map<String, dynamic>>> Function(
-    String collection,
-    SelectorBuilder filter,
-  )?
-  fetchOverride;
-
-  @visibleForTesting
-  static Future<void> Function(String collection, Map<String, dynamic> data)?
-  insertOverride;
-
-  @visibleForTesting
-  static Future<void> Function(
-    String collection,
-    SelectorBuilder filter,
-    Map<String, dynamic> data,
-  )?
-  updateOverride;
-
-  @visibleForTesting
-  static Future<void> Function(String collection, String id)? deleteOverride;
-
   Future<LaporanFasilitasModel> create(LaporanFasilitasModel laporan) async {
     final data = laporan.toJson();
-    final override = insertOverride;
-    if (override != null) {
-      await override(collectionName, data);
-      return laporan;
-    }
-
     final mongo = MonggoDBServices();
     await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum insert
     await mongo.insertData(collectionName, data);
@@ -78,13 +50,7 @@ class LaporanFasilitasService {
   }
 
   Future<LaporanFasilitasModel> update(LaporanFasilitasModel laporan) async {
-    final override = updateOverride;
     final data = laporan.toJson();
-    if (override != null) {
-      await override(collectionName, where.eq('_id', laporan.id), data);
-      return laporan;
-    }
-
     final mongo = MonggoDBServices();
     await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum update
     await mongo.updateOneByFilter(
@@ -127,24 +93,12 @@ class LaporanFasilitasService {
   }
 
   Future<void> delete(String id) async {
-    final override = deleteOverride;
-    if (override != null) {
-      await override(collectionName, id);
-      return;
-    }
-
     final mongo = MonggoDBServices();
     await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum delete
     await mongo.deleteData(collectionName, id);
   }
 
   Future<void> _updateById(String id, Map<String, dynamic> data) async {
-    final override = updateOverride;
-    if (override != null) {
-      await override(collectionName, where.eq('_id', id), data);
-      return;
-    }
-    
     final mongo = MonggoDBServices();
     await mongo.ensureConnected(); // <-- Pastikan koneksi aman sebelum update parsial
     await mongo.updateOneByFilter(
@@ -157,18 +111,12 @@ class LaporanFasilitasService {
   Future<List<Map<String, dynamic>>> _fetchByFilter(
     SelectorBuilder filter,
   ) async {
-    final override = fetchOverride;
-    List<Map<String, dynamic>> rawRows;
     final mongo = MonggoDBServices();
     
     // Pastikan koneksi aman sebelum menarik data
     await mongo.ensureConnected(); 
     
-    if (override != null) {
-      rawRows = await override(collectionName, filter);
-    } else {
-      rawRows = await mongo.fetch(collectionName, filter);
-    }
+    final rawRows = await mongo.fetch(collectionName, filter);
 
     if (rawRows.isEmpty) return rawRows;
 
@@ -214,19 +162,7 @@ class LaporanFasilitasService {
   }
 
   Future<List<LaporanFasilitasModel>> fetchAll() async {
-    // Kita panggil fetch yang sudah ada dengan filter kosong
-    // pastikan method fetch internal Anda menangani filter kosong
-    final mongo = MonggoDBServices();
-    await mongo.ensureConnected();
-    
-    // Asumsi kita menggunakan logic fetch yang sudah Anda buat di service tersebut
-    // Anda mungkin perlu menyesuaikan pemanggilan ke method internal 
-    // jika logic 'enrichment' nama user ada di method lain
-    final rawRows = await mongo.fetch(collectionName, where.sortBy('createdAt', descending: true));
-    
-    // Jika Anda sudah memiliki logic enrichment di service, 
-    // pastikan Anda memanggil fungsi yang benar atau copy logic enrichment ke sini
-    
-    return rawRows.map((e) => LaporanFasilitasModel.fromJson(e)).toList();
+    final rawRows = await _fetchByFilter(where.sortBy('createdAt', descending: true));
+    return rawRows.map(LaporanFasilitasModel.fromJson).toList();
   }
 }

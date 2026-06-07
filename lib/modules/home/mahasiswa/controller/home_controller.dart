@@ -17,6 +17,8 @@ class HomeController extends GetxController {
   /// Data user yang sedang login (Menggunakan identitas kamu)[cite: 6]
   UserModel? get currentUser => AuthService().currentUser;
 
+  UserModel? get user => AuthService().currentUser;
+
   final RxList<KalenderAkademikModel> kalenderList =
       <KalenderAkademikModel>[].obs;
   final RxList<AksesCepatModel> aksesCepatList = <AksesCepatModel>[].obs;
