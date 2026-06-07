@@ -72,4 +72,13 @@ class AspirasiService {
       throw Exception('Gagal memperbarui aspirasi: $e');
     }
   }
+
+  /// Menghapus aspirasi dari MongoDB
+  Future<void> deleteAspirasi(String id) async {
+    try {
+      await _db.deleteData(_collectionName, id);
+    } catch (e) {
+      throw Exception('Gagal menghapus aspirasi: $e');
+    }
+  }
 }

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:proyek_4_poki_polban_kita/modules/login/widgets/brand_mark.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/role_navigation_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_button.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_text_field.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/main_layout_shell.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -19,7 +19,6 @@ class _LoginViewState extends State<LoginView> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isLoading = false;
-  bool _rememberMe = false;
   bool _obscurePassword = true;
   String? _status;
 

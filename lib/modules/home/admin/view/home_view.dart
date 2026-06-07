@@ -113,7 +113,6 @@ class AdminDashboardView extends StatelessWidget {
           ),
         );
       }),
-      bottomNavigationBar: _buildBottomNavBar(context, ctrl),
     );
   }
 
@@ -126,8 +125,6 @@ class AdminDashboardView extends StatelessWidget {
         title: 'Institution Admin',
         subtitle: ctrl.currentAdmin.value.name,
         avatarIcon: Icons.admin_panel_settings_rounded,
-        unreadCount: ctrl.unreadNotif.value,
-        onNotificationTap: ctrl.onNotifikasiTapped,
       ),
     );
   }
@@ -501,7 +498,7 @@ class AdminDashboardView extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: ctrl.aktivitasList.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
+        separatorBuilder: (_, _) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
           final item = ctrl.aktivitasList[index];
           return _AktivitasCard(

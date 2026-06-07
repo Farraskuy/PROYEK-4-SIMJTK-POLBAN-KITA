@@ -6,12 +6,23 @@ import 'package:proyek_4_poki_polban_kita/shared/widgets/app_button.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_text_field.dart';
 
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_bottom_nav_bar.dart';
+import 'package:proyek_4_poki_polban_kita/modules/home/admin/controller/home_controller.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/admin_laporan_fasilitas_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/admin_aspirasi_view.dart';
+
 class AdminAddUserView extends StatelessWidget {
   const AdminAddUserView({super.key});
 
   @override
   Widget build(BuildContext context) {
     final ctrl = Get.put(AdminAddUserController());
+    final adminCtrl = Get.find<AdminDashboardController>();
+
+    // Memastikan indeks navbar otomatis berpindah ke 'User' (indeks ke-3) saat halaman ini dibuka
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      adminCtrl.selectedNavIndex.value = 3;
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -20,6 +31,10 @@ class AdminAddUserView extends StatelessWidget {
           Obx(() => AppSliverDetailAppBar(
             title: ctrl.isEditMode.value ? 'Edit User' : 'Tambah User',
             subtitle: 'Kelola akun SIMJTK',
+            onBack: () {
+              adminCtrl.selectedNavIndex.value = 0;
+              Get.back();
+            },
           )),
           SliverToBoxAdapter(
             child: Padding(
@@ -35,6 +50,26 @@ class AdminAddUserView extends StatelessWidget {
           ),
         ],
       ),
+      bottomNavigationBar: Obx(() => AppBottomNavBar(
+        items: const [
+          AppNavItem(label: 'Home', icon: Icons.dashboard_rounded),
+          AppNavItem(label: 'Layanan', icon: Icons.apartment_rounded),
+          AppNavItem(label: 'Aspirasi', icon: Icons.campaign_rounded),
+          AppNavItem(label: 'User', icon: Icons.group_rounded),
+        ],
+        selectedIndex: adminCtrl.selectedNavIndex.value,
+        onTap: (index) {
+          if (index == adminCtrl.selectedNavIndex.value) return;
+          adminCtrl.selectedNavIndex.value = index;
+          if (index == 0) {
+            Get.back();
+          } else if (index == 1) {
+            Get.off(() => const AdminLaporanFasilitasView());
+          } else if (index == 2) {
+            Get.off(() => const AdminAspirasiView());
+          }
+        },
+      )),
     );
   }
 }

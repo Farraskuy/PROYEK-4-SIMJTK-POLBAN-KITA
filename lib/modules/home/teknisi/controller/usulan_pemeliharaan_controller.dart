@@ -105,7 +105,9 @@ class UsulanPemeliharaanController extends GetxController {
     tahunAnggaranCtrl.dispose();
     pengelolaCtrl.dispose();
     for (final r in rows) {
-      for (final c in r.values) c.dispose();
+      for (final c in r.values) {
+        c.dispose();
+      }
     }
     super.onClose();
   }

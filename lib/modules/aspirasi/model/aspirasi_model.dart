@@ -43,7 +43,7 @@ extension KategoriAspirasiExt on KategoriAspirasi {
 }
 
 // --------------- ENUM TAB FILTER ---------------
-enum TabAspirasi { terbaru, terpopuler, diproses }
+enum TabAspirasi { terbaru, terpopuler, selesai }
 
 extension TabAspirasiExt on TabAspirasi {
   String get label {
@@ -52,8 +52,8 @@ extension TabAspirasiExt on TabAspirasi {
         return 'Terbaru';
       case TabAspirasi.terpopuler:
         return 'Terpopuler';
-      case TabAspirasi.diproses:
-        return 'Diproses';
+      case TabAspirasi.selesai:
+        return 'Selesai';
     }
   }
 }

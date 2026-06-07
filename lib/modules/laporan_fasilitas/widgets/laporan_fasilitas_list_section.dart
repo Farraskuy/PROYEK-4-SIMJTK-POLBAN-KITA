@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/interaksi_laporan_controller.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/lapor_fasilitas_controller.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/lapor_fasilitas_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/tambah_laporan_fasilitas_view.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_card.dart';
 
 class LaporanFasilitasListSection extends StatelessWidget {
@@ -30,8 +30,9 @@ class LaporanFasilitasListSection extends StatelessWidget {
               child: LaporanFasilitasCard(
                 laporan: laporan,
                 currentUserId: controller.currentUserId,
-                showVoteColumn: controller.isMahasiswa,
-                showActions: controller.isMahasiswa,
+                showVoteColumn: true,
+                showActions: false,
+                showVoteButtons: controller.isMahasiswa,
                 onTap: () async {
                   final changed = await Navigator.push(
                     context,
@@ -50,7 +51,8 @@ class LaporanFasilitasListSection extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const LaporFasilitasView(),
+                      builder: (context) =>
+                          const TambahLaporanFasilitasView(),
                     ),
                   );
                 },

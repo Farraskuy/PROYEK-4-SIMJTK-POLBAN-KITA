@@ -6,8 +6,6 @@ class AppHomeAppBar extends StatelessWidget {
   final String subtitle;
   final IconData avatarIcon;
   final String? avatarText;
-  final int unreadCount;
-  final VoidCallback? onNotificationTap;
 
   const AppHomeAppBar({
     super.key,
@@ -15,8 +13,6 @@ class AppHomeAppBar extends StatelessWidget {
     required this.subtitle,
     required this.avatarIcon,
     this.avatarText,
-    this.unreadCount = 0,
-    this.onNotificationTap,
   });
 
   @override
@@ -74,7 +70,6 @@ class AppHomeAppBar extends StatelessWidget {
                 ],
               ),
             ),
-            _NotificationButton(count: unreadCount, onTap: onNotificationTap),
           ],
         ),
       ),
@@ -222,51 +217,6 @@ class _AppBarTitle extends StatelessWidget {
             ),
           ),
         ],
-      ],
-    );
-  }
-}
-
-class _NotificationButton extends StatelessWidget {
-  final int count;
-  final VoidCallback? onTap;
-
-  const _NotificationButton({required this.count, this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        IconButton(
-          onPressed: onTap,
-          icon: const Icon(
-            Icons.notifications_outlined,
-            color: AppColors.title,
-            size: 26,
-          ),
-        ),
-        if (count > 0)
-          Positioned(
-            right: 8,
-            top: 8,
-            child: Container(
-              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              decoration: const BoxDecoration(
-                color: AppColors.danger,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                count > 9 ? '9+' : '$count',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }

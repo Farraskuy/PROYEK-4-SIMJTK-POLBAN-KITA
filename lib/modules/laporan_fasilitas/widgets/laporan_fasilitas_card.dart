@@ -1,15 +1,16 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_status_chip.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_vote_column.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_report_image.dart';
 
 class LaporanFasilitasCard extends StatelessWidget {
   final LaporanFasilitasModel laporan;
   final String currentUserId;
   final bool showVoteColumn;
   final bool showActions;
+  final bool showVoteButtons;
   final VoidCallback onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
@@ -22,6 +23,7 @@ class LaporanFasilitasCard extends StatelessWidget {
     required this.currentUserId,
     required this.showVoteColumn,
     required this.showActions,
+    this.showVoteButtons = true,
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
@@ -37,10 +39,17 @@ class LaporanFasilitasCard extends StatelessWidget {
         ? laporan.foto_urls.first
         : null;
 
+    final initials = laporan.pelapor_nama.isNotEmpty
+        ? (laporan.pelapor_nama.trim().split(' ').length >= 2
+            ? '${laporan.pelapor_nama.trim().split(' ')[0][0]}${laporan.pelapor_nama.trim().split(' ')[1][0]}'
+            : laporan.pelapor_nama[0])
+        : '?';
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -62,8 +71,8 @@ class LaporanFasilitasCard extends StatelessWidget {
                   voteScore: laporan.vote_score,
                   isUpvoted: isUpvoted,
                   isDownvoted: isDownvoted,
-                  onUpvote: onUpvote,
-                  onDownvote: onDownvote,
+                  onUpvote: showVoteButtons ? onUpvote : () {},
+                  onDownvote: showVoteButtons ? onDownvote : () {},
                 ),
               if (showVoteColumn) const SizedBox(width: 12),
               Expanded(
@@ -83,15 +92,14 @@ class LaporanFasilitasCard extends StatelessWidget {
                             children: [
                               CircleAvatar(
                                 radius: 14,
-                                backgroundColor: const Color(
-                                  0xFF1A3A6B,
-                                ).withOpacity(0.1),
-                                child: const Text(
-                                  'AH',
-                                  style: TextStyle(
+                                backgroundColor: AppColors.primary.withOpacity(0.1),
+                                child: Text(
+                                  initials.toUpperCase(),
+                                  style: const TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1A3A6B),
+                                    color: AppColors.primary,
+                                    fontFamily: 'Poppins',
                                   ),
                                 ),
                               ),
@@ -100,19 +108,24 @@ class LaporanFasilitasCard extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Ahmad Hidayat',
-                                      style: TextStyle(
+                                    Text(
+                                      laporan.pelapor_nama.isNotEmpty
+                                          ? laporan.pelapor_nama
+                                          : 'Mahasiswa JTK',
+                                      style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13,
+                                        color: AppColors.title,
+                                        fontFamily: 'Poppins',
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     Text(
-                                      'D4 Teknik Informatika • 2 jam lalu',
-                                      style: TextStyle(
+                                      'D4 Teknik Informatika • ${_getWaktuRelatif(laporan.createdAt)}',
+                                      style: const TextStyle(
                                         fontSize: 11,
-                                        color: Colors.grey.shade600,
+                                        color: AppColors.body,
+                                        fontFamily: 'Poppins',
                                       ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -122,33 +135,35 @@ class LaporanFasilitasCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        if (showActions)
+                        if (showActions && (onEdit != null || onDelete != null))
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              IconButton(
-                                onPressed: onEdit,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                icon: const Icon(
-                                  Icons.edit_outlined,
-                                  color: Colors.grey,
-                                  size: 20,
+                              if (onEdit != null)
+                                IconButton(
+                                  onPressed: onEdit,
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
+                                  tooltip: 'Edit',
                                 ),
-                                tooltip: 'Edit',
-                              ),
                               const SizedBox(width: 6),
-                              IconButton(
-                                onPressed: onDelete,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                icon: const Icon(
-                                  Icons.delete_outline,
-                                  color: Colors.redAccent,
-                                  size: 20,
+                              if (onDelete != null)
+                                IconButton(
+                                  onPressed: onDelete,
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: AppColors.danger,
+                                    size: 20,
+                                  ),
+                                  tooltip: 'Hapus',
                                 ),
-                                tooltip: 'Hapus',
-                              ),
                             ],
                           ),
                       ],
@@ -158,8 +173,9 @@ class LaporanFasilitasCard extends StatelessWidget {
                       laporan.judul,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Color(0xFF1A3A6B),
+                        fontSize: 16,
+                        color: AppColors.title,
+                        fontFamily: 'Poppins',
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -168,7 +184,7 @@ class LaporanFasilitasCard extends StatelessWidget {
                         const Icon(
                           Icons.location_on_outlined,
                           size: 14,
-                          color: Colors.grey,
+                          color: AppColors.body,
                         ),
                         const SizedBox(width: 4),
                         Expanded(
@@ -176,7 +192,8 @@ class LaporanFasilitasCard extends StatelessWidget {
                             laporan.lokasi,
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Colors.grey,
+                              color: AppColors.body,
+                              fontFamily: 'Poppins',
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -184,15 +201,13 @@ class LaporanFasilitasCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    if (fotoLaporanPath != null) ...[
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: LaporanFasilitasImage(
-                          imagePath: fotoLaporanPath,
-                        ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: LaporanFasilitasImage(
+                        imagePath: fotoLaporanPath,
                       ),
-                      const SizedBox(height: 12),
-                    ],
+                    ),
+                    const SizedBox(height: 12),
                     if (laporan.catatanPetugas?.isNotEmpty == true) ...[
                       Text(
                         'Petugas: ${laporan.catatanPetugas}',
@@ -200,79 +215,39 @@ class LaporanFasilitasCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.black87,
+                          color: AppColors.body,
+                          fontFamily: 'Poppins',
                         ),
                       ),
                       const SizedBox(height: 12),
                     ],
-                    if (showVoteColumn)
+                    if (showVoteButtons) ...[
                       Row(
                         children: [
                           Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: onUpvote,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isUpvoted
-                                    ? Colors.orange.shade50
-                                    : const Color(0xFFEFEFEF),
-                                foregroundColor: isUpvoted
-                                    ? Colors.orange
-                                    : Colors.black87,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                              ),
-                              icon: const Icon(
-                                Icons.arrow_upward_rounded,
-                                size: 16,
-                              ),
-                              label: const Text(
-                                'Up vote',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                            child: _VoteButton(
+                              label: 'Up vote',
+                              icon: Icons.keyboard_arrow_up_rounded,
+                              count: laporan.upvoter_ids.length,
+                              isActive: isUpvoted,
+                              activeColor: AppColors.primary,
+                              onTap: onUpvote,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 10),
                           Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: onDownvote,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isDownvoted
-                                    ? Colors.blue.shade50
-                                    : const Color(0xFFEFEFEF),
-                                foregroundColor: isDownvoted
-                                    ? Colors.blue
-                                    : Colors.black87,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
-                              ),
-                              icon: const Icon(
-                                Icons.arrow_downward_rounded,
-                                size: 16,
-                              ),
-                              label: const Text(
-                                'Down Vote',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                            child: _VoteButton(
+                              label: 'Down Vote',
+                              icon: Icons.keyboard_arrow_down_rounded,
+                              count: laporan.downvoter_ids.length,
+                              isActive: isDownvoted,
+                              activeColor: AppColors.danger,
+                              onTap: onDownvote,
                             ),
                           ),
                         ],
                       ),
+                    ],
                   ],
                 ),
               ),
@@ -282,44 +257,82 @@ class LaporanFasilitasCard extends StatelessWidget {
       ),
     );
   }
+
+  String _getWaktuRelatif(DateTime dateTime) {
+    final diff = DateTime.now().difference(dateTime);
+    if (diff.inMinutes < 60) return '${diff.inMinutes} menit lalu';
+    if (diff.inHours < 24) return '${diff.inHours} jam lalu';
+    return '${diff.inDays} hari lalu';
+  }
 }
 
 class LaporanFasilitasImage extends StatelessWidget {
-  final String imagePath;
+  final String? imagePath;
 
   const LaporanFasilitasImage({super.key, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {
-    return imagePath.startsWith('http')
-        ? Image.network(
-            imagePath,
-            height: 160,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => const _ImagePlaceholder(),
-          )
-        : Image.file(
-            File(imagePath),
-            height: 160,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => const _ImagePlaceholder(),
-          );
+    return AppReportImage(source: imagePath, height: 160);
   }
 }
 
-class _ImagePlaceholder extends StatelessWidget {
-  const _ImagePlaceholder();
+class _VoteButton extends StatelessWidget {
+  const _VoteButton({
+    required this.label,
+    required this.icon,
+    required this.count,
+    required this.isActive,
+    required this.activeColor,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final int count;
+  final bool isActive;
+  final Color activeColor;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 160,
-      width: double.infinity,
-      color: Colors.grey[200],
-      child: const Center(
-        child: Icon(Icons.broken_image_outlined, color: Colors.grey, size: 40),
+    final isUpvote = label.toLowerCase().contains('up');
+    final color = isUpvote ? AppColors.primary : AppColors.danger;
+    final bgColor = isActive ? color : color.withOpacity(0.06);
+    final borderColor = isActive ? color : color.withOpacity(0.3);
+    final textColor = isActive ? Colors.white : color;
+    final iconColor = isActive ? Colors.white : color;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: bgColor,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: borderColor),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: iconColor),
+              const SizedBox(width: 4),
+              Text(
+                '$label ${count.toString()}',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+                  color: textColor,
+                  fontFamily: 'Poppins',
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

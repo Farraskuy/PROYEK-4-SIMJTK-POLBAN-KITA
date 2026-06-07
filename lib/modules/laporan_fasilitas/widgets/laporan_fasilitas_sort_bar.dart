@@ -15,20 +15,29 @@ class LaporanFasilitasSortBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          _SortChip(
-            label: 'Terpopuler',
-            selected: selectedIndex == 0,
-            onTap: () => onChanged(0),
-          ),
-          const SizedBox(width: 8),
-          _SortChip(
-            label: 'Terbaru',
-            selected: selectedIndex == 1,
-            onTap: () => onChanged(1),
-          ),
-        ],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _SortChip(
+              label: 'Terpopuler',
+              selected: selectedIndex == 0,
+              onTap: () => onChanged(0),
+            ),
+            const SizedBox(width: 8),
+            _SortChip(
+              label: 'Terbaru',
+              selected: selectedIndex == 1,
+              onTap: () => onChanged(1),
+            ),
+            const SizedBox(width: 8),
+            _SortChip(
+              label: 'Selesai',
+              selected: selectedIndex == 2,
+              onTap: () => onChanged(2),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -51,7 +60,7 @@ class _SortChip extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(999),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: selected ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(999),
@@ -65,6 +74,7 @@ class _SortChip extends StatelessWidget {
             fontSize: 12,
             fontWeight: FontWeight.w700,
             color: selected ? Colors.white : AppColors.title,
+            fontFamily: 'Poppins',
           ),
         ),
       ),

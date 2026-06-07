@@ -3,16 +3,19 @@ import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import '../model/laporan_fasilitas_model.dart';
 import '../service/detail_laporan_fasilitas_service.dart';
 import '../service/laporan_fasilitas_service.dart';
+import '../service/tanggapan_tugas_service.dart';
 
 class DetailLaporanFasilitasController extends ChangeNotifier {
   final DetailLaporanFasilitasService _detailService =
       DetailLaporanFasilitasService();
   final LaporanFasilitasService _laporanService = LaporanFasilitasService();
+  final TanggapanTugasService _tanggapanService = TanggapanTugasService();
 
   LaporanFasilitasModel? laporan;
   bool isLoading = true;
   bool isSubmitting = false;
   String? errorMessage;
+  Map<String, dynamic>? tanggapan;
 
   Future<void> fetchLaporan(String id) async {
     isLoading = true;
@@ -27,6 +30,7 @@ class DetailLaporanFasilitasController extends ChangeNotifier {
       // Jika karena alasan tertentu data tidak ditemukan di _laporanService,
       // lakukan fallback menggunakan _detailService.
       laporan = fetchedLaporan ?? await _detailService.getLaporanById(id);
+      tanggapan = await _tanggapanService.getTanggapan(id);
       
     } catch (e) {
       errorMessage = 'Gagal memuat laporan: $e';

@@ -1,14 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/model/aspirasi_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/onboarding/view/onboarding_view.dart';
-import 'package:proyek_4_poki_polban_kita/modules/profile/view/widgets/profile_empty_state.dart';
-import 'package:proyek_4_poki_polban_kita/modules/profile/view/widgets/profile_settings_card.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
-import 'package:proyek_4_poki_polban_kita/shared/widgets/mahasiswa_bottom_nav_bar.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
+
+import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_card.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/widgets/laporan_fasilitas_empty_state.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/detail_laporan_fasilitas_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/widgets/aspirasi_card.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/detail_aspirasi_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/service/aspirasi_service.dart';
+import 'package:proyek_4_poki_polban_kita/modules/aspirasi/view/aspirasi_form_view.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/controller/lapor_fasilitas_controller.dart';
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/view/tambah_laporan_fasilitas_view.dart';
 
 class RoleProfileView extends StatefulWidget {
   const RoleProfileView({super.key, required this.role});
@@ -21,6 +31,7 @@ class RoleProfileView extends StatefulWidget {
 
 class _RoleProfileViewState extends State<RoleProfileView> {
   late Future<_ProfileData> _profileFuture;
+  int _loadGeneration = 0;
 
   @override
   void initState() {
@@ -43,8 +54,6 @@ class _RoleProfileViewState extends State<RoleProfileView> {
     }
   }
 
-  bool get _showBottomNav => widget.role == 'mahasiswa';
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -60,20 +69,9 @@ class _RoleProfileViewState extends State<RoleProfileView> {
               );
             }
 
-            if (snapshot.hasError) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    'Gagal memuat profil: ${snapshot.error}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: AppColors.body),
-                  ),
-                ),
-              );
-            }
-
             final data = snapshot.data ?? _ProfileData.empty(_roleLabel);
+
+            final isMahasiswa = widget.role == 'mahasiswa';
 
             return RefreshIndicator(
               color: AppColors.primary,
@@ -83,79 +81,94 @@ class _RoleProfileViewState extends State<RoleProfileView> {
                 });
                 await _profileFuture;
               },
-              child: NestedScrollView(
+              child: CustomScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                headerSliverBuilder: (context, innerBoxIsScrolled) => [
+                slivers: [
                   AppHomeAppBar(
                     title: 'Halo, ${data.firstName}',
                     subtitle: '${data.roleLabel} JTK',
                     avatarIcon: Icons.person_rounded,
-                    unreadCount: 0,
-                    onNotificationTap: null,
                   ),
                   SliverToBoxAdapter(child: _ProfileHero(data: data)),
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _PinnedTabHeaderDelegate(
-                      child: const _ProfileTabs(),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (isMahasiswa) ...[
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _OwnHistoryCardButton(
+                                    title: 'Laporan Saya',
+                                    subtitle: 'Keluhan fasilitas',
+                                    count: data.ownLaporan.length,
+                                    icon: Icons.assignment_outlined,
+                                    color: AppColors.primary,
+                                    onTap: () {
+                                      Get.to(
+                                        () => MahasiswaOwnReportsView(
+                                          ownLaporan: data.ownLaporan,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: 14),
+                                Expanded(
+                                  child: _OwnHistoryCardButton(
+                                    title: 'Aspirasi Saya',
+                                    subtitle: 'Saran & masukan',
+                                    count: data.ownAspirasi.length,
+                                    icon: Icons.chat_bubble_outline_rounded,
+                                    color: AppColors.secondary,
+                                    onTap: () {
+                                      Get.to(
+                                        () => MahasiswaOwnAspirationsView(
+                                          ownAspirasi: data.ownAspirasi,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                          const _SignOutTile(),
+                        ],
+                      ),
                     ),
                   ),
                 ],
-                body: TabBarView(
-                  children: [
-                    _ProfileContent(
-                      emptyText: 'Belum ada laporan fasilitas yang Anda buat.',
-                      children: data.ownLaporan
-                          .map(
-                            (laporan) => _LaporanHistoryCard(laporan: laporan),
-                          )
-                          .toList(),
-                    ),
-                    _ProfileContent(
-                      emptyText: 'Belum ada aspirasi yang Anda buat.',
-                      children: data.ownAspirasi
-                          .map(
-                            (aspirasi) =>
-                                _AspirasiHistoryCard(aspirasi: aspirasi),
-                          )
-                          .toList(),
-                    ),
-                  ],
-                ),
               ),
             );
           },
         ),
-        bottomNavigationBar: _showBottomNav
-            ? const MahasiswaBottomNavBar(
-                selected: MahasiswaNavDestination.profil,
-              )
-            : null,
       ),
     );
   }
 
   Future<_ProfileData> _loadProfileData() async {
+    final generation = ++_loadGeneration;
     final auth = AuthService();
-    final user = auth.currentUser ?? await auth.loadSavedSession();
+    var user = auth.currentUser;
+    if (user == null) {
+      try {
+        user = await auth.loadSavedSession();
+      } catch (_) {
+        user = null;
+      }
+    }
+
     final userIds = <String>{};
     if (user != null) {
       if (user.id.isNotEmpty) userIds.add(user.id);
       if (user.nomorInduk.isNotEmpty) userIds.add(user.nomorInduk);
     }
 
-    final aspirasiList = new List<AspirasiModel>.from({});
-    //     AspirasiModel.dummyList()
-    //         .where((item) => userIds.contains(item.pelaporId))
-    //         .toList()
-    //       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-    final laporanList = await LaporanFasilitasService().getAll();
-    final ownLaporan =
-        laporanList.where((item) => userIds.contains(item.pelapor_id)).toList()
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-    return _ProfileData(
+    final baseData = _ProfileData(
       roleLabel: _roleLabel,
       name: user?.name.isNotEmpty == true ? user!.name : 'Pengguna',
       nomorInduk: user?.nomorInduk ?? '-',
@@ -163,9 +176,54 @@ class _RoleProfileViewState extends State<RoleProfileView> {
           ? user!.programStudy
           : 'Dept. of Computer Science',
       initials: _initials(user?.name ?? _roleLabel),
-      ownAspirasi: aspirasiList,
-      ownLaporan: ownLaporan,
+      ownAspirasi: const [],
+      ownLaporan: const [],
     );
+
+    unawaited(_loadProfileHistory(baseData, userIds, generation));
+    return baseData;
+  }
+
+  Future<void> _loadProfileHistory(
+    _ProfileData baseData,
+    Set<String> userIds,
+    int generation,
+  ) async {
+    var aspirasiList = <AspirasiModel>[];
+    var ownLaporan = <LaporanFasilitasModel>[];
+
+    await Future.wait([
+      () async {
+        try {
+          final raw = await AspirasiService().fetchAllAspirasi();
+          aspirasiList =
+              raw
+                  .where(
+                    (item) =>
+                        item.pelaporId != null &&
+                        userIds.contains(item.pelaporId),
+                  )
+                  .toList()
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        } catch (_) {}
+      }(),
+      () async {
+        try {
+          final raw = await LaporanFasilitasService().getAll();
+          ownLaporan =
+              raw.where((item) => userIds.contains(item.pelapor_id)).toList()
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        } catch (_) {}
+      }(),
+    ]);
+
+    if (!mounted || generation != _loadGeneration) return;
+
+    setState(() {
+      _profileFuture = Future.value(
+        baseData.copyWith(ownAspirasi: aspirasiList, ownLaporan: ownLaporan),
+      );
+    });
   }
 
   String _initials(String value) {
@@ -205,6 +263,21 @@ class _ProfileData {
     return parts.isEmpty ? name : parts.first;
   }
 
+  _ProfileData copyWith({
+    List<AspirasiModel>? ownAspirasi,
+    List<LaporanFasilitasModel>? ownLaporan,
+  }) {
+    return _ProfileData(
+      roleLabel: roleLabel,
+      name: name,
+      nomorInduk: nomorInduk,
+      programStudy: programStudy,
+      initials: initials,
+      ownAspirasi: ownAspirasi ?? this.ownAspirasi,
+      ownLaporan: ownLaporan ?? this.ownLaporan,
+    );
+  }
+
   factory _ProfileData.empty(String roleLabel) {
     return _ProfileData(
       roleLabel: roleLabel,
@@ -218,80 +291,6 @@ class _ProfileData {
   }
 }
 
-class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({required this.data});
-
-  final _ProfileData data;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.surface,
-      padding: EdgeInsets.fromLTRB(
-        20,
-        MediaQuery.of(context).padding.top + 12,
-        20,
-        20,
-      ),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor: const Color(0xFF132536),
-            child: Stack(
-              alignment: Alignment.center,
-              children: const [
-                Icon(Icons.school_rounded, color: Color(0xFFFF944D), size: 26),
-                Positioned(
-                  right: 6,
-                  top: 10,
-                  child: Icon(Icons.circle, color: Color(0xFFFFB36D), size: 6),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Halo, ${data.firstName}',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    height: 1.1,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${data.roleLabel} JTK',
-                  style: const TextStyle(
-                    color: AppColors.body,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.notifications_outlined,
-              color: AppColors.primary,
-              size: 28,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _ProfileHero extends StatelessWidget {
   const _ProfileHero({required this.data});
 
@@ -300,9 +299,9 @@ class _ProfileHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 304,
+      height: 180,
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 34),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF00335F), Color(0xFF0F4D82)],
@@ -313,17 +312,17 @@ class _ProfileHero extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 110,
-            height: 110,
+            width: 72,
+            height: 72,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.white24, width: 5),
+              border: Border.all(color: Colors.white24, width: 3),
               color: const Color(0xFF2F363B),
             ),
             alignment: Alignment.center,
             child: Container(
-              width: 80,
-              height: 80,
+              width: 52,
+              height: 52,
               decoration: const BoxDecoration(
                 color: Color(0xFF6FA6A4),
                 shape: BoxShape.circle,
@@ -331,12 +330,12 @@ class _ProfileHero extends StatelessWidget {
               child: ClipOval(
                 child: CustomPaint(
                   painter: _AvatarPainter(),
-                  size: const Size(80, 80),
+                  size: const Size(52, 52),
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 18),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -348,18 +347,18 @@ class _ProfileHero extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                    height: 1.05,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    height: 1.1,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 _HeroLine(
                   icon: Icons.badge_outlined,
                   text:
                       'NIM: ${data.nomorInduk.isEmpty ? '-' : data.nomorInduk}',
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 6),
                 _HeroLine(
                   icon: Icons.account_balance_outlined,
                   text: data.programStudy,
@@ -524,8 +523,8 @@ class _HeroLine extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: const Color(0xFFD7E7F3), size: 21),
-        const SizedBox(width: 8),
+        Icon(icon, color: const Color(0xFFD7E7F3), size: 16),
+        const SizedBox(width: 6),
         Expanded(
           child: Text(
             text,
@@ -533,308 +532,13 @@ class _HeroLine extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
               color: Color(0xFFD7E7F3),
-              fontSize: 18,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
         ),
       ],
     );
-  }
-}
-
-class _ProfileTabs extends StatelessWidget {
-  const _ProfileTabs();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: const Color(0xFFF7F8FA),
-      padding: const EdgeInsets.fromLTRB(22, 0, 22, 0),
-      child: const TabBar(
-        labelColor: Color(0xFF005B84),
-        unselectedLabelColor: Color(0xFF444B55),
-        indicatorColor: Color(0xFF005B84),
-        indicatorWeight: 2.5,
-        indicatorSize: TabBarIndicatorSize.tab,
-        dividerColor: Color(0xFFE0E2E5),
-        labelStyle: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
-        unselectedLabelStyle: TextStyle(
-          fontSize: 17,
-          fontWeight: FontWeight.w500,
-        ),
-        tabs: [
-          Tab(text: 'Laporan Saya'),
-          Tab(text: 'Aspirasi Saya'),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileContent extends StatelessWidget {
-  const _ProfileContent({required this.children, required this.emptyText});
-
-  final List<Widget> children;
-  final String emptyText;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(22, 30, 22, 24),
-      children: [
-        if (children.isEmpty)
-          ProfileEmptyState(text: emptyText)
-        else
-          ...children,
-        const SizedBox(height: 10),
-        const ProfileSettingsCard(),
-        const SizedBox(height: 18),
-        const _SignOutTile(),
-      ],
-    );
-  }
-}
-
-class _LaporanHistoryCard extends StatelessWidget {
-  const _LaporanHistoryCard({required this.laporan});
-
-  final LaporanFasilitasModel laporan;
-
-  @override
-  Widget build(BuildContext context) {
-    return _HistoryCard(
-      icon: _iconForLaporan(laporan.judul),
-      title: laporan.judul,
-      description: laporan.deskripsi,
-      date: _formatDate(laporan.createdAt),
-      status: _StatusPresentation.fromLaporan(laporan.status),
-    );
-  }
-
-  IconData _iconForLaporan(String title) {
-    final lower = title.toLowerCase();
-    if (lower.contains('jaringan') || lower.contains('wifi')) {
-      return Icons.wifi_off_rounded;
-    }
-    if (lower.contains('kursi')) return Icons.chair_outlined;
-    return Icons.construction_rounded;
-  }
-}
-
-class _AspirasiHistoryCard extends StatelessWidget {
-  const _AspirasiHistoryCard({required this.aspirasi});
-
-  final AspirasiModel aspirasi;
-
-  @override
-  Widget build(BuildContext context) {
-    return _HistoryCard(
-      icon: Icons.chat_bubble_outline_rounded,
-      title: aspirasi.topik,
-      description: aspirasi.isiSaran,
-      date: _formatDate(aspirasi.createdAt),
-      status: _StatusPresentation.fromAspirasi(aspirasi.status),
-    );
-  }
-}
-
-class _HistoryCard extends StatelessWidget {
-  const _HistoryCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.date,
-    required this.status,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-  final String date;
-  final _StatusPresentation status;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 22),
-      padding: const EdgeInsets.fromLTRB(30, 30, 30, 28),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF2F3F5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, color: const Color(0xFF2F609F), size: 30),
-              ),
-              const SizedBox(width: 2),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(0xFF1D2024),
-                          fontSize: 21,
-                          fontWeight: FontWeight.w800,
-                          height: 1.12,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        description,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(0xFF535B66),
-                          fontSize: 17,
-                          fontWeight: FontWeight.w400,
-                          height: 1.35,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 22),
-          const Divider(height: 1, color: Color(0xFFECEDEF)),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              Text(
-                date,
-                style: const TextStyle(
-                  color: Color(0xFF535B66),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Spacer(),
-              _StatusChip(status: status),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
-
-  final _StatusPresentation status;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(
-        color: status.background,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(status.icon, color: status.foreground, size: 15),
-          const SizedBox(width: 6),
-          Text(
-            status.label,
-            style: TextStyle(
-              color: status.foreground,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _StatusPresentation {
-  const _StatusPresentation({
-    required this.label,
-    required this.icon,
-    required this.background,
-    required this.foreground,
-  });
-
-  final String label;
-  final IconData icon;
-  final Color background;
-  final Color foreground;
-
-  factory _StatusPresentation.fromLaporan(StatusLaporan status) {
-    switch (status) {
-      case StatusLaporan.resolved:
-        return const _StatusPresentation(
-          label: 'Selesai',
-          icon: Icons.check_circle_rounded,
-          background: Color(0xFFE2EEF1),
-          foreground: Color(0xFF005B84),
-        );
-      case StatusLaporan.in_progress:
-      case StatusLaporan.escalated_to_upt:
-      case StatusLaporan.waiting_disposal:
-        return const _StatusPresentation(
-          label: 'Diproses',
-          icon: Icons.more_horiz_rounded,
-          background: Color(0xFFE6F2FF),
-          foreground: Color(0xFF005B84),
-        );
-      case StatusLaporan.pending:
-      case StatusLaporan.cancelled:
-        return const _StatusPresentation(
-          label: 'Menunggu Verifikasi',
-          icon: Icons.schedule_rounded,
-          background: Color(0xFFE9EAEC),
-          foreground: Color(0xFF535B66),
-        );
-    }
-  }
-
-  factory _StatusPresentation.fromAspirasi(StatusAspirasi status) {
-    switch (status) {
-      case StatusAspirasi.responded:
-        return const _StatusPresentation(
-          label: 'Selesai',
-          icon: Icons.check_circle_rounded,
-          background: Color(0xFFE2EEF1),
-          foreground: Color(0xFF005B84),
-        );
-      case StatusAspirasi.inReview:
-        return const _StatusPresentation(
-          label: 'Diproses',
-          icon: Icons.more_horiz_rounded,
-          background: Color(0xFFE6F2FF),
-          foreground: Color(0xFF005B84),
-        );
-      case StatusAspirasi.open:
-        return const _StatusPresentation(
-          label: 'Menunggu Verifikasi',
-          icon: Icons.schedule_rounded,
-          background: Color(0xFFE9EAEC),
-          foreground: Color(0xFF535B66),
-        );
-    }
   }
 }
 
@@ -850,24 +554,19 @@ class _SignOutTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         onTap: () async {
           await AuthService().logout();
-          if (context.mounted) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const OnboardingView()),
-              (route) => false,
-            );
-          }
+          Get.offAll(() => const OnboardingView());
         },
         child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 30, vertical: 18),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              Icon(Icons.logout_rounded, color: Color(0xFFD21D1D), size: 22),
+              Icon(Icons.logout_rounded, color: Color(0xFFD21D1D), size: 18),
               SizedBox(width: 10),
               Text(
                 'Sign Out',
                 style: TextStyle(
                   color: Color(0xFFD21D1D),
-                  fontSize: 18,
+                  fontSize: 14,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -879,51 +578,523 @@ class _SignOutTile extends StatelessWidget {
   }
 }
 
-class _PinnedTabHeaderDelegate extends SliverPersistentHeaderDelegate {
-  _PinnedTabHeaderDelegate({required this.child});
+class _OwnHistoryCardButton extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final int count;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
 
-  final Widget child;
-
-  @override
-  double get minExtent => 70;
-
-  @override
-  double get maxExtent => 70;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return SizedBox(height: maxExtent, child: child);
-  }
+  const _OwnHistoryCardButton({
+    required this.title,
+    required this.subtitle,
+    required this.count,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
-  bool shouldRebuild(covariant _PinnedTabHeaderDelegate oldDelegate) {
-    return oldDelegate.child != child;
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(icon, color: color, size: 20),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '$count',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                          fontFamily: 'Poppins',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.title,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.body,
+                    fontFamily: 'Poppins',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
-String _formatDate(DateTime date) {
-  final now = DateTime.now();
-  final sameDay =
-      now.year == date.year && now.month == date.month && now.day == date.day;
-  if (sameDay) return 'Hari Ini';
+class MahasiswaOwnReportsView extends StatefulWidget {
+  final List<LaporanFasilitasModel> ownLaporan;
 
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'Mei',
-    'Jun',
-    'Jul',
-    'Agu',
-    'Sep',
-    'Okt',
-    'Nov',
-    'Des',
-  ];
-  return '${date.day} ${months[date.month - 1]} ${date.year}';
+  const MahasiswaOwnReportsView({super.key, required this.ownLaporan});
+
+  @override
+  State<MahasiswaOwnReportsView> createState() =>
+      _MahasiswaOwnReportsViewState();
+}
+
+class _MahasiswaOwnReportsViewState extends State<MahasiswaOwnReportsView> {
+  late List<LaporanFasilitasModel> _listLaporan;
+  String _currentFilter = 'Terbaru'; // 'Terbaru' or 'Selesai'
+
+  @override
+  void initState() {
+    super.initState();
+    _listLaporan = List.from(widget.ownLaporan);
+  }
+
+  List<LaporanFasilitasModel> get _filteredLaporan {
+    var list = List<LaporanFasilitasModel>.from(_listLaporan);
+    if (_currentFilter == 'Terbaru') {
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    } else if (_currentFilter == 'Selesai') {
+      list = list
+          .where((l) => l.status == StatusLaporan.resolved || l.sudahDicetak)
+          .toList();
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+    return list;
+  }
+
+  Widget _localSortChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : AppColors.surface,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: selected ? Colors.white : AppColors.title,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = _filteredLaporan;
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: CustomScrollView(
+        slivers: [
+          const AppSliverDetailAppBar(
+            title: 'Laporan Saya',
+            subtitle: 'Riwayat keluhan Anda',
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Row(
+                children: [
+                  _localSortChip(
+                    label: 'Terbaru',
+                    selected: _currentFilter == 'Terbaru',
+                    onTap: () {
+                      setState(() {
+                        _currentFilter = 'Terbaru';
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _localSortChip(
+                    label: 'Selesai',
+                    selected: _currentFilter == 'Selesai',
+                    onTap: () {
+                      setState(() {
+                        _currentFilter = 'Selesai';
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (filtered.isEmpty)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: LaporanFasilitasEmptyState(),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final laporan = filtered[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: LaporanFasilitasCard(
+                      laporan: laporan,
+                      currentUserId: laporan.pelapor_id,
+                      showVoteColumn: false,
+                      showActions: true,
+                      showVoteButtons: false,
+                      onTap: () async {
+                        final changed = await Get.to(
+                          () => DetailLaporanFasilitasView(
+                            laporanId: laporan.id,
+                            role: 'mahasiswa',
+                          ),
+                        );
+                        if (changed == true) {
+                          final fresh = await LaporanFasilitasService()
+                              .getAll();
+                          final user = AuthService().currentUser;
+                          if (user != null) {
+                            setState(() {
+                              _listLaporan = fresh
+                                  .where(
+                                    (item) =>
+                                        item.pelapor_id == user.id ||
+                                        item.pelapor_id == user.nomorInduk,
+                                  )
+                                  .toList();
+                            });
+                          }
+                        }
+                      },
+                      onEdit: () {
+                        final currentUser = AuthService().currentUser;
+                        if (currentUser == null) return;
+                        if (laporan.pelapor_id != currentUser.id &&
+                            laporan.pelapor_id != currentUser.nomorInduk) {
+                          Get.snackbar(
+                            'Gagal',
+                            'Anda hanya bisa mengubah laporan Anda sendiri',
+                          );
+                          return;
+                        }
+                        final laporCtrl = Get.put(LaporFasilitasController());
+                        laporCtrl.setupEditPage(laporan);
+                        Get.to(() => const TambahLaporanFasilitasView());
+                      },
+                      onDelete: () {
+                        final currentUser = AuthService().currentUser;
+                        if (currentUser == null) return;
+                        if (laporan.pelapor_id != currentUser.id &&
+                            laporan.pelapor_id != currentUser.nomorInduk) {
+                          Get.snackbar(
+                            'Gagal',
+                            'Anda hanya bisa menghapus laporan Anda sendiri',
+                          );
+                          return;
+                        }
+                        Get.defaultDialog(
+                          title: 'Hapus Laporan',
+                          middleText:
+                              'Apakah Anda yakin ingin menghapus laporan ini?',
+                          textConfirm: 'Hapus',
+                          textCancel: 'Batal',
+                          confirmTextColor: Colors.white,
+                          buttonColor: AppColors.danger,
+                          onConfirm: () async {
+                            try {
+                              await LaporanFasilitasService().delete(
+                                laporan.id,
+                              );
+                              Get.back();
+                              Get.snackbar(
+                                'Sukses',
+                                'Laporan berhasil dihapus',
+                              );
+                              setState(() {
+                                _listLaporan.removeWhere(
+                                  (item) => item.id == laporan.id,
+                                );
+                              });
+                            } catch (e) {
+                              Get.snackbar(
+                                'Gagal',
+                                'Gagal menghapus laporan: $e',
+                              );
+                            }
+                          },
+                        );
+                      },
+                      onUpvote: () {},
+                      onDownvote: () {},
+                    ),
+                  );
+                }, childCount: filtered.length),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class MahasiswaOwnAspirationsView extends StatefulWidget {
+  final List<AspirasiModel> ownAspirasi;
+
+  const MahasiswaOwnAspirationsView({super.key, required this.ownAspirasi});
+
+  @override
+  State<MahasiswaOwnAspirationsView> createState() =>
+      _MahasiswaOwnAspirationsViewState();
+}
+
+class _MahasiswaOwnAspirationsViewState
+    extends State<MahasiswaOwnAspirationsView> {
+  late List<AspirasiModel> _listAspirasi;
+  String _currentFilter = 'Terbaru'; // 'Terbaru' or 'Selesai'
+
+  @override
+  void initState() {
+    super.initState();
+    _listAspirasi = List.from(widget.ownAspirasi);
+  }
+
+  List<AspirasiModel> get _filteredAspirasi {
+    var list = List<AspirasiModel>.from(_listAspirasi);
+    if (_currentFilter == 'Terbaru') {
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    } else if (_currentFilter == 'Selesai') {
+      list = list.where((a) => a.status == StatusAspirasi.responded).toList();
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    }
+    return list;
+  }
+
+  Widget _localSortChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(999),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : AppColors.surface,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: selected ? Colors.white : AppColors.title,
+            fontFamily: 'Poppins',
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = _filteredAspirasi;
+
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: CustomScrollView(
+        slivers: [
+          const AppSliverDetailAppBar(
+            title: 'Aspirasi Saya',
+            subtitle: 'Riwayat saran Anda',
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              child: Row(
+                children: [
+                  _localSortChip(
+                    label: 'Terbaru',
+                    selected: _currentFilter == 'Terbaru',
+                    onTap: () {
+                      setState(() {
+                        _currentFilter = 'Terbaru';
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _localSortChip(
+                    label: 'Selesai',
+                    selected: _currentFilter == 'Selesai',
+                    onTap: () {
+                      setState(() {
+                        _currentFilter = 'Selesai';
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (filtered.isEmpty)
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: LaporanFasilitasEmptyState(
+                icon: Icons.campaign_outlined,
+                title: 'Belum ada aspirasi',
+                description: 'Aspirasi Anda akan muncul di bagian ini.',
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final aspirasi = filtered[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: AspirasiCard(
+                      aspirasi: aspirasi,
+                      isUpvoted: false,
+                      isDownvoted: false,
+                      showActions: true,
+                      showVoteButtons: false,
+                      onUpvote: () {},
+                      onDownvote: () {},
+                      onEdit: () {
+                        final currentUser = AuthService().currentUser;
+                        if (currentUser == null) return;
+                        if (aspirasi.pelaporId != currentUser.id &&
+                            aspirasi.pelaporId != currentUser.nomorInduk) {
+                          Get.snackbar(
+                            'Gagal',
+                            'Anda hanya bisa mengubah aspirasi Anda sendiri',
+                          );
+                          return;
+                        }
+                        Get.to(() => AspirasiEditView(aspirasi: aspirasi));
+                      },
+                      onDelete: () {
+                        final currentUser = AuthService().currentUser;
+                        if (currentUser == null) return;
+                        if (aspirasi.pelaporId != currentUser.id &&
+                            aspirasi.pelaporId != currentUser.nomorInduk) {
+                          Get.snackbar(
+                            'Gagal',
+                            'Anda hanya bisa menghapus aspirasi Anda sendiri',
+                          );
+                          return;
+                        }
+                        Get.defaultDialog(
+                          title: 'Hapus Aspirasi',
+                          middleText:
+                              'Apakah Anda yakin ingin menghapus aspirasi ini?',
+                          textConfirm: 'Hapus',
+                          textCancel: 'Batal',
+                          confirmTextColor: Colors.white,
+                          buttonColor: AppColors.danger,
+                          onConfirm: () async {
+                            try {
+                              await AspirasiService().deleteAspirasi(
+                                aspirasi.id,
+                              );
+                              Get.back();
+                              Get.snackbar(
+                                'Sukses',
+                                'Aspirasi berhasil dihapus',
+                              );
+                              setState(() {
+                                _listAspirasi.removeWhere(
+                                  (item) => item.id == aspirasi.id,
+                                );
+                              });
+                            } catch (e) {
+                              Get.snackbar(
+                                'Gagal',
+                                'Gagal menghapus aspirasi: $e',
+                              );
+                            }
+                          },
+                        );
+                      },
+                      onTap: () {
+                        Get.to(
+                          () => DetailAspirasiView(
+                            aspirasi: aspirasi,
+                            role: 'mahasiswa',
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }, childCount: filtered.length),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }

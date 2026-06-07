@@ -25,7 +25,6 @@ class HomeController extends GetxController {
   final RxInt selectedNavIndex = 0.obs;
   final RxInt activeKalenderIndex = 0.obs;
   final RxBool isLoading = false.obs;
-  final RxInt unreadNotifCount = 3.obs;
 
     final LaporanFasilitasService _laporanService = LaporanFasilitasService();
 
@@ -143,10 +142,6 @@ class HomeController extends GetxController {
 
   bool isLaporanDownvoted(LaporanFasilitasModel laporan) {
     return laporan.downvoter_ids.contains(_currentUserId);
-  }
-
-  void onNotificationTapped() {
-    unreadNotifCount.value = 0;
   }
 
   void onLihatSemuaKalender() {}

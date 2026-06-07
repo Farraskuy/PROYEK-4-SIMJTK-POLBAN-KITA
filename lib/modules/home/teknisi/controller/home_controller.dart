@@ -5,13 +5,12 @@
 // MODIFIKASI: Tugas Mendesak dari DB laporan_fasilitas, sort by vote_score
 // ============================================================
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/home_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_service.dart';
-
-enum HomeTeknisiNavTarget { tugas, riwayat, profile }
+import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/tanggapan_tugas_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 
 class HomeTeknisiController extends GetxController {
   // --------------------------------------------------------
@@ -29,22 +28,17 @@ class HomeTeknisiController extends GetxController {
   final RxList<LaporanFasilitasModel> tugasMendesak =
       <LaporanFasilitasModel>[].obs;
 
-  /// Index bottom nav aktif
-  final RxInt selectedNavIndex = 0.obs;
-
   /// Status loading
   final RxBool isLoading = false.obs;
 
   /// Status koneksi internet (offline-first sesuai PDF)
   final RxBool isOnline = true.obs;
 
-  /// Jumlah notifikasi belum dibaca
-  final RxInt unreadNotif = 2.obs;
-
   // --------------------------------------------------------
   // SERVICES
   // --------------------------------------------------------
   final LaporanFasilitasService _laporanService = LaporanFasilitasService();
+  final TanggapanTugasService _draftService = TanggapanTugasService();
 
   // --------------------------------------------------------
   // LIFECYCLE
@@ -64,31 +58,65 @@ class HomeTeknisiController extends GetxController {
     isLoading.value = true;
 
     try {
-      // Ambil semua laporan dengan role teknisi
-      // (status: pending | in_progress | escalated_to_upt)
-      final allLaporan = await _laporanService.getForRole('teknisi');
+      final session =
+          AuthService().currentUser ?? await AuthService().loadSavedSession();
+      if (session != null) {
+        currentTeknisi.value = TeknisiUserModel(
+          id: session.id,
+          name: session.name,
+          nimNip: session.nomorInduk,
+          email: session.email,
+          role: session.role,
+          spesialisasi: 'Teknisi JTK',
+          isActive: session.isActive,
+        );
+      }
+
+      final allLaporan = await _laporanService.getAll();
+      final drafts = await _draftService.getAllDrafts();
+      final activeLaporan = allLaporan
+          .where(
+            (laporan) =>
+                laporan.status != StatusLaporan.resolved &&
+                drafts[laporan.id]?['form_status'] != 'selesai',
+          )
+          .toList();
 
       // Urutkan berdasarkan vote_score tertinggi (Top Upvote) untuk Tugas Mendesak
-      final sorted = List<LaporanFasilitasModel>.from(allLaporan)
+      final sorted = List<LaporanFasilitasModel>.from(activeLaporan)
         ..sort((a, b) => b.vote_score.compareTo(a.vote_score));
 
       tugasMendesak.assignAll(sorted);
 
       // Hitung statistik dari data real
-      final selesai = allLaporan
-          .where((l) => l.status == StatusLaporan.resolved)
+      final aliases = {
+        session?.id.trim().toLowerCase(),
+        session?.nomorInduk.trim().toLowerCase(),
+      }..removeWhere((value) => value == null || value.isEmpty);
+      final milikTeknisi = allLaporan.where((laporan) {
+        final teknisiId = laporan.teknisi_id?.trim().toLowerCase();
+        return teknisiId != null && aliases.contains(teknisiId);
+      }).toList();
+      final selesai = milikTeknisi
+          .where(
+            (laporan) =>
+                laporan.status == StatusLaporan.resolved ||
+                drafts[laporan.id]?['form_status'] == 'selesai',
+          )
           .length;
-      final pending = allLaporan
-          .where((l) =>
-              l.status == StatusLaporan.pending ||
-              l.status == StatusLaporan.in_progress)
+      final pending = activeLaporan
+          .where(
+            (l) =>
+                l.status == StatusLaporan.pending ||
+                l.status == StatusLaporan.in_progress,
+          )
           .length;
 
       statistik.value = StatistikTugasModel(
-        totalTugas: allLaporan.length,
+        totalTugas: activeLaporan.length,
         tugasSelesai: selesai,
         tugasPending: pending,
-        tugasInProgress: allLaporan
+        tugasInProgress: activeLaporan
             .where((l) => l.status == StatusLaporan.in_progress)
             .length,
       );
@@ -109,36 +137,6 @@ class HomeTeknisiController extends GetxController {
 
   /// Pull-to-refresh
   Future<void> onRefresh() async => await _loadData();
-
-  /// Bottom nav tap
-  HomeTeknisiNavTarget? onNavTapped(int index) {
-    selectedNavIndex.value = index;
-    switch (index) {
-      case 1:
-        return HomeTeknisiNavTarget.tugas;
-      case 2:
-        return HomeTeknisiNavTarget.riwayat;
-      case 3:
-        return HomeTeknisiNavTarget.profile;
-      default:
-        return null;
-    }
-  }
-
-  /// Notifikasi bell
-  void onNotifikasiTapped() {
-    unreadNotif.value = 0;
-  }
-
-  /// Tap pada kartu tugas mendesak.
-  void onTugasTapped(LaporanFasilitasModel laporan) {
-    Get.snackbar(
-      laporan.judul,
-      '${laporan.lokasi} • ${laporan.vote_score} upvote',
-      snackPosition: SnackPosition.BOTTOM,
-      margin: const EdgeInsets.all(16),
-    );
-  }
 
   /// Tap hamburger menu (drawer)
   void onMenuTapped() {

@@ -13,7 +13,6 @@ import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/log_service.dart';
 import '../model/aspirasi_model.dart';
 import '../service/aspirasi_service.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 
 class AspirasiController extends GetxController
     with GetSingleTickerProviderStateMixin {
@@ -38,13 +37,6 @@ class AspirasiController extends GetxController
   /// Status loading
   final RxBool isLoading = false.obs;
 
-  /// Jumlah notifikasi belum dibaca
-  final RxInt unreadNotifCount = 3.obs;
-
-  void onNotificationTapped() {
-    unreadNotifCount.value = 0;
-  }
-
   /// Data user yang sedang login
   UserModel? get currentUser => AuthService().currentUser;
 
@@ -60,6 +52,8 @@ class AspirasiController extends GetxController
 
   /// Controller teks area aspirasi
   final isiSaranController = TextEditingController();
+  final adminSearchController = TextEditingController();
+  final RxString adminSearchQuery = ''.obs;
 
   /// Status submitting form
   final RxBool isSubmitting = false.obs;
@@ -96,15 +90,23 @@ class AspirasiController extends GetxController
     isiSaranController.addListener(() {
       if (isiSaranController.text.isNotEmpty) errorIsiSaran.value = '';
     });
+    adminSearchController.addListener(() {
+      adminSearchQuery.value = adminSearchController.text;
+      _applyFilter();
+    });
   }
 
   Future<void> _initCurrentUser() async {
     final user = await AuthService().loadSavedSession();
     if (user != null) {
       // Simpan ID user untuk kebutuhan cek validasi vote
-      currentUserId.value = user.id ?? user.nomorInduk ?? 'anonymous';
-      currentUserName.value = user.name ?? 'Mahasiswa';
-      currentUserProdi.value = user.programStudy ?? '-';
+      currentUserId.value = user.id.isNotEmpty
+          ? user.id
+          : (user.nomorInduk.isNotEmpty ? user.nomorInduk : 'anonymous');
+      currentUserName.value = user.name.isNotEmpty ? user.name : 'Mahasiswa';
+      currentUserProdi.value = user.programStudy.isNotEmpty
+          ? user.programStudy
+          : '-';
     }
   }
 
@@ -113,6 +115,7 @@ class AspirasiController extends GetxController
     tabController.removeListener(_onTabChanged);
     tabController.dispose();
     isiSaranController.dispose();
+    adminSearchController.dispose();
     super.onClose();
   }
 
@@ -144,40 +147,49 @@ class AspirasiController extends GetxController
         activeTab.value = TabAspirasi.terpopuler;
         break;
       case 2:
-        activeTab.value = TabAspirasi.diproses;
+        activeTab.value = TabAspirasi.selesai;
         break;
     }
     _applyFilter();
   }
 
   void _applyFilter() {
+    List<AspirasiModel> result;
     switch (activeTab.value) {
       case TabAspirasi.terbaru:
-        final sorted = List<AspirasiModel>.from(_allAspirasi)
+        result = List<AspirasiModel>.from(_allAspirasi)
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        displayedAspirasi.assignAll(sorted);
         break;
 
       case TabAspirasi.terpopuler:
-        final sorted = List<AspirasiModel>.from(_allAspirasi)
+        result = List<AspirasiModel>.from(_allAspirasi)
           ..sort((a, b) => b.upvoteCount.compareTo(a.upvoteCount));
-        displayedAspirasi.assignAll(sorted);
         break;
 
-      case TabAspirasi.diproses:
-        final filtered =
+      case TabAspirasi.selesai:
+        result =
             _allAspirasi
                 .where(
                   (a) =>
-                      a.status == StatusAspirasi.inReview ||
-                      a.status == StatusAspirasi.responded,
+                      a.status == StatusAspirasi.responded ||
+                      a.status == StatusAspirasi.inReview,
                 )
                 .toList()
               ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        displayedAspirasi.assignAll(filtered);
         break;
     }
+    final query = adminSearchQuery.value.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      result = result.where((aspirasi) {
+        return aspirasi.topik.toLowerCase().contains(query) ||
+            aspirasi.isiSaran.toLowerCase().contains(query) ||
+            (aspirasi.pelaporName ?? '').toLowerCase().contains(query);
+      }).toList();
+    }
+    displayedAspirasi.assignAll(result);
   }
+
+  void clearAdminSearch() => adminSearchController.clear();
 
   bool _validateForm() {
     if (isiSaranController.text.trim().length < minIsiSaranLength) {
@@ -311,12 +323,18 @@ class AspirasiController extends GetxController
     isSubmitting.value = false;
   }
 
-  void deleteAspirasi(String aspirasiId) {
-    _allAspirasi.removeWhere((item) => item.id == aspirasiId);
-    _applyFilter();
-    if (_editingAspirasi.value?.id == aspirasiId) {
-      _editingAspirasi.value = null;
-      _resetForm();
+  Future<void> deleteAspirasi(String aspirasiId) async {
+    try {
+      await _service.deleteAspirasi(aspirasiId);
+      _allAspirasi.removeWhere((item) => item.id == aspirasiId);
+      _applyFilter();
+      if (_editingAspirasi.value?.id == aspirasiId) {
+        _editingAspirasi.value = null;
+        _resetForm();
+      }
+      Get.snackbar('Sukses', 'Aspirasi berhasil dihapus');
+    } catch (e) {
+      Get.snackbar('Gagal', 'Gagal menghapus aspirasi: $e');
     }
   }
 
@@ -375,7 +393,11 @@ class AspirasiController extends GetxController
 
       // 2. Jika berhasil, perbarui state lokal UI
       _allAspirasi[idx] = updatedAspirasi;
-      _applyFilter();
+      final dispIdx = displayedAspirasi.indexWhere((a) => a.id == aspirasiId);
+      if (dispIdx != -1) {
+        displayedAspirasi[dispIdx] = updatedAspirasi;
+      }
+      displayedAspirasi.refresh();
     } catch (e) {
       Get.snackbar(
         'Gagal',
@@ -430,7 +452,11 @@ class AspirasiController extends GetxController
 
       // 2. Jika berhasil, perbarui state lokal UI
       _allAspirasi[idx] = updatedAspirasi;
-      _applyFilter();
+      final dispIdx = displayedAspirasi.indexWhere((a) => a.id == aspirasiId);
+      if (dispIdx != -1) {
+        displayedAspirasi[dispIdx] = updatedAspirasi;
+      }
+      displayedAspirasi.refresh();
     } catch (e) {
       Get.snackbar(
         'Gagal',
@@ -442,8 +468,39 @@ class AspirasiController extends GetxController
   }
 
   // ---- GETTERS HELPER ----
-  bool isUpvoted(AspirasiModel a) => a.upvoterIds.contains(currentUserId);
-  bool isDownvoted(AspirasiModel a) => a.downvoterIds.contains(currentUserId);
+  Future<void> submitTanggapan(String aspirasiId, String tanggapan) async {
+    final idx = _allAspirasi.indexWhere((a) => a.id == aspirasiId);
+    if (idx == -1) return;
+
+    final current = _allAspirasi[idx];
+    final updatedAspirasi = current.copyWith(
+      tanggapanJurusan: tanggapan,
+      status: StatusAspirasi.responded,
+    );
+
+    try {
+      await _service.updateAspirasi(updatedAspirasi);
+      _allAspirasi[idx] = updatedAspirasi;
+      _applyFilter();
+      Get.snackbar(
+        'Sukses',
+        'Tanggapan berhasil disimpan.',
+        backgroundColor: Colors.green.shade100,
+        colorText: Colors.green.shade900,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Gagal',
+        'Gagal menyimpan tanggapan: $e',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+    }
+  }
+
+  bool isUpvoted(AspirasiModel a) => a.upvoterIds.contains(currentUserId.value);
+  bool isDownvoted(AspirasiModel a) =>
+      a.downvoterIds.contains(currentUserId.value);
 
   /// Refresh data (pull-to-refresh)
   Future<void> onRefresh() async => await _loadAspirasi();

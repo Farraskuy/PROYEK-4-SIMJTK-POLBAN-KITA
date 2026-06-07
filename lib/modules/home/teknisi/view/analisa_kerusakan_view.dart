@@ -71,10 +71,15 @@ class AnalisaKerusakanView extends StatelessWidget {
                     children: [
                       _buildFilterChips(ctrl),
                       const SizedBox(height: 4),
-                      Obx(() => Text(
-                            '${ctrl.laporanBelumDianalisa.length} tugas baru, ${ctrl.filteredAnalisa.length} tanggapan terkirim',
-                            style: const TextStyle(color: Colors.grey, fontSize: 12),
-                          )),
+                      Obx(
+                        () => Text(
+                          '${ctrl.laporanBelumDianalisa.length} tugas baru, ${ctrl.filteredAnalisa.length} tanggapan terkirim',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
                       const SizedBox(height: 12),
                     ],
                   ),
@@ -84,28 +89,28 @@ class AnalisaKerusakanView extends StatelessWidget {
               // ── SEKSI 1: LIST TUGAS MENDESAK (BELUM DIRESPONS) ────────
               Obx(() {
                 final pendingTasks = ctrl.laporanBelumDianalisa;
-                if (pendingTasks.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+                if (pendingTasks.isEmpty)
+                  return const SliverToBoxAdapter(child: SizedBox.shrink());
 
                 return SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   sliver: SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        return _PendingTaskCard(
-                          task: pendingTasks[index],
-                          ctrl: ctrl,
-                        );
-                      },
-                      childCount: pendingTasks.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      return _PendingTaskCard(
+                        task: pendingTasks[index],
+                        ctrl: ctrl,
+                      );
+                    }, childCount: pendingTasks.length),
                   ),
                 );
               }),
 
               // ── SEKSI 2: RIWAYAT TANGGAPAN YANG SUDAH TERKIRIM ─────────
               Obx(() {
-                final isEmpty = ctrl.filteredAnalisa.isEmpty && ctrl.laporanBelumDianalisa.isEmpty;
-                
+                final isEmpty =
+                    ctrl.filteredAnalisa.isEmpty &&
+                    ctrl.laporanBelumDianalisa.isEmpty;
+
                 if (isEmpty) {
                   return SliverFillRemaining(child: _buildEmpty());
                 }
@@ -127,25 +132,13 @@ class AnalisaKerusakanView extends StatelessWidget {
           ),
         );
       }),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          ctrl.resetForm();
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const FormAnalisaView()),
-          );
-        },
-        backgroundColor: _primary,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Tambah Formulir',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-      ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(AnalisaKerusakanController ctrl, BuildContext context) {
+  PreferredSizeWidget _buildAppBar(
+    AnalisaKerusakanController ctrl,
+    BuildContext context,
+  ) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0,
@@ -167,7 +160,11 @@ class AnalisaKerusakanView extends StatelessWidget {
             children: [
               Text(
                 'Modul Teknisi',
-                style: TextStyle(color: Colors.black, fontSize: 13, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               Text(
                 'Tanggapan Tugas',
@@ -183,16 +180,37 @@ class AnalisaKerusakanView extends StatelessWidget {
   Widget _buildStatsRow(AnalisaKerusakanController ctrl) {
     return Obx(() {
       final total = ctrl.analisaList.length;
-      final berat = ctrl.analisaList.where((a) => a.tingkatKerusakan == TingkatKerusakan.berat || a.tingkatKerusakan == TingkatKerusakan.total).length;
+      final berat = ctrl.analisaList
+          .where(
+            (a) =>
+                a.tingkatKerusakan == TingkatKerusakan.berat ||
+                a.tingkatKerusakan == TingkatKerusakan.total,
+          )
+          .length;
       final pending = ctrl.laporanBelumDianalisa.length;
 
       return Row(
         children: [
-          _StatChip(label: 'Total Formulir', count: total, color: _primary, icon: Icons.description_outlined),
+          _StatChip(
+            label: 'Total Formulir',
+            count: total,
+            color: _primary,
+            icon: Icons.description_outlined,
+          ),
           const SizedBox(width: 10),
-          _StatChip(label: 'Kerusakan Berat', count: berat, color: Colors.red, icon: Icons.warning_amber_outlined),
+          _StatChip(
+            label: 'Kerusakan Berat',
+            count: berat,
+            color: Colors.red,
+            icon: Icons.warning_amber_outlined,
+          ),
           const SizedBox(width: 10),
-          _StatChip(label: 'Belum Dianalisa', count: pending, color: Colors.orange, icon: Icons.pending_outlined),
+          _StatChip(
+            label: 'Belum Dianalisa',
+            count: pending,
+            color: Colors.orange,
+            icon: Icons.pending_outlined,
+          ),
         ],
       );
     });
@@ -209,7 +227,11 @@ class AnalisaKerusakanView extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.assignment_late_outlined, color: Colors.orange, size: 18),
+            const Icon(
+              Icons.assignment_late_outlined,
+              color: Colors.orange,
+              size: 18,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -248,11 +270,16 @@ class AnalisaKerusakanView extends StatelessWidget {
                 onTap: () => ctrl.filterKategori.value = f['key']!,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: isActive ? _primary : Colors.white,
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: isActive ? _primary : Colors.grey.shade300),
+                    border: Border.all(
+                      color: isActive ? _primary : Colors.grey.shade300,
+                    ),
                   ),
                   child: Text(
                     f['label']!,
@@ -278,7 +305,10 @@ class AnalisaKerusakanView extends StatelessWidget {
         children: [
           Icon(Icons.description_outlined, size: 64, color: Colors.grey[300]),
           const SizedBox(height: 12),
-          Text('Belum ada tugas atau tanggapan', style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+          Text(
+            'Belum ada tugas atau tanggapan',
+            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+          ),
         ],
       ),
     );
@@ -374,7 +404,9 @@ class _PendingTaskCard extends StatelessWidget {
         ctrl.setLaporan(task);
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const FormAnalisaView()),
+          MaterialPageRoute(
+            builder: (context) => FormAnalisaView(laporan: task),
+          ),
         );
       },
       child: Container(
@@ -412,7 +444,7 @@ class _PendingTaskCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 14),
-            
+
             // Konten Kanan
             Expanded(
               child: Column(
@@ -430,7 +462,7 @@ class _PendingTaskCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  
+
                   // Lokasi
                   Row(
                     children: [
@@ -439,14 +471,17 @@ class _PendingTaskCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           task.lokasi,
-                          style: const TextStyle(color: _textGrey, fontSize: 12),
+                          style: const TextStyle(
+                            color: _textGrey,
+                            fontSize: 12,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  
+
                   // Baris Bawah: Tanggal & Badge
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -455,12 +490,12 @@ class _PendingTaskCard extends StatelessWidget {
                       Text(
                         _formatDate(task.createdAt),
                         style: const TextStyle(
-                          color: _textGrey, 
-                          fontSize: 12, 
+                          color: _textGrey,
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      
+
                       // Badge Status & Upvote (Kanan Bawah)
                       Row(
                         children: [
@@ -484,9 +519,12 @@ class _PendingTaskCard extends StatelessWidget {
   String _formatDate(dynamic date) {
     if (date == null) return '-';
     DateTime dt;
-    if (date is DateTime) dt = date;
-    else dt = DateTime.tryParse(date.toString()) ?? DateTime.now();
-    
+    if (date is DateTime) {
+      dt = date;
+    } else {
+      dt = DateTime.tryParse(date.toString()) ?? DateTime.now();
+    }
+
     return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
   }
 
@@ -513,7 +551,10 @@ class _PendingTaskCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(6)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(6),
+      ),
       child: Text(
         text,
         style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.bold),
@@ -529,18 +570,27 @@ class _PendingTaskCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(6)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(6),
+      ),
       child: Row(
         children: [
           Icon(
-            isPositive ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+            isPositive
+                ? Icons.arrow_upward_rounded
+                : Icons.arrow_downward_rounded,
             size: 12,
             color: fg,
           ),
           const SizedBox(width: 4),
           Text(
             '${votes.abs()}',
-            style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: fg,
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),
@@ -562,8 +612,9 @@ class _AnalisaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tingkatColor = _tingkatColor(analisa.tingkatKerusakan);
-    final isCritical = analisa.tingkatKerusakan == TingkatKerusakan.total ||
-                       analisa.tingkatKerusakan == TingkatKerusakan.berat;
+    final isCritical =
+        analisa.tingkatKerusakan == TingkatKerusakan.total ||
+        analisa.tingkatKerusakan == TingkatKerusakan.berat;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -571,7 +622,7 @@ class _AnalisaCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isCritical ? Colors.red.withOpacity(0.4) : _borderCol, 
+          color: isCritical ? Colors.red.withOpacity(0.4) : _borderCol,
           width: isCritical ? 1.5 : 1.2,
         ),
         boxShadow: [
@@ -599,7 +650,11 @@ class _AnalisaCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Center(
-                    child: Icon(Icons.build_circle_outlined, color: Colors.grey, size: 24),
+                    child: Icon(
+                      Icons.build_circle_outlined,
+                      color: Colors.grey,
+                      size: 24,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -609,17 +664,28 @@ class _AnalisaCard extends StatelessWidget {
                     children: [
                       Text(
                         analisa.namaAlat,
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: _textDark),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: _textDark,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Icons.qr_code, size: 12, color: Colors.grey.shade500),
+                          Icon(
+                            Icons.qr_code,
+                            size: 12,
+                            color: Colors.grey.shade500,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               '${analisa.kodeAlat} • ${analisa.noInventaris}',
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 11),
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 11,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -630,20 +696,40 @@ class _AnalisaCard extends StatelessWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: tingkatColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: tingkatColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
                             child: Text(
                               analisa.tingkatKerusakan.label,
-                              style: TextStyle(color: tingkatColor, fontSize: 10, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                color: tingkatColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(6)),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
                             child: Text(
                               analisa.kategoriKerusakan.label,
-                              style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -654,7 +740,7 @@ class _AnalisaCard extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // PEMBATAS
           Divider(height: 1, color: Colors.grey.shade200),
 
@@ -666,9 +752,12 @@ class _AnalisaCard extends StatelessWidget {
               children: [
                 _buildSectionInfo('TANGGAPAN MASALAH', analisa.analisaMasalah),
                 const SizedBox(height: 12),
-                _buildSectionInfo('REKOMENDASI PERBAIKAN', analisa.rekomendasiPerbaikan),
+                _buildSectionInfo(
+                  'REKOMENDASI PERBAIKAN',
+                  analisa.rekomendasiPerbaikan,
+                ),
                 const SizedBox(height: 16),
-                
+
                 // BARIS BAWAH: Meta Info & Sync
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -679,7 +768,10 @@ class _AnalisaCard extends StatelessWidget {
                         const SizedBox(width: 10),
                         Text(
                           _fmtDate(analisa.createdAt),
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 11,
+                          ),
                         ),
                       ],
                     ),
@@ -708,12 +800,21 @@ class _AnalisaCard extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.5),
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+            letterSpacing: 0.5,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           content,
-          style: TextStyle(color: Colors.grey.shade700, fontSize: 12, height: 1.4),
+          style: TextStyle(
+            color: Colors.grey.shade700,
+            fontSize: 12,
+            height: 1.4,
+          ),
         ),
       ],
     );
@@ -721,20 +822,29 @@ class _AnalisaCard extends StatelessWidget {
 
   Color _tingkatColor(TingkatKerusakan t) {
     switch (t) {
-      case TingkatKerusakan.ringan: return Colors.green;
-      case TingkatKerusakan.sedang: return Colors.orange;
-      case TingkatKerusakan.berat: return Colors.red;
-      case TingkatKerusakan.total: return Colors.red.shade900;
+      case TingkatKerusakan.ringan:
+        return Colors.green;
+      case TingkatKerusakan.sedang:
+        return Colors.orange;
+      case TingkatKerusakan.berat:
+        return Colors.red;
+      case TingkatKerusakan.total:
+        return Colors.red.shade900;
     }
   }
 
   Color _kategoriColor(KategoriKerusakan k) {
     switch (k) {
-      case KategoriKerusakan.hardware: return Colors.blue;
-      case KategoriKerusakan.software: return Colors.purple;
-      case KategoriKerusakan.jaringan: return Colors.teal;
-      case KategoriKerusakan.instalasi: return Colors.orange;
-      case KategoriKerusakan.lainnya: return Colors.grey;
+      case KategoriKerusakan.hardware:
+        return Colors.blue;
+      case KategoriKerusakan.software:
+        return Colors.purple;
+      case KategoriKerusakan.jaringan:
+        return Colors.teal;
+      case KategoriKerusakan.instalasi:
+        return Colors.orange;
+      case KategoriKerusakan.lainnya:
+        return Colors.grey;
     }
   }
 

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:proyek_4_poki_polban_kita/modules/home/teknisi/view/form_analisa_view.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_home_app_bar.dart';
+import 'package:proyek_4_poki_polban_kita/shared/widgets/app_report_image.dart';
 import '../controller/detail_laporan_fasilitas_controller.dart';
 import '../model/laporan_fasilitas_model.dart';
 
@@ -21,9 +25,6 @@ class DetailLaporanFasilitasView extends StatefulWidget {
 class _DetailLaporanFasilitasViewState
     extends State<DetailLaporanFasilitasView> {
   final _controller = DetailLaporanFasilitasController();
-  final _catatanController = TextEditingController();
-  final _kebutuhanTuController = TextEditingController();
-  bool _ajukanKeTu = false;
 
   bool get _isPetugas => widget.role == 'teknisi' || widget.role == 'petugas';
   bool get _isTu => widget.role == 'tu';
@@ -39,20 +40,12 @@ class _DetailLaporanFasilitasViewState
 
   void _onControllerChanged() {
     if (!mounted) return;
-    final laporan = _controller.laporan;
-    if (laporan != null && _catatanController.text.isEmpty) {
-      _catatanController.text = laporan.catatanPetugas ?? '';
-      _kebutuhanTuController.text = laporan.kebutuhanTu ?? '';
-      _ajukanKeTu = laporan.diajukanKeTu;
-    }
     setState(() {});
   }
 
   @override
   void dispose() {
     _controller.removeListener(_onControllerChanged);
-    _catatanController.dispose();
-    _kebutuhanTuController.dispose();
     super.dispose();
   }
 
@@ -82,44 +75,10 @@ class _DetailLaporanFasilitasViewState
       body: CustomScrollView(
         slivers: [
           // ── Hero + AppBar ──────────────────────────────────────────
-          SliverAppBar(
-            expandedHeight: 200,
-            pinned: true,
-            backgroundColor: _primaryBlue,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  laporan.foto_urls.isNotEmpty
-                      ? Image.network(
-                          laporan.foto_urls.first,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => _heroDark(),
-                        )
-                      : _heroDark(),
-                  // gradient gelap di bawah supaya badge terbaca
-                  Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Color(0xAA000000)],
-                      ),
-                    ),
-                  ),
-                  // Badge status pojok kanan atas
-                  Positioned(
-                    top: 16,
-                    right: 12,
-                    child: _buildStatusBadge(laporan.status.label),
-                  ),
-                ],
-              ),
-            ),
+          AppSliverDetailAppBar(
+            title: 'Detail Laporan',
+            subtitle: 'Portal Petugas JTK',
+            onBack: () => Navigator.pop(context),
           ),
 
           SliverToBoxAdapter(
@@ -131,6 +90,29 @@ class _DetailLaporanFasilitasViewState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Row(
+                        children: [
+                          _buildStatusBadge(laporan.status.label),
+                          const Spacer(),
+                          const Icon(
+                            Icons.engineering_outlined,
+                            color: AppColors.primary,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: AppReportImage(
+                          source: laporan.foto_urls.isEmpty
+                              ? null
+                              : laporan.foto_urls.first,
+                          height: 190,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
                       // Lokasi sebagai sub-label kecil
                       Text(
                         laporan.lokasi.toUpperCase(),
@@ -177,9 +159,7 @@ class _DetailLaporanFasilitasViewState
                           Expanded(
                             child: _metaItem(
                               label: 'TANGGAL LAPORAN',
-                              value: laporan.createdAt != null
-                                  ? _formatDate(laporan.createdAt!)
-                                  : '-',
+                              value: _formatDate(laporan.createdAt),
                             ),
                           ),
                         ],
@@ -228,6 +208,9 @@ class _DetailLaporanFasilitasViewState
                     ),
                   ),
 
+                if (_controller.tanggapan != null)
+                  _buildTanggapanDetail(_controller.tanggapan!),
+
                 // ── Kebutuhan TU ──
                 if (laporan.kebutuhanTu?.isNotEmpty == true)
                   _card(
@@ -264,17 +247,11 @@ class _DetailLaporanFasilitasViewState
                               padding: const EdgeInsets.only(right: 8),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  laporan.foto_urls[idx],
+                                child: AppReportImage(
+                                  source: laporan.foto_urls[idx],
                                   width: 100,
+                                  height: 100,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Container(
-                                    width: 100,
-                                    color: Colors.grey.shade200,
-                                    child: const Icon(
-                                      Icons.image_not_supported_outlined,
-                                    ),
-                                  ),
                                 ),
                               ),
                             ),
@@ -446,6 +423,102 @@ class _DetailLaporanFasilitasViewState
     ),
   );
 
+  Widget _buildTanggapanDetail(Map<String, dynamic> data) {
+    final photos = (data['foto_analisa_urls'] as List?)
+            ?.map((item) => item.toString())
+            .where((item) => item.isNotEmpty)
+            .toList() ??
+        const <String>[];
+
+    return _card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.engineering_outlined,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 8),
+              _sectionLabel('Detail Tanggapan Petugas'),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _detailValue('Petugas', data['teknisi_name']),
+          _detailValue('Kode Petugas', data['teknisi_id']),
+          _detailValue('Kode Alat', data['kode_alat']),
+          _detailValue('No. Inventaris', data['no_inventaris']),
+          _detailValue('Tingkat Kerusakan', data['tingkat_kerusakan']),
+          _detailValue('Diagnosis / Tanggapan', data['analisa_masalah']),
+          _detailValue(
+            'Tindakan Perbaikan',
+            data['rekomendasi_perbaikan'],
+          ),
+          if (photos.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            const Text(
+              'Foto Bukti Perbaikan',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: AppColors.title,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              height: 110,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: photos.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (_, index) => ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: AppReportImage(
+                    source: photos[index],
+                    width: 110,
+                    height: 110,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _detailValue(String label, Object? rawValue) {
+    final value = rawValue?.toString().trim() ?? '';
+    if (value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: AppColors.muted,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            value.replaceAll('_', ' '),
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.title,
+              height: 1.45,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── Timeline ──────────────────────────────────────────────────────
   Widget _buildTimeline(LaporanFasilitasModel laporan) {
     final statusLabel = laporan.status.label.toLowerCase();
@@ -453,9 +526,7 @@ class _DetailLaporanFasilitasViewState
       _TlStep(
         title: 'Laporan Dibuat',
         desc: 'Laporan berhasil diterima oleh sistem.',
-        time: laporan.createdAt != null
-            ? _formatDatetime(laporan.createdAt!)
-            : '',
+        time: _formatDatetime(laporan.createdAt),
         state: _TlState.done,
       ),
       _TlStep(
@@ -601,102 +672,23 @@ class _DetailLaporanFasilitasViewState
   // ── Form Petugas ──────────────────────────────────────────────────
   Widget _buildPetugasForm(LaporanFasilitasModel laporan) {
     return _card(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Tanggapan Petugas',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1A1A1A),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _catatanController,
-            minLines: 2,
-            maxLines: 4,
-            style: const TextStyle(fontSize: 13),
-            decoration: InputDecoration(
-              labelText: 'Catatan penanganan',
-              labelStyle: const TextStyle(fontSize: 13),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+      child: SizedBox(
+        width: double.infinity,
+        child: FilledButton.icon(
+          onPressed: () async {
+            final changed = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => FormAnalisaView(laporan: laporan),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
-            ),
-          ),
-          CheckboxListTile(
-            contentPadding: EdgeInsets.zero,
-            value: _ajukanKeTu,
-            activeColor: _primaryBlue,
-            onChanged: (v) => setState(() => _ajukanKeTu = v ?? false),
-            title: const Text(
-              'Ajukan laporan ini ke TU untuk dicetak',
-              style: TextStyle(fontSize: 13),
-            ),
-          ),
-          if (_ajukanKeTu) ...[
-            TextField(
-              controller: _kebutuhanTuController,
-              minLines: 2,
-              maxLines: 3,
-              style: const TextStyle(fontSize: 13),
-              decoration: InputDecoration(
-                labelText: 'Keterangan untuk TU',
-                labelStyle: const TextStyle(fontSize: 13),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 10,
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-          const SizedBox(height: 4),
-          SizedBox(
-            width: double.infinity,
-            height: 46,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _primaryBlue,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
-              onPressed: _controller.isSubmitting
-                  ? null
-                  : () async {
-                      final ok = await _controller.tanggapiPetugas(
-                        catatan: _catatanController.text,
-                        ajukanKeTu: _ajukanKeTu,
-                        kebutuhanTu: _kebutuhanTuController.text,
-                      );
-                      if (ok && mounted) {
-                        Get.snackbar('Sukses', 'Tanggapan petugas tersimpan');
-                        Navigator.pop(context, true);
-                      }
-                    },
-              icon: const Icon(Icons.save_rounded, size: 18),
-              label: Text(
-                _ajukanKeTu ? 'Simpan & Ajukan ke TU' : 'Simpan Tanggapan',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
+            );
+            if (changed == true) {
+              await _controller.fetchLaporan(laporan.id);
+            }
+          },
+          icon: const Icon(Icons.edit_note_rounded),
+          label: const Text('Buka Formulir Tanggapan'),
+        ),
       ),
     );
   }
