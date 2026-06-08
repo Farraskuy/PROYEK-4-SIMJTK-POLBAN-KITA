@@ -50,15 +50,12 @@ class AdminDashboardView extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Obx(
-                        () => Text(
-                          controller.user?.name ?? 'Admin',
-                          style: const TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.title,
-                          ),
+                      Text(
+                        controller.adminName.value,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.title,
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -125,8 +122,7 @@ class _SummaryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => GridView.count(
+    return GridView.count(
         crossAxisCount: 2,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -159,8 +155,7 @@ class _SummaryGrid extends StatelessWidget {
             color: AppColors.secondary,
           ),
         ],
-      ),
-    );
+      );
   }
 }
 

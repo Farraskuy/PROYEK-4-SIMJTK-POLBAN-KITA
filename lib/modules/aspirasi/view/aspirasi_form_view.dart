@@ -93,7 +93,7 @@ class _AspirasiFormScaffold extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppSimpleAppBar(
         title: title,
-        subtitle: 'Mahasiswa JTK',
+        subtitle: 'Mahasiswa',
         showBack: true,
       ),
       body: GestureDetector(

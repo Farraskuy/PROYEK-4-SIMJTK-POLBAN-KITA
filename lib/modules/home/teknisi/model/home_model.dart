@@ -1,11 +1,3 @@
-// ============================================================
-// FILE: modules/home/teknisi/model/home_teknisi_model.dart
-// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
-// Role: Staff / Teknisi JTK
-// Sesuai entitas Laporan_Fasilitas & Tindakan_Fasilitas di PDF
-// ============================================================
-
-// --------------- TEKNISI USER MODEL ---------------
 class TeknisiUserModel {
   final String id;
   final String name;

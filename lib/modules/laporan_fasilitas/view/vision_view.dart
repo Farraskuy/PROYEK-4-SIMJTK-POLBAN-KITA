@@ -26,10 +26,6 @@ class _VisionViewState extends State<VisionView>
   late Animation<double> _shutterAnimation;
   bool _showShutter = false;
 
-  // Pulse animation for AI Active indicator
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-
   @override
   void initState() {
     super.initState();
@@ -50,14 +46,6 @@ class _VisionViewState extends State<VisionView>
       parent: _shutterController,
       curve: Curves.easeOut,
     );
-
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
   }
 
   @override
@@ -66,7 +54,6 @@ class _VisionViewState extends State<VisionView>
       _visionController.dispose();
     }
     _shutterController.dispose();
-    _pulseController.dispose();
     super.dispose();
   }
 
@@ -219,10 +206,6 @@ class _VisionViewState extends State<VisionView>
             // 2. HUD / Focus Grid Lines
             _buildFocusHUD(),
 
-            // 3. AI Bounding Box Overlay
-            if (_visionController.isOverlayVisible)
-              ..._buildAIOverlays(constraints),
-
             // 4. Shutter Effect
             if (_showShutter)
               Positioned.fill(
@@ -231,9 +214,6 @@ class _VisionViewState extends State<VisionView>
                   child: Container(color: Colors.white),
                 ),
               ),
-
-            // 5. Ambient Vignette Overlay (Top & Bottom gradients)
-            _buildAmbientGradients(),
 
             // 6. Custom Modern App Bar (Floating style)
             Positioned(
@@ -346,69 +326,6 @@ class _VisionViewState extends State<VisionView>
     );
   }
 
-  List<Widget> _buildAIOverlays(BoxConstraints constraints) {
-    return _visionController.currentDetections.map((detection) {
-      final left = detection.box.left * constraints.maxWidth;
-      final top = detection.box.top * constraints.maxHeight;
-      final width = detection.box.width * constraints.maxWidth;
-      final height = detection.box.height * constraints.maxHeight;
-
-      return Positioned(
-        left: left,
-        top: top,
-        width: width,
-        height: height,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: AppColors.warning, width: 2),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.warning.withOpacity(0.2),
-                blurRadius: 8,
-                spreadRadius: 1,
-              ),
-            ],
-          ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Positioned(
-                top: -24,
-                left: -2,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: AppColors.warning,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(4),
-                      topRight: Radius.circular(4),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.psychology_outlined, color: Colors.white, size: 12),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${detection.label} (${(detection.score * 100).toStringAsFixed(0)}%)',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }).toList();
-  }
-
   Widget _buildAmbientGradients() {
     return const IgnorePointer(
       child: Stack(
@@ -470,66 +387,12 @@ class _VisionViewState extends State<VisionView>
               backgroundColor: Colors.white.withOpacity(0.07),
             ),
             onPressed: () => Navigator.pop(context),
-          ),
-
-          // Title & Status
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Pulse AI Indicator
-              AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.warning,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.warning.withOpacity(_pulseAnimation.value),
-                          blurRadius: 6,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                "SMART VISION ACTIVE",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.2,
-                ),
-              ),
-            ],
-          ),
+          ), 
 
           // Utility toggles
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Overlay Toggle (Hide/Show Bounding Boxes)
-              IconButton(
-                icon: Icon(
-                  _visionController.isOverlayVisible
-                      ? Icons.remove_red_eye_outlined
-                      : Icons.visibility_off_outlined,
-                  color: Colors.white,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: _visionController.isOverlayVisible
-                      ? AppColors.primaryLight.withOpacity(0.3)
-                      : Colors.transparent,
-                ),
-                onPressed: _visionController.toggleOverlay,
-                tooltip: 'Toggle AI Vision Overlay',
-              ),
               // Flashlight toggle
               IconButton(
                 icon: Icon(
@@ -555,28 +418,6 @@ class _VisionViewState extends State<VisionView>
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Helper hint bubble
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.6),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white12, width: 0.5),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.info_outline, color: Colors.white70, size: 14),
-              SizedBox(width: 6),
-              Text(
-                'Kamera mendeteksi kerusakan secara otomatis',
-                style: TextStyle(color: Colors.white70, fontSize: 11),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-
         // Shutter & Utility layout
         Row(
           mainAxisAlignment: MainAxisAlignment.center,

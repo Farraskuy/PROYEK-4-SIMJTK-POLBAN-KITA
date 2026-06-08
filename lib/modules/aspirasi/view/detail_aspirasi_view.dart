@@ -135,7 +135,7 @@ class _DetailAspirasiViewState extends State<DetailAspirasiView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _currentAspirasi.pelaporName ?? 'Mahasiswa JTK',
+                              _currentAspirasi.pelaporName,
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,

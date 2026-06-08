@@ -61,7 +61,7 @@ class _AspirasiListPage extends StatelessWidget {
         Obx(
           () => AppHomeAppBar(
             title: 'Halo, ${ctrl.currentUserName.value}',
-            subtitle: 'Mahasiswa JTK',
+            subtitle: 'Mahasiswa',
             avatarIcon: Icons.person_rounded,
             avatarText: ctrl.currentUserName.value.isEmpty
                 ? 'M'

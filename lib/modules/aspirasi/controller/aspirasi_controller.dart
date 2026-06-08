@@ -1,11 +1,3 @@
-// ============================================================
-// FILE: modules/aspirasi/controller/aspirasi_controller.dart
-// Kelompok A7 â€“ SIMJTK (Sistem Informasi Mahasiswa JTK)
-// ============================================================
-//
-// Dependency: get: ^4.6.6
-// ============================================================
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proyek_4_poki_polban_kita/modules/user/model/user_model.dart';

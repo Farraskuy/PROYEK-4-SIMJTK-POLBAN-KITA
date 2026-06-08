@@ -31,7 +31,7 @@ class HomeView extends StatelessWidget {
             slivers: [
               AppHomeAppBar(
                 title: 'Halo, ${controller.user?.name ?? 'Mahasiswa'}',
-                subtitle: 'Mahasiswa JTK',
+                subtitle: 'Mahasiswa',
                 avatarIcon: Icons.person_rounded,
                 avatarText: (controller.user?.name ?? 'Mahasiswa').isEmpty
                     ? 'M'

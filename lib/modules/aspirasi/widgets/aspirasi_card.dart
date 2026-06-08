@@ -102,7 +102,7 @@ class AspirasiCard extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      aspirasi.pelaporName ?? 'Mahasiswa JTK',
+                                      aspirasi.pelaporName,
                                       style: const TextStyle(
                                         fontSize: 13,
                                         fontWeight: FontWeight.bold,

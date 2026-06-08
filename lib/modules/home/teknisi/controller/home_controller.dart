@@ -1,10 +1,3 @@
-// ============================================================
-// FILE: modules/home/teknisi/controller/home_teknisi_controller.dart
-// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
-// Sesuai UC-07: Mengelola Tindakan Teknisi
-// MODIFIKASI: Tugas Mendesak dari DB laporan_fasilitas, sort by vote_score
-// ============================================================
-
 import 'package:get/get.dart';
 import '../model/home_model.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/model/laporan_fasilitas_model.dart';
@@ -70,7 +63,7 @@ class HomeTeknisiController extends GetxController {
           nimNip: session.nomorInduk,
           email: session.email,
           role: session.role,
-          spesialisasi: 'Teknisi JTK',
+          spesialisasi: 'Teknisi',
           isActive: session.isActive,
         );
       }

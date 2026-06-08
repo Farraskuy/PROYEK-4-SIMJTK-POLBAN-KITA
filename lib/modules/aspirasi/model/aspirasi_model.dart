@@ -1,10 +1,3 @@
-// ============================================================
-// FILE: modules/aspirasi/model/aspirasi_model.dart
-// Kelompok A7 – SIMJTK (Sistem Informasi Mahasiswa JTK)
-// Sesuai entitas Saran_Masukan dari dokumen pengajuan topik
-// ============================================================
-
-// --------------- ENUM STATUS ---------------
 enum StatusAspirasi { open, inReview, responded }
 
 extension StatusAspirasiExt on StatusAspirasi {
@@ -73,7 +66,7 @@ class AspirasiModel {
   final String? pelaporId;
 
   /// Nama pelapor — di-join dari User untuk tampilan
-  final String? pelaporName;
+  final String pelaporName;
 
   /// Program studi pelapor — untuk tampilan di card
   final String? pelaporProdi;
@@ -110,7 +103,7 @@ class AspirasiModel {
     required this.topik,
     required this.isiSaran,
     this.pelaporId,
-    this.pelaporName,
+    required this.pelaporName,
     this.pelaporProdi,
     required this.upvoteCount,
     this.downvoteCount = 0,
@@ -226,89 +219,6 @@ class AspirasiModel {
       'createdAt': createdAt.toIso8601String(),
     };
   }
-
-  // // ---- DUMMY DATA ----
-  // static List<AspirasiModel> dummyList() => [
-  //       AspirasiModel(
-  //         id: 'asp-001',
-  //         topik: 'Penambahan Fasilitas Air Minum di Gedung Baru',
-  //         isiSaran:
-  //             'Mohon dipertimbangkan untuk menambahkan dispenser air minum di setiap lantai gedung perkuliahan baru. Saat ini mahasiswa kesulitan mencari air minum saat pergantian jam kuliah, terutama di lantai atas.',
-  //         pelaporId: 'usr-010',
-  //         pelaporName: 'Ahmad Hidayat',
-  //         pelaporProdi: 'D4 Teknik Informatika',
-  //         upvoteCount: 128,
-  //         downvoteCount: 3,
-  //         upvoterIds: [],
-  //         downvoterIds: [],
-  //         tanggapanJurusan:
-  //             'Terima kasih atas masukannya. Pengadaan dispenser air minum untuk gedung baru sedang dalam proses tender dan ditargetkan akan tersedia di setiap lantai pada awal semester ganjil mendatang.',
-  //         status: StatusAspirasi.responded,
-  //         kategori: KategoriAspirasi.fasilitas,
-  //         createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-  //       ),
-  //       AspirasiModel(
-  //         id: 'asp-002',
-  //         topik: 'AC di Ruang Kelas 302 Rusak',
-  //         isiSaran:
-  //             'AC di ruang 302 sudah tidak berfungsi selama 2 minggu. Suasana ruangan sangat panas dan mengganggu konsentrasi belajar mahasiswa. Mohon segera diperbaiki.',
-  //         pelaporId: 'usr-002',
-  //         pelaporName: 'Rina Sari',
-  //         pelaporProdi: 'D3 Teknik Informatika',
-  //         upvoteCount: 89,
-  //         downvoteCount: 1,
-  //         upvoterIds: [],
-  //         downvoterIds: [],
-  //         status: StatusAspirasi.inReview,
-  //         kategori: KategoriAspirasi.fasilitas,
-  //         createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-  //       ),
-  //       AspirasiModel(
-  //         id: 'asp-003',
-  //         topik: 'Jadwal Praktikum Jaringan Komputer Bentrok',
-  //         isiSaran:
-  //             'Terdapat bentrok jadwal antara praktikum Jaringan Komputer dan mata kuliah Basis Data untuk mahasiswa kelas 2B. Mohon pihak jurusan meninjau ulang jadwal tersebut.',
-  //         pelaporId: 'usr-003',
-  //         pelaporName: 'Budi Santoso',
-  //         pelaporProdi: 'D3 Teknik Informatika',
-  //         upvoteCount: 67,
-  //         downvoteCount: 0,
-  //         upvoterIds: [],
-  //         downvoterIds: [],
-  //         status: StatusAspirasi.inReview,
-  //         kategori: KategoriAspirasi.akademik,
-  //         createdAt: DateTime.now().subtract(const Duration(hours: 8)),
-  //       ),
-  //       AspirasiModel(
-  //         id: 'asp-004',
-  //         topik: 'Parkiran Motor Kurang Luas',
-  //         isiSaran:
-  //             'Area parkiran motor di depan gedung JTK tidak cukup menampung kendaraan mahasiswa pada jam sibuk. Banyak motor terpaksa parkir di area yang tidak semestinya.',
-  //         upvoteCount: 54,
-  //         downvoteCount: 2,
-  //         upvoterIds: [],
-  //         downvoterIds: [],
-  //         status: StatusAspirasi.open,
-  //         kategori: KategoriAspirasi.fasilitas,
-  //         createdAt: DateTime.now().subtract(const Duration(days: 1)),
-  //       ),
-  //       AspirasiModel(
-  //         id: 'asp-005',
-  //         topik: 'Perlu Ruang Diskusi Tambahan',
-  //         isiSaran:
-  //             'Mahasiswa sering kesulitan mendapatkan ruang untuk berdiskusi kelompok. Mohon disediakan ruang diskusi tambahan yang bisa digunakan secara bebas tanpa harus melalui proses peminjaman yang rumit.',
-  //         pelaporId: 'usr-005',
-  //         pelaporName: 'Siti Nurhaliza',
-  //         pelaporProdi: 'D4 Teknik Informatika',
-  //         upvoteCount: 41,
-  //         downvoteCount: 4,
-  //         upvoterIds: [],
-  //         downvoterIds: [],
-  //         status: StatusAspirasi.open,
-  //         kategori: KategoriAspirasi.fasilitas,
-  //         createdAt: DateTime.now().subtract(const Duration(days: 2)),
-  //       ),
-  //     ];
 }
 
 // --------------- FORM INPUT MODEL ---------------

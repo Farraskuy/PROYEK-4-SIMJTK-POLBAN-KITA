@@ -85,11 +85,6 @@ class AccessControlService {
       feature: 'dokumen_teknisi', 
       permissions: [create, read, update, process] // process: eksekusi step-by-step
     );
-    grantPermissions(
-      role: roleTeknisi,
-      feature: 'log_harian', 
-      permissions: [create, read, readOwn, updateOwn, deleteOwn] 
-    );
 
     // 5. ROLE: TU (TATA USAHA)
     // Mencetak laporan, BAP dokumen teknisi, rekap log, dan mengelola agenda kalender.
@@ -103,11 +98,6 @@ class AccessControlService {
       role: roleTu,
       feature: 'log_harian', 
       permissions: [read, export] 
-    );
-    grantPermissions(
-      role: roleTu,
-      feature: 'kalender', 
-      permissions: [create, read, update, delete] 
     );
   }
 

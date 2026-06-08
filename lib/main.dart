@@ -4,17 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/laporan_fasilitas_sync_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/auth_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/hive_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/log_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
-import 'package:proyek_4_poki_polban_kita/shared/services/network_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/role_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/user_credential_seeder.dart';
 import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/main_layout_shell.dart';
-import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/tanggapan_tugas_service.dart';
 
 import 'modules/onboarding/view/onboarding_view.dart';
 
@@ -27,12 +24,11 @@ void main() async {
   } catch (e) {
     await dotenv.load(fileName: '.env.example');
   }
+
   AccessControlService.initSimjtkRoles();
 
   try {
     await MonggoDBServices().connect();
-    await LaporanFasilitasSyncService().syncPending();
-    await TanggapanTugasService().syncPendingDrafts();
     await UserCredentialSeeder.seedDefaults();
   } catch (e) {
     await LogService.writeLog(
@@ -59,13 +55,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _connectivitySubscription = NetworkService().onOnlineChanged.listen(
-      (isOnline) {
-        if (isOnline) {
-          unawaited(_syncPendingSafely());
-        }
-      },
-    );
   }
 
   @override
@@ -85,24 +74,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> _refreshMongoConnectionSafely() async {
     try {
       await MonggoDBServices().refreshConnection();
-      await LaporanFasilitasSyncService().syncPending();
-      await TanggapanTugasService().syncPendingDrafts();
     } catch (e) {
       await LogService.writeLog(
         "Failed to refresh MongoDB connection on resume: $e",
-        source: "main.dart",
-        level: 1,
-      );
-    }
-  }
-
-  Future<void> _syncPendingSafely() async {
-    try {
-      await LaporanFasilitasSyncService().syncPending();
-      await TanggapanTugasService().syncPendingDrafts();
-    } catch (e) {
-      await LogService.writeLog(
-        "Failed to sync pending data: $e",
         source: "main.dart",
         level: 1,
       );
