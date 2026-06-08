@@ -34,7 +34,6 @@ class _VisionViewState extends State<VisionView>
       _ownsController = false;
     } else {
       _visionController = VisionController();
-      _visionController.startMockDetection();
       _ownsController = true;
     }
 
@@ -95,8 +94,9 @@ class _VisionViewState extends State<VisionView>
         return;
       }
 
-      if (!mounted) return;
-      Navigator.pop(context, image.path);
+      if (mounted) {
+        Navigator.pop(context, image.path);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -143,7 +143,7 @@ class _VisionViewState extends State<VisionView>
             const CircularProgressIndicator(color: AppColors.primaryLight),
             const SizedBox(height: 24),
             const Text(
-              "MENGHUBUNGKAN KE SENSOR VISUAL...",
+              "MENGHUBUNGKAN KE KAMERA...",
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,

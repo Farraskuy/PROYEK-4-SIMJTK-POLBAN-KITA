@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:math';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 
@@ -12,8 +10,6 @@ class VisionController extends ChangeNotifier with WidgetsBindingObserver {
   bool isInitialized = false;
   String? errorMessage;
 
-  List<DetectionResult> currentDetections = [];
-  Timer? _mockDetectionTimer;
   Future<void>? _cameraLifecycleInFlight;
 
   bool isFlashlightOn = false;
@@ -121,48 +117,9 @@ class VisionController extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  void startMockDetection() {
-    _mockDetectionTimer = Timer.periodic(
-      const Duration(seconds: 3),
-      (timer) => _generateMockDetection(),
-    );
-  }
-
-  void _generateMockDetection() {
-    final random = Random();
-
-    final x = random.nextDouble() * 0.8 + 0.1;
-    final y = random.nextDouble() * 0.8 + 0.1;
-    final width = 0.2 + random.nextDouble() * 0.2;
-    final height = 0.1 + random.nextDouble() * 0.1;
-
-    currentDetections = [
-      DetectionResult(
-        box: Rect.fromLTWH(x, y, width, height),
-        label: _getRandomDamageType(),
-        score: 0.85 + random.nextDouble() * 0.14,
-      ),
-    ];
-
-    notifyListeners();
-  }
-
-  String _getRandomDamageType() {
-    final types = ['D00', 'D10', 'D20', 'D40'];
-    final labels = {
-      'D00': 'Longitudinal Crack',
-      'D10': 'Transverse Crack',
-      'D20': 'Alligator Crack',
-      'D40': 'Pothole',
-    };
-    final type = types[Random().nextInt(types.length)];
-    return ' [$type] ${labels[type]!}';
-  }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _mockDetectionTimer?.cancel();
     controller?.dispose();
     super.dispose();
   }

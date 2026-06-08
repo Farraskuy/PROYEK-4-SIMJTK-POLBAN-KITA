@@ -181,15 +181,14 @@ class HomeTeknisiView extends StatelessWidget {
   // APP BAR
   // ============================================================
   Widget _buildAppBar(HomeTeknisiController ctrl, BuildContext context) {
-    return Obx(
-      () => AppHomeAppBar(
-        title: 'Halo, ${ctrl.currentTeknisi.value.name.isEmpty ? 'Teknisi' : ctrl.currentTeknisi.value.name}',
-        subtitle: ctrl.currentTeknisi.value.role,
-        avatarIcon: Icons.engineering_rounded,
-        avatarText: ctrl.currentTeknisi.value.name.isEmpty
-            ? 'T'
-            : ctrl.currentTeknisi.value.name[0].toUpperCase(),
-      ),
+    return AppHomeAppBar(
+      title:
+          'Halo, ${ctrl.currentTeknisi.value.name.isEmpty ? 'Teknisi' : ctrl.currentTeknisi.value.name}',
+      subtitle: ctrl.currentTeknisi.value.role,
+      avatarIcon: Icons.engineering_rounded,
+      avatarText: ctrl.currentTeknisi.value.name.isEmpty
+          ? 'T'
+          : ctrl.currentTeknisi.value.name[0].toUpperCase(),
     );
   }
 
@@ -200,15 +199,13 @@ class HomeTeknisiView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Obx(
-          () => Text(
-            'Hallo, ${ctrl.user?.name ?? 'Teknisi'}',
-            style: const TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              color: AppColors.title,
-              height: 1.1,
-            ),
+        Text(
+          'Hallo, ${ctrl.user?.name ?? 'Teknisi'}',
+          style: const TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+            color: AppColors.title,
+            height: 1.1,
           ),
         ),
         const SizedBox(height: 4),
@@ -224,186 +221,184 @@ class HomeTeknisiView extends StatelessWidget {
   // STATISTIK TUGAS
   // ============================================================
   Widget _buildStatistik(HomeTeknisiController ctrl) {
-    return Obx(() {
-      final stat = ctrl.statistik.value;
-      if (stat == null) return const SizedBox.shrink();
+    final stat = ctrl.statistik.value;
+    if (stat == null) return const SizedBox.shrink();
 
-      return Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: const [
-                        Icon(
-                          Icons.assignment_rounded,
-                          color: AppColors.primary,
-                          size: 18,
-                        ),
-                        SizedBox(width: 6),
-                        Text(
-                          'TUGAS AKTIF',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.muted,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      '${stat.totalTugas}',
-                      style: const TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.title,
-                        height: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 5,
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(15),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 18,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: AppColors.navy,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(16),
+                  Row(
+                    children: const [
+                      Icon(
+                        Icons.assignment_rounded,
+                        color: AppColors.primary,
+                        size: 18,
                       ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'SELESAI',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white60,
-                            letterSpacing: 0.8,
-                          ),
+                      SizedBox(width: 6),
+                      Text(
+                        'TUGAS AKTIF',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.muted,
+                          letterSpacing: 0.8,
                         ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${stat.tugasSelesai}',
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                                height: 1.0,
-                              ),
-                            ),
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.check_circle_outline_rounded,
-                                color: Colors.white,
-                                size: 18,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 18,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: AppColors.blueSoft,
-                      borderRadius: BorderRadius.only(
-                        bottomRight: Radius.circular(16),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'PENDING',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.body,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${stat.tugasPending}',
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.title,
-                                height: 1.0,
-                              ),
-                            ),
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.access_time_rounded,
-                                color: AppColors.primary,
-                                size: 18,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                  const SizedBox(height: 14),
+                  Text(
+                    '${stat.totalTugas}',
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.title,
+                      height: 1.0,
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      );
-    });
+          ),
+          Expanded(
+            flex: 5,
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 18,
+                  ),
+                  decoration: const BoxDecoration(
+                    color: AppColors.navy,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'SELESAI',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white60,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '${stat.tugasSelesai}',
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              height: 1.0,
+                            ),
+                          ),
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.check_circle_outline_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 18,
+                  ),
+                  decoration: const BoxDecoration(
+                    color: AppColors.blueSoft,
+                    borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(16),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'PENDING',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.body,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '${stat.tugasPending}',
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.title,
+                              height: 1.0,
+                            ),
+                          ),
+                          Container(
+                            width: 32,
+                            height: 32,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.access_time_rounded,
+                              color: AppColors.primary,
+                              size: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // ============================================================
@@ -455,31 +450,29 @@ class HomeTeknisiView extends StatelessWidget {
   // TUGAS MENDESAK LIST — dari LaporanFasilitasModel
   // ============================================================
   Widget _buildTugasMendesakList(HomeTeknisiController ctrl) {
-    return Obx(() {
-      final list = ctrl.tugasMendesak;
+    final list = ctrl.tugasMendesak;
 
-      if (list.isEmpty) {
-        return _EmptyMendesak();
-      }
+    if (list.isEmpty) {
+      return _EmptyMendesak();
+    }
 
-      // Tampilkan maksimal 5 tugas teratas di home
-      final displayList = list.take(5).toList();
+    // Tampilkan maksimal 5 tugas teratas di home
+    final displayList = list.take(5).toList();
 
-      return ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: displayList.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 10),
-        itemBuilder: (context, index) {
-          final laporan = displayList[index];
-          return TeknisiLaporanFasilitasCard(
-            laporan: laporan,
-            onTap: () => _openTanggapan(context, ctrl, laporan.id),
-            onRespond: () => _openForm(context, ctrl, laporan),
-          );
-        },
-      );
-    });
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: displayList.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 10),
+      itemBuilder: (context, index) {
+        final laporan = displayList[index];
+        return TeknisiLaporanFasilitasCard(
+          laporan: laporan,
+          onTap: () => _openTanggapan(context, ctrl, laporan.id),
+          onRespond: () => _openForm(context, ctrl, laporan),
+        );
+      },
+    );
   }
 
   Future<void> _openTanggapan(

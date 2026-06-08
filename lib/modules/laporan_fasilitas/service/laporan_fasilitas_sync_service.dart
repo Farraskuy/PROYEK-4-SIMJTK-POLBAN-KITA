@@ -2,6 +2,7 @@ import 'package:proyek_4_poki_polban_kita/shared/services/hive_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/network_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/sync_queue_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/cloudinary_service.dart';
 
 class LaporanFasilitasSyncService {
   static const String collectionName = 'laporan_fasilitas';
@@ -18,6 +19,7 @@ class LaporanFasilitasSyncService {
   final MonggoDBServices _mongo = MonggoDBServices();
   final NetworkService _network = NetworkService();
   final SyncQueueService _queue = SyncQueueService();
+  final CloudinaryService _cloudinary = CloudinaryService();
 
   Future<void> syncPending() async {
     if (_isSyncing || !await _network.isOnline) return;
@@ -45,6 +47,37 @@ class LaporanFasilitasSyncService {
     final operation = SyncQueueOperation.fromValue(item['operation']);
     final documentId = item['documentId'].toString();
     final payload = Map<String, dynamic>.from(item['payload'] as Map? ?? {});
+
+    // Upload local paths in foto_urls to Cloudinary first
+    final fotoUrls = List<String>.from(payload['foto_urls'] as List? ?? []);
+    final uploadedUrls = <String>[];
+    bool hasChanges = false;
+    for (final path in fotoUrls) {
+      if (path.startsWith('http://') || path.startsWith('https://')) {
+        uploadedUrls.add(path);
+      } else {
+        try {
+          final remoteUrl = await _cloudinary.uploadImage(
+            path,
+            folder: 'simjtk/laporan_fasilitas',
+          );
+          uploadedUrls.add(remoteUrl);
+          hasChanges = true;
+        } catch (_) {
+          uploadedUrls.add(path);
+        }
+      }
+    }
+
+    if (hasChanges) {
+      payload['foto_urls'] = uploadedUrls;
+      final localData = HiveService.laporanBox.get(documentId);
+      if (localData is Map) {
+        final updatedLocal = Map<String, dynamic>.from(localData);
+        updatedLocal['foto_urls'] = uploadedUrls;
+        await HiveService.laporanBox.put(documentId, updatedLocal);
+      }
+    }
 
     await _markLocal(documentId, 'syncing');
 

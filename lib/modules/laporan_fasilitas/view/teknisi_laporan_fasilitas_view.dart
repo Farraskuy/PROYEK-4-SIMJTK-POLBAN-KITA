@@ -21,46 +21,44 @@ class TeknisiLaporanFasilitasView extends StatelessWidget {
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: controller.fetchTugas,
-        child: CustomScrollView(
-          slivers: [
-            _buildAppBar(controller, context),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'Tugas Petugas',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.title,
-                        height: 1.1,
+        child: Obx(
+          () => CustomScrollView(
+            slivers: [
+              _buildAppBar(controller, context),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        'Tugas Petugas',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.title,
+                          height: 1.1,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      'Tanggapi dan tindak lanjuti laporan fasilitas yang masuk.',
-                      style: TextStyle(fontSize: 13, color: AppColors.body),
-                    ),
-                  ],
+                      SizedBox(height: 5),
+                      Text(
+                        'Tanggapi dan tindak lanjuti laporan fasilitas yang masuk.',
+                        style: TextStyle(fontSize: 13, color: AppColors.body),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            SliverToBoxAdapter(child: _SearchBar(controller: controller)),
-            SliverToBoxAdapter(child: _FilterBar(controller: controller)),
-            Obx(() {
-              if (controller.isLoading.value) {
-                return const SliverFillRemaining(
+              SliverToBoxAdapter(child: _SearchBar(controller: controller)),
+              SliverToBoxAdapter(child: _FilterBar(controller: controller)),
+              if (controller.isLoading.value)
+                const SliverFillRemaining(
                   child: Center(
                     child: CircularProgressIndicator(color: AppColors.primary),
                   ),
-                );
-              }
-
-              if (controller.tugasTampil.isEmpty) {
-                return const SliverFillRemaining(
+                )
+              else if (controller.tugasTampil.isEmpty)
+                const SliverFillRemaining(
                   hasScrollBody: false,
                   child: LaporanFasilitasEmptyState(
                     icon: Icons.assignment_turned_in_outlined,
@@ -68,35 +66,34 @@ class TeknisiLaporanFasilitasView extends StatelessWidget {
                     description:
                         'Laporan fasilitas yang perlu ditangani akan muncul di sini.',
                   ),
-                );
-              }
-
-              return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                sliver: SliverList.separated(
-                  itemCount: controller.tugasTampil.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final laporan = controller.tugasTampil[index];
-                    return TeknisiLaporanFasilitasCard(
-                      laporan: laporan,
-                      onTap: () => _openTanggapan(
-                        context,
-                        controller,
-                        laporan,
-                        detailFirst: true,
-                      ),
-                      onRespond: () => _openTanggapan(
-                        context,
-                        controller,
-                        laporan,
-                      ),
-                    );
-                  },
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  sliver: SliverList.separated(
+                    itemCount: controller.tugasTampil.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final laporan = controller.tugasTampil[index];
+                      return TeknisiLaporanFasilitasCard(
+                        laporan: laporan,
+                        onTap: () => _openTanggapan(
+                          context,
+                          controller,
+                          laporan,
+                          detailFirst: true,
+                        ),
+                        onRespond: () => _openTanggapan(
+                          context,
+                          controller,
+                          laporan,
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              );
-            }),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -106,15 +103,13 @@ class TeknisiLaporanFasilitasView extends StatelessWidget {
     TeknisiLaporanFasilitasController ctrl,
     BuildContext context,
   ) {
-    return Obx(() {
-      final name = ctrl.user?.name ?? 'Teknisi';
-      return AppHomeAppBar(
-        title: 'Halo, $name',
-        subtitle: 'Teknisi JTK',
-        avatarIcon: Icons.engineering_rounded,
-        avatarText: name.isEmpty ? 'T' : name[0].toUpperCase(),
-      );
-    });
+    final name = ctrl.user?.name ?? 'Teknisi';
+    return AppHomeAppBar(
+      title: 'Halo, $name',
+      subtitle: 'Teknisi JTK',
+      avatarIcon: Icons.engineering_rounded,
+      avatarText: name.isEmpty ? 'T' : name[0].toUpperCase(),
+    );
   }
 
   Future<void> _openTanggapan(
@@ -151,31 +146,29 @@ class _SearchBar extends StatelessWidget {
     return Container(
       color: AppColors.surface,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: Obx(
-        () => TextField(
-          controller: controller.searchController,
-          decoration: InputDecoration(
-            hintText: 'Cari tugas berdasarkan judul, lokasi, atau ID...',
-            prefixIcon: const Icon(Icons.search_rounded),
-            suffixIcon: controller.isSearchActive
-                ? IconButton(
-                    onPressed: controller.clearSearch,
-                    icon: const Icon(Icons.close_rounded),
-                  )
-                : null,
-            filled: true,
-            fillColor: AppColors.surface,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: AppColors.primary,
-                width: 1.5,
-              ),
+      child: TextField(
+        controller: controller.searchController,
+        decoration: InputDecoration(
+          hintText: 'Cari tugas berdasarkan judul, lokasi, atau ID...',
+          prefixIcon: const Icon(Icons.search_rounded),
+          suffixIcon: controller.isSearchActive
+              ? IconButton(
+                  onPressed: controller.clearSearch,
+                  icon: const Icon(Icons.close_rounded),
+                )
+              : null,
+          filled: true,
+          fillColor: AppColors.surface,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.border),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: AppColors.primary,
+              width: 1.5,
             ),
           ),
         ),
@@ -199,26 +192,20 @@ class _FilterBar extends StatelessWidget {
           const Divider(height: 1, color: AppColors.border),
           SizedBox(
             height: 56,
-            child: Obx(
-              () {
-                final activeSort = controller.activeSort.value;
-
-                return ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  itemCount: TeknisiLaporanSort.values.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final sort = TeknisiLaporanSort.values[index];
-                    return _FilterChip(
-                      sort: sort,
-                      selected: activeSort == sort,
-                      onTap: () => controller.changeSort(sort),
-                    );
-                  },
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 10,
+              ),
+              itemCount: TeknisiLaporanSort.values.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
+              itemBuilder: (context, index) {
+                final sort = TeknisiLaporanSort.values[index];
+                return _FilterChip(
+                  sort: sort,
+                  selected: controller.activeSort.value == sort,
+                  onTap: () => controller.changeSort(sort),
                 );
               },
             ),

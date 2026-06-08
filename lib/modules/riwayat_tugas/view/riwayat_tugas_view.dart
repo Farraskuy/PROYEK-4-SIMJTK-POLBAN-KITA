@@ -27,45 +27,44 @@ class RiwayatTugasView extends StatelessWidget {
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: ctrl.onRefresh,
-        child: CustomScrollView(
-          slivers: [
-            _buildAppBar(ctrl, context),
-            SliverToBoxAdapter(child: _buildHeaderContent(ctrl)),
-            SliverToBoxAdapter(child: _buildSearchBar(ctrl)),
-            SliverToBoxAdapter(child: _buildFilterChips(ctrl)),
-            Obx(() {
-              if (ctrl.isLoading.value) {
-                return const SliverFillRemaining(
+        child: Obx(
+          () => CustomScrollView(
+            slivers: [
+              _buildAppBar(ctrl, context),
+              SliverToBoxAdapter(child: _buildHeaderContent(ctrl, context)),
+              SliverToBoxAdapter(child: _buildSearchBar(ctrl)),
+              SliverToBoxAdapter(child: _buildFilterChips(ctrl)),
+              if (ctrl.isLoading.value)
+                const SliverFillRemaining(
                   child: Center(
                     child: CircularProgressIndicator(color: AppColors.primary),
                   ),
-                );
-              }
-              if (ctrl.riwayatTampil.isEmpty) {
-                return SliverFillRemaining(
+                )
+              else if (ctrl.riwayatTampil.isEmpty)
+                SliverFillRemaining(
                   hasScrollBody: false,
                   child: _EmptyState(
                     isSearch: ctrl.isSearchActive,
                     filter: ctrl.activeFilter.value,
                   ),
-                );
-              }
-              return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                sliver: SliverList.separated(
-                  itemCount: ctrl.riwayatTampil.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 10),
-                  itemBuilder: (context, index) {
-                    final item = ctrl.riwayatTampil[index];
-                    return _RiwayatCard(
-                      item: item,
-                      onTap: () => ctrl.onItemTapped(item),
-                    );
-                  },
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                  sliver: SliverList.separated(
+                    itemCount: ctrl.riwayatTampil.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final item = ctrl.riwayatTampil[index];
+                      return _RiwayatCard(
+                        item: item,
+                        onTap: () => ctrl.onItemTapped(item),
+                      );
+                    },
+                  ),
                 ),
-              );
-            }),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -75,40 +74,42 @@ class RiwayatTugasView extends StatelessWidget {
   // APP BAR
   // ============================================================
   Widget _buildAppBar(RiwayatTugasController ctrl, BuildContext context) {
-    return Obx(() {
-      final name = ctrl.user?.name ?? 'Teknisi';
-      return AppHomeAppBar(
-        title: 'Halo, $name',
-        subtitle: 'Teknisi JTK',
-        avatarIcon: Icons.engineering_rounded,
-        avatarText: name.isEmpty ? 'T' : name[0].toUpperCase(),
-      );
-    });
+    final name = ctrl.user?.name ?? 'Teknisi';
+    return AppHomeAppBar(
+      title: 'Halo, $name',
+      subtitle: 'Teknisi JTK',
+      avatarIcon: Icons.engineering_rounded,
+      avatarText: name.isEmpty ? 'T' : name[0].toUpperCase(),
+    );
   }
 
-  Widget _buildHeaderContent(RiwayatTugasController ctrl) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Riwayat Tugas',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              color: AppColors.title,
-              height: 1.1,
+  // ============================================================
+  // HEADER
+  // ============================================================
+  Widget _buildHeaderContent(RiwayatTugasController ctrl, BuildContext context) {
+    return Container(
+      color: AppColors.surface,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Riwayat Tugas',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+                color: AppColors.title,
+                height: 1.1,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Laporan yang telah Anda selesaikan.',
-            style: TextStyle(fontSize: 13, color: AppColors.body),
-          ),
-          const SizedBox(height: 8),
-          Obx(
-            () => Container(
+            const SizedBox(height: 4),
+            const Text(
+              'Laporan yang telah Anda selesaikan.',
+              style: TextStyle(fontSize: 13, color: AppColors.body),
+            ),
+            const SizedBox(height: 8),
+            Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
                 color: AppColors.blueSoft,
@@ -130,109 +131,7 @@ class RiwayatTugasView extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ============================================================
-  // HEADER
-  // ============================================================
-  Widget buildHeaderLegacy(RiwayatTugasController ctrl, BuildContext context) {
-    return Container(
-      color: AppColors.surface,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 22,
-                    backgroundColor: AppColors.primary,
-                    child: Text(
-                      (ctrl.user?.name ?? 'Teknisi').isEmpty
-                          ? 'T'
-                          : ctrl.user!.name[0].toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Halo, ${ctrl.user?.name ?? 'Teknisi'}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.title,
-                          ),
-                        ),
-                        const Text(
-                          'Teknisi JTK',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.body,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Riwayat Tugas',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.title,
-                  height: 1.1,
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Laporan yang telah Anda selesaikan.',
-                style: TextStyle(fontSize: 13, color: AppColors.body),
-              ),
-
-              // ─── Info ID Petugas ───
-              const SizedBox(height: 8),
-              Obx(() => Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.blueSoft,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.badge_rounded,
-                            size: 13, color: AppColors.primary),
-                        const SizedBox(width: 5),
-                        Text(
-                          'ID Petugas: ${ctrl.user?.nomorInduk ?? ctrl.user?.id ?? '-'}',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -245,37 +144,32 @@ class RiwayatTugasView extends StatelessWidget {
     return Container(
       color: AppColors.surface,
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      child: Obx(() => TextField(
-            controller: ctrl.searchController,
-            style: const TextStyle(fontSize: 14, color: AppColors.title),
-            decoration: InputDecoration(
-              hintText: 'Cari riwayat tugas...',
-              hintStyle:
-                  const TextStyle(color: AppColors.muted, fontSize: 14),
-              prefixIcon: const Icon(Icons.search_rounded,
-                  color: AppColors.muted, size: 20),
-              suffixIcon: ctrl.isSearchActive
-                  ? IconButton(
-                      icon: const Icon(Icons.close_rounded,
-                          color: AppColors.muted, size: 18),
-                      onPressed: ctrl.onClearSearch,
-                    )
-                  : null,
-              filled: true,
-              fillColor: AppColors.surface,
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(
-                    color: AppColors.border, width: 1.2),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide:
-                    const BorderSide(color: AppColors.primary, width: 1.5),
-              ),
-            ),
-          )),
+      child: TextField(
+        controller: ctrl.searchController,
+        style: const TextStyle(fontSize: 14, color: AppColors.title),
+        decoration: InputDecoration(
+          hintText: 'Cari riwayat tugas...',
+          hintStyle: const TextStyle(color: AppColors.muted, fontSize: 14),
+          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.muted, size: 20),
+          suffixIcon: ctrl.isSearchActive
+              ? IconButton(
+                  icon: const Icon(Icons.close_rounded, color: AppColors.muted, size: 18),
+                  onPressed: ctrl.onClearSearch,
+                )
+              : null,
+          filled: true,
+          fillColor: AppColors.surface,
+          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.border, width: 1.2),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          ),
+        ),
+      ),
     );
   }
 
@@ -290,43 +184,42 @@ class RiwayatTugasView extends StatelessWidget {
           const Divider(height: 1, color: AppColors.border),
           SizedBox(
             height: 52,
-            child: Obx(() => ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 10),
-                  children: FilterRiwayat.values.map((filter) {
-                    final isActive = ctrl.activeFilter.value == filter;
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 10),
+              children: FilterRiwayat.values.map((filter) {
+                final isActive = ctrl.activeFilter.value == filter;
 
-                    int count;
-                    switch (filter) {
-                      case FilterRiwayat.semua:
-                        count = ctrl.countSemua;
-                        break;
-                      case FilterRiwayat.mingguIni:
-                        count = ctrl.countMingguIni;
-                        break;
-                      case FilterRiwayat.bulanIni:
-                        count = ctrl.countBulanIni;
-                        break;
-                    }
+                int count;
+                switch (filter) {
+                  case FilterRiwayat.semua:
+                    count = ctrl.countSemua;
+                    break;
+                  case FilterRiwayat.mingguIni:
+                    count = ctrl.countMingguIni;
+                    break;
+                  case FilterRiwayat.bulanIni:
+                    count = ctrl.countBulanIni;
+                    break;
+                }
 
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: _FilterChip(
-                        label: filter.label,
-                        count: count,
-                        isActive: isActive,
-                        onTap: () => ctrl.onFilterChanged(filter),
-                      ),
-                    );
-                  }).toList(),
-                )),
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: _FilterChip(
+                    label: filter.label,
+                    count: count,
+                    isActive: isActive,
+                    onTap: () => ctrl.onFilterChanged(filter),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),
     );
   }
-
 }
 
 // ============================================================
