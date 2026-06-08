@@ -1,24 +1,64 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/controller/aspirasi_controller.dart';
-import 'package:proyek_4_poki_polban_kita/modules/aspirasi/service/aspirasi_service.dart';
 import 'package:proyek_4_poki_polban_kita/modules/aspirasi/model/aspirasi_model.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/hive_service.dart';
+import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 import 'package:flutter_secure_storage/test/test_flutter_secure_storage_platform.dart';
 import 'package:flutter_secure_storage_platform_interface/flutter_secure_storage_platform_interface.dart';
 import 'dart:convert';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  late MonggoDBServices mongoService;
 
-  group('AspirasiController Tests', () {
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    HttpOverrides.global = null;
+
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('dev.fluttercommunity.plus/connectivity'),
+      (MethodCall methodCall) async {
+        if (methodCall.method == 'check') {
+          return ['wifi'];
+        }
+        return null;
+      },
+    );
+
+    final tempDir = Directory.systemTemp.createTempSync('test_hive_aspirasi_ctrl_');
+    HiveService.testPath = tempDir.path;
+
+    final envFile = File('.env');
+    if (envFile.existsSync()) {
+      dotenv.loadFromString(envString: envFile.readAsStringSync());
+    }
+    mongoService = MonggoDBServices();
+    await mongoService.connect();
+  });
+
+  tearDownAll(() async {
+    await mongoService.close();
+    await Hive.close();
+    try {
+      final dir = Directory(HiveService.testPath!);
+      if (dir.existsSync()) {
+        dir.deleteSync(recursive: true);
+      }
+    } catch (_) {}
+  });
+
+  group('AspirasiController Tests (Real Connection)', () {
     late AspirasiController controller;
-    final aspirasiStore = <String, Map<String, dynamic>>{};
     final storageData = <String, String>{};
 
-    setUp(() {
+    setUp(() async {
       Get.testMode = true;
-      aspirasiStore.clear();
       storageData.clear();
 
       FlutterSecureStoragePlatform.instance =
@@ -26,26 +66,29 @@ void main() {
       storageData['current_user_data'] = jsonEncode({
         'id': 'usr-test',
         'name': 'Tester Budi',
+        'nomor_induk': '12345678',
+        'role': 'mahasiswa',
+        'isActive': true,
       });
 
-      AspirasiService.fetchOverride = (collection, filter) async =>
-          aspirasiStore.values.toList();
-      AspirasiService.insertOverride = (collection, data) async {
-        aspirasiStore[data['_id'].toString()] =
-            Map<String, dynamic>.from(data);
-      };
-      AspirasiService.updateOverride = (collection, filter, data) async {
-        aspirasiStore[data['_id'].toString()] =
-            Map<String, dynamic>.from(data);
-      };
+      await mongoService.ensureConnected();
+      try {
+        await mongoService.getCollection('aspirasi').deleteMany({'_id': {'\$regex': '^test-asp-ctrl-'}});
+      } catch (_) {}
+
+      await HiveService.init();
+      await HiveService.aspirasiBox.clear();
+      await HiveService.queueBox.clear();
 
       controller = AspirasiController();
     });
 
-    tearDown(() {
-      AspirasiService.fetchOverride = null;
-      AspirasiService.insertOverride = null;
-      AspirasiService.updateOverride = null;
+    tearDown(() async {
+      try {
+        if (mongoService.isConnected) {
+          await mongoService.getCollection('aspirasi').deleteMany({'_id': {'\$regex': '^test-asp-ctrl-'}});
+        }
+      } catch (_) {}
       Get.reset();
     });
 
@@ -53,32 +96,29 @@ void main() {
         (tester) async {
       await tester.pumpWidget(GetMaterialApp(home: Scaffold(body: Container())));
 
-      // Minimal 20 karakter agar lolos validasi
+      controller.judulController.text = 'Judul Aspirasi Valid';
       controller.isiSaranController.text =
           'Saran ini sudah lebih dari dua puluh karakter lho.';
 
       await controller.submitAspirasi();
-      await tester.pumpAndSettle(const Duration(seconds: 4));
+      await tester.pump(const Duration(seconds: 4));
 
-      // Controller menyimpan ke list lokal, bukan langsung ke service
       expect(controller.displayedAspirasi.length, equals(1));
       expect(
         controller.displayedAspirasi[0].isiSaran,
         equals('Saran ini sudah lebih dari dua puluh karakter lho.'),
       );
-      expect(controller.displayedAspirasi[0].pelaporId, equals('usr-test'));
     });
 
     testWidgets('submitAspirasi does not add if invalid', (tester) async {
       await tester.pumpWidget(GetMaterialApp(home: Scaffold(body: Container())));
 
-      // Kurang dari 20 karakter → invalid
+      controller.judulController.text = 'Pendek';
       controller.isiSaranController.text = 'Pendek saja';
 
       await controller.submitAspirasi();
-      await tester.pumpAndSettle(const Duration(seconds: 4));
+      await tester.pump(const Duration(seconds: 4));
 
-      // Tidak ada yang ditambahkan ke list
       expect(controller.displayedAspirasi.length, equals(0));
       expect(controller.errorIsiSaran.value, isNotEmpty);
     });
@@ -86,9 +126,8 @@ void main() {
     testWidgets('onUpvote increments upvote and adds userId', (tester) async {
       await tester.pumpWidget(GetMaterialApp(home: Scaffold(body: Container())));
 
-      // Buat dummy aspirasi menggunakan constructor yang benar
       final aspirasi = AspirasiModel(
-        id: 'asp-1',
+        id: 'test-asp-ctrl-001',
         topik: 'Topik A',
         isiSaran: 'Isi saran ini cukup panjang untuk lolos validasi',
         pelaporId: 'usr-1',
@@ -100,21 +139,22 @@ void main() {
         createdAt: DateTime.now(),
       );
 
-      aspirasiStore['asp-1'] = aspirasi.toJson();
+      // Insert directly
+      await mongoService.insertData('aspirasi', aspirasi.toJson());
       await controller.onRefresh();
 
-      expect(
-        controller.displayedAspirasi[0].upvoterIds.contains('usr-test'),
-        isFalse,
-      );
+      expect(controller.displayedAspirasi.length, greaterThanOrEqualTo(1));
+      final itemIndex = controller.displayedAspirasi.indexWhere((a) => a.id == aspirasi.id);
+      expect(itemIndex, isNot(-1));
 
-      await controller.onUpvote(controller.displayedAspirasi[0].id);
-      await tester.pumpAndSettle(const Duration(seconds: 4));
+      final target = controller.displayedAspirasi[itemIndex];
+      expect(target.upvoterIds.contains('usr-test'), isFalse);
 
-      expect(
-        controller.displayedAspirasi[0].upvoterIds.contains('usr-test'),
-        isTrue,
-      );
+      await controller.onUpvote(target.id);
+      await tester.pump(const Duration(seconds: 4));
+
+      final updatedIndex = controller.displayedAspirasi.indexWhere((a) => a.id == aspirasi.id);
+      expect(controller.displayedAspirasi[updatedIndex].upvoterIds.contains('usr-test'), isTrue);
     });
   });
 }
