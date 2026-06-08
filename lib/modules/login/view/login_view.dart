@@ -23,10 +23,9 @@ class _LoginViewState extends State<LoginView> {
   String? _status;
 
   void _navigateByRole() {
-    final role = AuthService().currentUser?.role;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
-        builder: (_) => RoleNavigationService.buildHomeByRole(role),
+        builder: (_) => MainLayoutShell(userRole: AuthService().currentUser!.role),
       ),
       (_) => false,
     );
