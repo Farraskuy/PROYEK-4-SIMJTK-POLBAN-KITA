@@ -23,9 +23,9 @@ class AdminAspirasiView extends StatelessWidget {
               title: 'Portal Admin / TU',
               subtitle: 'SIMJTK',
               avatarIcon: Icons.admin_panel_settings_rounded,
-              avatarText: (controller.user?.name ?? 'Admin').isEmpty
+              avatarText: controller.currentUserName.value.isEmpty
                   ? 'A'
-                  : controller.user!.name[0].toUpperCase(),
+                  : controller.currentUserName.value[0].toUpperCase(),
             ),
           ),
           SliverToBoxAdapter(

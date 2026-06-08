@@ -12,6 +12,7 @@ import 'package:proyek_4_poki_polban_kita/shared/services/mongodb_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/network_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/role_service.dart';
 import 'package:proyek_4_poki_polban_kita/shared/services/user_credential_seeder.dart';
+import 'package:proyek_4_poki_polban_kita/shared/theme/app_colors.dart';
 import 'package:proyek_4_poki_polban_kita/shared/widgets/main_layout_shell.dart';
 import 'package:proyek_4_poki_polban_kita/modules/laporan_fasilitas/service/tanggapan_tugas_service.dart';
 
@@ -116,8 +117,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1E3A5F),
-          primary: const Color(0xFF1E3A5F),
+          seedColor: AppColors.navyDark,
+          primary: AppColors.navy,
         ),
         useMaterial3: true,
         textTheme: GoogleFonts.poppinsTextTheme(),
@@ -129,4 +130,3 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     );
   }
 }
-  

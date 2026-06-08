@@ -60,12 +60,12 @@ class _AspirasiListPage extends StatelessWidget {
       headerSliverBuilder: (context, innerBoxIsScrolled) => [
         Obx(
           () => AppHomeAppBar(
-            title: 'Halo, ${ctrl.user?.name ?? 'Mahasiswa'}',
+            title: 'Halo, ${ctrl.currentUserName.value}',
             subtitle: 'Mahasiswa JTK',
             avatarIcon: Icons.person_rounded,
-            avatarText: (ctrl.user?.name ?? 'Mahasiswa').isEmpty
+            avatarText: ctrl.currentUserName.value.isEmpty
                 ? 'M'
-                : ctrl.user!.name[0].toUpperCase(),
+                : ctrl.currentUserName.value[0].toUpperCase(),
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 12)),

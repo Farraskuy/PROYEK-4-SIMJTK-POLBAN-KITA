@@ -183,12 +183,12 @@ class HomeTeknisiView extends StatelessWidget {
   Widget _buildAppBar(HomeTeknisiController ctrl, BuildContext context) {
     return Obx(
       () => AppHomeAppBar(
-        title: 'Halo, ${ctrl.user?.name ?? 'Teknisi'}',
-        subtitle: 'Teknisi JTK',
+        title: 'Halo, ${ctrl.currentTeknisi.value.name.isEmpty ? 'Teknisi' : ctrl.currentTeknisi.value.name}',
+        subtitle: ctrl.currentTeknisi.value.role,
         avatarIcon: Icons.engineering_rounded,
-        avatarText: (ctrl.user?.name ?? 'Teknisi').isEmpty
+        avatarText: ctrl.currentTeknisi.value.name.isEmpty
             ? 'T'
-            : ctrl.user!.name[0].toUpperCase(),
+            : ctrl.currentTeknisi.value.name[0].toUpperCase(),
       ),
     );
   }
